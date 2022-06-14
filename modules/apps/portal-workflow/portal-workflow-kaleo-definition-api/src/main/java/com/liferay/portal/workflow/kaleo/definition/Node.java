@@ -73,6 +73,14 @@ public abstract class Node implements ActionAware, NotificationAware {
 		return _actions;
 	}
 
+	public String getDefaultLabel() {
+		if (_labelMap.isEmpty()) {
+			return _name;
+		}
+
+		return _labelMap.get(LocaleUtil.getDefault());
+	}
+
 	public String getDescription() {
 		return _description;
 	}
