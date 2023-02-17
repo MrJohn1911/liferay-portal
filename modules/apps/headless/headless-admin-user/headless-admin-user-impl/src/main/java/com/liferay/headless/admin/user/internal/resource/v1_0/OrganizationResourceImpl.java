@@ -30,6 +30,7 @@ import com.liferay.headless.admin.user.internal.dto.v1_0.converter.AccountResour
 import com.liferay.headless.admin.user.internal.dto.v1_0.converter.OrganizationResourceDTOConverter;
 import com.liferay.headless.admin.user.internal.dto.v1_0.converter.UserResourceDTOConverter;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.CustomFieldsUtil;
+import com.liferay.headless.admin.user.internal.dto.v1_0.util.DTOConverterUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderAddressUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderCountryUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderEmailAddressUtil;
@@ -114,8 +115,8 @@ public class OrganizationResourceImpl
 		throws Exception {
 
 		deleteAccountOrganization(
-			_accountResourceDTOConverter.getAccountEntryId(
-				externalReferenceCode),
+			DTOConverterUtil.getModelPrimaryKey(
+				_accountResourceDTOConverter, externalReferenceCode),
 			organizationId);
 	}
 
@@ -144,7 +145,9 @@ public class OrganizationResourceImpl
 				contextCompany.getCompanyId(), externalReferenceCode);
 
 		_organizationService.deleteOrganization(
-			organization.getOrganizationId());
+			DTOConverterUtil.getModelPrimaryKey(
+				_organizationResourceDTOConverter,
+				organization.getExternalReferenceCode()));
 	}
 
 	@Override
@@ -174,8 +177,8 @@ public class OrganizationResourceImpl
 		throws Exception {
 
 		return getAccountOrganizationsPage(
-			_accountResourceDTOConverter.getAccountEntryId(
-				externalReferenceCode),
+			DTOConverterUtil.getModelPrimaryKey(
+				_accountResourceDTOConverter, externalReferenceCode),
 			search, filter, pagination, sorts);
 	}
 
@@ -230,9 +233,12 @@ public class OrganizationResourceImpl
 				_organizationService.getOrganizationByExternalReferenceCode(
 					contextCompany.getCompanyId(), externalReferenceCode);
 
+		long organizationId = DTOConverterUtil.getModelPrimaryKey(
+			_organizationResourceDTOConverter,
+			serviceBuilderOrganization.getExternalReferenceCode());
+
 		return _organizationResourceDTOConverter.toDTO(
-			_getDTOConverterContext(
-				String.valueOf(serviceBuilderOrganization.getOrganizationId())),
+			_getDTOConverterContext(String.valueOf(organizationId)),
 			serviceBuilderOrganization);
 	}
 
@@ -304,8 +310,8 @@ public class OrganizationResourceImpl
 		throws Exception {
 
 		postAccountOrganization(
-			_accountResourceDTOConverter.getAccountEntryId(
-				externalReferenceCode),
+			DTOConverterUtil.getModelPrimaryKey(
+				_accountResourceDTOConverter, externalReferenceCode),
 			organizationId);
 	}
 
@@ -334,9 +340,12 @@ public class OrganizationResourceImpl
 				_getPhones(organization), _getWebsites(organization),
 				_createServiceContext(organization));
 
+		long organizationId = DTOConverterUtil.getModelPrimaryKey(
+			_organizationResourceDTOConverter,
+			serviceBuilderOrganization.getExternalReferenceCode());
+
 		return _organizationResourceDTOConverter.toDTO(
-			_getDTOConverterContext(
-				String.valueOf(serviceBuilderOrganization.getOrganizationId())),
+			_getDTOConverterContext(String.valueOf(organizationId)),
 			serviceBuilderOrganization);
 	}
 
@@ -345,6 +354,9 @@ public class OrganizationResourceImpl
 			String organizationId, String emailAddress)
 		throws Exception {
 
+		long contextUserId = DTOConverterUtil.getModelPrimaryKey(
+			_userResourceDTOConverter, contextUser.getExternalReferenceCode());
+
 		User user = _organizationService.addOrganizationUserByEmailAddress(
 			emailAddress, _getServiceBuilderOrganizationId(organizationId),
 			new ServiceContext() {
@@ -352,14 +364,17 @@ public class OrganizationResourceImpl
 					setCompanyId(contextCompany.getCompanyId());
 					setLanguageId(
 						contextAcceptLanguage.getPreferredLanguageId());
-					setUserId(contextUser.getUserId());
+					setUserId(contextUserId);
 				}
 			});
+
+		long userId = DTOConverterUtil.getModelPrimaryKey(
+			_userResourceDTOConverter, user.getExternalReferenceCode());
 
 		return _userResourceDTOConverter.toDTO(
 			new DefaultDTOConverterContext(
 				contextAcceptLanguage.isAcceptAllLanguages(), null,
-				_dtoConverterRegistry, user.getUserId(),
+				_dtoConverterRegistry, userId,
 				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
 				contextUser),
 			user);
@@ -383,10 +398,16 @@ public class OrganizationResourceImpl
 		String[] organizationRoleIdsArray = StringUtil.split(
 			organizationRoleIds, CharPool.COMMA);
 
+		long userAccountId;
+
 		for (UserAccount userAccount : userAccounts) {
+			userAccountId = DTOConverterUtil.getModelPrimaryKey(
+				_userResourceDTOConverter,
+				userAccount.getExternalReferenceCode());
+
 			for (String organizationRoleId : organizationRoleIdsArray) {
 				_roleResource.postOrganizationRoleUserAccountAssociation(
-					GetterUtil.getLong(organizationRoleId), userAccount.getId(),
+					GetterUtil.getLong(organizationRoleId), userAccountId,
 					GetterUtil.getLong(organizationId));
 			}
 		}
@@ -397,7 +418,10 @@ public class OrganizationResourceImpl
 				userAccount -> _userResourceDTOConverter.toDTO(
 					new DefaultDTOConverterContext(
 						contextAcceptLanguage.isAcceptAllLanguages(), null,
-						_dtoConverterRegistry, userAccount.getId(),
+						_dtoConverterRegistry,
+						DTOConverterUtil.getModelPrimaryKey(
+							_userResourceDTOConverter,
+							userAccount.getExternalReferenceCode()),
 						contextAcceptLanguage.getPreferredLocale(),
 						contextUriInfo, contextUser),
 					_userService.getUserByEmailAddress(
@@ -419,7 +443,9 @@ public class OrganizationResourceImpl
 		return _organizationResourceDTOConverter.toDTO(
 			_getDTOConverterContext(organizationId),
 			_organizationService.updateOrganization(
-				serviceBuilderOrganization.getOrganizationId(),
+				DTOConverterUtil.getModelPrimaryKey(
+					_organizationResourceDTOConverter,
+					serviceBuilderOrganization.getExternalReferenceCode()),
 				_getDefaultParentOrganizationId(organization),
 				organization.getName(), serviceBuilderOrganization.getType(),
 				_getRegionId(organization, countryId), countryId,
@@ -473,9 +499,12 @@ public class OrganizationResourceImpl
 				_getWebsites(organization),
 				_createServiceContext(organization));
 
+		long organizationId = DTOConverterUtil.getModelPrimaryKey(
+			_organizationResourceDTOConverter,
+			serviceBuilderOrganization.getExternalReferenceCode());
+
 		return _organizationResourceDTOConverter.toDTO(
-			_getDTOConverterContext(
-				String.valueOf(serviceBuilderOrganization.getOrganizationId())),
+			_getDTOConverterContext(String.valueOf(organizationId)),
 			serviceBuilderOrganization);
 	}
 
@@ -774,7 +803,8 @@ public class OrganizationResourceImpl
 			return GetterUtil.getLong(organizationId);
 		}
 
-		return serviceBuilderOrganization.getOrganizationId();
+		return DTOConverterUtil.getModelPrimaryKey(
+			_organizationResourceDTOConverter, organizationId);
 	}
 
 	private List<Website> _getWebsites(Organization organization) {

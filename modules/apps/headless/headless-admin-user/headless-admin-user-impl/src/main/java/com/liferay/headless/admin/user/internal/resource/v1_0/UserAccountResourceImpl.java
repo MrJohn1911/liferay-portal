@@ -33,6 +33,7 @@ import com.liferay.headless.admin.user.internal.dto.v1_0.converter.AccountResour
 import com.liferay.headless.admin.user.internal.dto.v1_0.converter.OrganizationResourceDTOConverter;
 import com.liferay.headless.admin.user.internal.dto.v1_0.converter.UserResourceDTOConverter;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.CustomFieldsUtil;
+import com.liferay.headless.admin.user.internal.dto.v1_0.util.DTOConverterUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderAddressUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderEmailAddressUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderListTypeUtil;
@@ -144,8 +145,8 @@ public class UserAccountResourceImpl
 			externalReferenceCode, contextCompany.getCompanyId());
 
 		_accountEntryUserRelService.deleteAccountEntryUserRelByEmailAddress(
-			_accountResourceDTOConverter.getAccountEntryId(
-				accountExternalReferenceCode),
+			DTOConverterUtil.getModelPrimaryKey(
+				_accountResourceDTOConverter, accountExternalReferenceCode),
 			user.getEmailAddress());
 	}
 
@@ -164,8 +165,8 @@ public class UserAccountResourceImpl
 		throws Exception {
 
 		deleteAccountUserAccountByEmailAddress(
-			_accountResourceDTOConverter.getAccountEntryId(
-				externalReferenceCode),
+			DTOConverterUtil.getModelPrimaryKey(
+				_accountResourceDTOConverter, externalReferenceCode),
 			emailAddress);
 	}
 
@@ -203,7 +204,9 @@ public class UserAccountResourceImpl
 		User user = _userLocalService.getUserByExternalReferenceCode(
 			externalReferenceCode, contextCompany.getCompanyId());
 
-		deleteUserAccount(user.getUserId());
+		deleteUserAccount(
+			DTOConverterUtil.getModelPrimaryKey(
+				_userResourceDTOConverter, user.getExternalReferenceCode()));
 	}
 
 	@Override
@@ -213,8 +216,8 @@ public class UserAccountResourceImpl
 		throws Exception {
 
 		return getAccountUserAccountsPage(
-			_accountResourceDTOConverter.getAccountEntryId(
-				externalReferenceCode),
+			DTOConverterUtil.getModelPrimaryKey(
+				_accountResourceDTOConverter, externalReferenceCode),
 			search, filter, pagination, sorts);
 	}
 
@@ -292,16 +295,15 @@ public class UserAccountResourceImpl
 			Pagination pagination, Sort[] sorts)
 		throws Exception {
 
-		Organization organization = _organizationResourceDTOConverter.getObject(
-			organizationId);
+		long externalReferenceCode = DTOConverterUtil.getModelPrimaryKey(
+			_organizationResourceDTOConverter, organizationId);
 
 		return _getUserAccountsPage(
 			_getModelActions(
 				Collections.singletonMap(
 					ActionKeys.MANAGE_USERS,
 					new String[] {"getOrganizationUserAccountsPage"}),
-				organization.getOrganizationId(),
-				_organizationModelResourcePermission),
+				externalReferenceCode, _organizationModelResourcePermission),
 			booleanQuery -> {
 				BooleanFilter booleanFilter =
 					booleanQuery.getPreBooleanFilter();
@@ -309,7 +311,7 @@ public class UserAccountResourceImpl
 				booleanFilter.add(
 					new TermFilter(
 						"organizationIds",
-						String.valueOf(organization.getOrganizationId())),
+						String.valueOf(externalReferenceCode)),
 					BooleanClauseOccur.MUST);
 			},
 			filter, search, pagination, sorts);
@@ -394,15 +396,18 @@ public class UserAccountResourceImpl
 			externalReferenceCode, contextCompany.getCompanyId());
 
 		_accountEntryUserRelService.addAccountEntryUserRelByEmailAddress(
-			_accountResourceDTOConverter.getAccountEntryId(
-				accountExternalReferenceCode),
+			DTOConverterUtil.getModelPrimaryKey(
+				_accountResourceDTOConverter, accountExternalReferenceCode),
 			user.getEmailAddress(), new long[0], null,
 			new ServiceContext() {
 				{
 					setCompanyId(contextCompany.getCompanyId());
 					setLanguageId(
 						contextAcceptLanguage.getPreferredLanguageId());
-					setUserId(contextUser.getUserId());
+					setUserId(
+						DTOConverterUtil.getModelPrimaryKey(
+							_userResourceDTOConverter,
+							contextUser.getExternalReferenceCode()));
 				}
 			});
 	}
@@ -414,7 +419,10 @@ public class UserAccountResourceImpl
 
 		AccountEntryUserRel accountEntryUserRel =
 			_accountEntryUserRelService.addAccountEntryUserRel(
-				accountId, contextUser.getUserId(),
+				accountId,
+				DTOConverterUtil.getModelPrimaryKey(
+					_userResourceDTOConverter,
+					contextUser.getExternalReferenceCode()),
 				userAccount.getAlternateName(), userAccount.getEmailAddress(),
 				contextAcceptLanguage.getPreferredLocale(),
 				userAccount.getGivenName(), userAccount.getAdditionalName(),
@@ -456,9 +464,12 @@ public class UserAccountResourceImpl
 			twitter = userAccountContactInformation.getTwitter();
 		}
 
+		long userId = DTOConverterUtil.getModelPrimaryKey(
+			_userResourceDTOConverter, user.getExternalReferenceCode());
+
 		return _toUserAccount(
 			_userLocalService.updateUser(
-				user.getUserId(), null, null, null, false,
+				userId, null, null, null, false,
 				user.getReminderQueryQuestion(), user.getReminderQueryAnswer(),
 				user.getScreenName(), user.getEmailAddress(), false, null,
 				user.getLanguageId(), user.getTimeZoneId(), user.getGreeting(),
@@ -492,7 +503,10 @@ public class UserAccountResourceImpl
 						setCompanyId(contextCompany.getCompanyId());
 						setLanguageId(
 							contextAcceptLanguage.getPreferredLanguageId());
-						setUserId(contextUser.getUserId());
+						setUserId(
+							DTOConverterUtil.getModelPrimaryKey(
+								_userResourceDTOConverter,
+								contextUser.getExternalReferenceCode()));
 					}
 				});
 
@@ -506,8 +520,8 @@ public class UserAccountResourceImpl
 		throws Exception {
 
 		return postAccountUserAccount(
-			_accountResourceDTOConverter.getAccountEntryId(
-				externalReferenceCode),
+			DTOConverterUtil.getModelPrimaryKey(
+				_accountResourceDTOConverter, externalReferenceCode),
 			userAccount);
 	}
 
@@ -517,8 +531,8 @@ public class UserAccountResourceImpl
 		throws Exception {
 
 		postAccountUserAccountByEmailAddress(
-			_accountResourceDTOConverter.getAccountEntryId(
-				externalReferenceCode),
+			DTOConverterUtil.getModelPrimaryKey(
+				_accountResourceDTOConverter, externalReferenceCode),
 			emailAddress);
 	}
 
@@ -655,7 +669,10 @@ public class UserAccountResourceImpl
 
 			_contactLocalService.updateContact(contact);
 
-			user = _userService.getUserById(user.getUserId());
+			user = _userService.getUserById(
+				DTOConverterUtil.getModelPrimaryKey(
+					_userResourceDTOConverter,
+					user.getExternalReferenceCode()));
 		}
 
 		return _toUserAccount(user);
@@ -772,11 +789,13 @@ public class UserAccountResourceImpl
 				userAccount.getCurrentPassword());
 		}
 
+		long contextUserId = DTOConverterUtil.getModelPrimaryKey(
+			_userResourceDTOConverter, contextUser.getExternalReferenceCode());
+
 		User user = _userService.addOrUpdateUser(
-			externalReferenceCode, contextUser.getUserId(),
-			contextCompany.getCompanyId(), autoPassword, password, password,
-			false, userAccount.getAlternateName(),
-			userAccount.getEmailAddress(),
+			externalReferenceCode, contextUserId, contextCompany.getCompanyId(),
+			autoPassword, password, password, false,
+			userAccount.getAlternateName(), userAccount.getEmailAddress(),
 			contextAcceptLanguage.getPreferredLocale(),
 			userAccount.getGivenName(), userAccount.getAdditionalName(),
 			userAccount.getFamilyName(), _getPrefixId(userAccount),
@@ -807,7 +826,10 @@ public class UserAccountResourceImpl
 
 			_contactLocalService.updateContact(contact);
 
-			user = _userService.getUserById(user.getUserId());
+			user = _userService.getUserById(
+				DTOConverterUtil.getModelPrimaryKey(
+					_userResourceDTOConverter,
+					user.getExternalReferenceCode()));
 		}
 
 		return _toUserAccount(user);
@@ -901,17 +923,22 @@ public class UserAccountResourceImpl
 	private void _checkCurrentPassword(User user, String currentPassword)
 		throws Exception {
 
-		if ((user == null) || (contextUser.getUserId() != user.getUserId())) {
+		long contextUserId = DTOConverterUtil.getModelPrimaryKey(
+			_userResourceDTOConverter, contextUser.getExternalReferenceCode());
+
+		long userId = DTOConverterUtil.getModelPrimaryKey(
+			_userResourceDTOConverter, user.getExternalReferenceCode());
+
+		if ((user == null) || (contextUserId != userId)) {
 			return;
 		}
 
 		if (Validator.isNull(currentPassword)) {
-			throw new UserPasswordException.MustMatchCurrentPassword(
-				user.getUserId());
+			throw new UserPasswordException.MustMatchCurrentPassword(userId);
 		}
 
 		int authResult = _userLocalService.authenticateByUserId(
-			contextCompany.getCompanyId(), user.getUserId(), currentPassword,
+			contextCompany.getCompanyId(), userId, currentPassword,
 			new HashMap<>(), new HashMap<>(), new HashMap<>());
 
 		if (authResult == Authenticator.FAILURE) {
@@ -929,8 +956,7 @@ public class UserAccountResourceImpl
 					user, user.getPasswordPolicy());
 			}
 
-			throw new UserPasswordException.MustMatchCurrentPassword(
-				user.getUserId());
+			throw new UserPasswordException.MustMatchCurrentPassword(userId);
 		}
 	}
 
@@ -1199,7 +1225,11 @@ public class UserAccountResourceImpl
 
 	private UserAccount _toUserAccount(User user) throws Exception {
 		return _userResourceDTOConverter.toDTO(
-			_getDTOConverterContext(user.getUserId()), user);
+			_getDTOConverterContext(
+				DTOConverterUtil.getModelPrimaryKey(
+					_userResourceDTOConverter,
+					user.getExternalReferenceCode())),
+			user);
 	}
 
 	private void _updatePassword(
@@ -1210,16 +1240,20 @@ public class UserAccountResourceImpl
 			return;
 		}
 
+		long userId = DTOConverterUtil.getModelPrimaryKey(
+			_userResourceDTOConverter, user.getExternalReferenceCode());
+		long contextUserId = DTOConverterUtil.getModelPrimaryKey(
+			_userResourceDTOConverter, contextUser.getExternalReferenceCode());
+
 		_checkCurrentPassword(user, currentPassword);
 
 		_userService.updatePassword(
-			user.getUserId(), password, password,
-			_isPasswordResetRequired(user));
+			userId, password, password, _isPasswordResetRequired(user));
 
 		String cookie = CookiesManagerUtil.getCookieValue(
 			CookiesConstants.NAME_JSESSIONID, contextHttpServletRequest, false);
 
-		if ((contextUser.getUserId() == user.getUserId()) && (cookie != null)) {
+		if ((contextUserId == userId) && (cookie != null)) {
 			String login = null;
 
 			String authType = contextCompany.getAuthType();
@@ -1231,7 +1265,7 @@ public class UserAccountResourceImpl
 				login = user.getScreenName();
 			}
 			else if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
-				login = String.valueOf(user.getUserId());
+				login = String.valueOf(userId);
 			}
 
 			_authenticatedSessionManager.login(
