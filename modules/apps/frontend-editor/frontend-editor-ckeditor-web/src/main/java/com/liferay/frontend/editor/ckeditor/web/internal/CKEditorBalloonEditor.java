@@ -14,8 +14,6 @@
 
 package com.liferay.frontend.editor.ckeditor.web.internal;
 
-import com.liferay.frontend.editor.EditorRenderer;
-import com.liferay.frontend.editor.ckeditor.web.internal.constants.CKEditorConstants;
 import com.liferay.portal.kernel.editor.Editor;
 import com.liferay.portal.kernel.servlet.PortalWebResourceConstants;
 
@@ -27,16 +25,8 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Julien Castelain
  */
-@Component(
-	property = "name=ballooneditor",
-	service = {Editor.class, EditorRenderer.class}
-)
-public class CKEditorBalloonEditor implements Editor, EditorRenderer {
-
-	@Override
-	public String getAttributeNamespace() {
-		return CKEditorConstants.ATTRIBUTE_NAMESPACE;
-	}
+@Component(property = "name=ballooneditor", service = Editor.class)
+public class CKEditorBalloonEditor implements Editor {
 
 	@Override
 	public String[] getJavaScriptModules() {
@@ -50,12 +40,7 @@ public class CKEditorBalloonEditor implements Editor, EditorRenderer {
 
 	@Override
 	public String getName() {
-		return _name;
-	}
-
-	@Override
-	public String getResourcesJspPath() {
-		return null;
+		return name;
 	}
 
 	@Override
@@ -65,9 +50,9 @@ public class CKEditorBalloonEditor implements Editor, EditorRenderer {
 
 	@Activate
 	protected void activate(Map<String, Object> properties) {
-		_name = (String)properties.get("name");
+		name = (String)properties.get("name");
 	}
 
-	private String _name;
+	protected String name;
 
 }
