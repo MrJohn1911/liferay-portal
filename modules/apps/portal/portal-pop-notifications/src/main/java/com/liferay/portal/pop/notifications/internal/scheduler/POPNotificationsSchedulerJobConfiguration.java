@@ -14,6 +14,8 @@
 
 package com.liferay.portal.pop.notifications.internal.scheduler;
 
+import com.liferay.mail.kernel.auth.token.provider.MailAuthTokenProvider;
+import com.liferay.mail.kernel.auth.token.provider.MailAuthTokenProviderRegistryUtil;
 import com.liferay.mail.kernel.model.Account;
 import com.liferay.mail.kernel.service.MailService;
 import com.liferay.osgi.service.tracker.collections.list.ServiceTrackerList;
@@ -178,6 +180,16 @@ public class POPNotificationsSchedulerJobConfiguration
 		String prefix = "mail." + storeProtocol + ".";
 
 		String host = session.getProperty(prefix + "host");
+
+		MailAuthTokenProvider mailAuthTokenProvider =
+			MailAuthTokenProviderRegistryUtil.getMailAuthTokenProvider(host);
+
+		if (mailAuthTokenProvider != null) {
+			String accessToken =
+				mailAuthTokenProvider.getAccessToken(companyId);
+
+			System.out.println("Access token " + accessToken);
+		}
 
 		String user = session.getProperty(prefix + "user");
 
