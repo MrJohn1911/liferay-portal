@@ -192,13 +192,6 @@ public class AccountResourceImpl
 			Pagination pagination, Sort[] sorts)
 		throws Exception {
 
-		Organization organization = _organizationResourceDTOConverter.getObject(
-			organizationId);
-
-		long organizationResourceId = DTOConverterUtil.getModelPrimaryKey(
-			_organizationResourceDTOConverter,
-			organization.getExternalReferenceCode());
-
 		return _getOrganizationAccountsPage(
 			Collections.emptyMap(),
 			booleanQuery -> {
@@ -208,7 +201,10 @@ public class AccountResourceImpl
 				booleanFilter.add(
 					new TermFilter(
 						"organizationIds",
-						String.valueOf(organizationResourceId)),
+						String.valueOf(
+							DTOConverterUtil.getModelPrimaryKey(
+							_organizationResourceDTOConverter,
+							organizationId))),
 					BooleanClauseOccur.MUST);
 			},
 			search, filter, pagination, sorts);
