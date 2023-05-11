@@ -27,7 +27,6 @@ import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.PortalRunMode;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.search.ccr.CrossClusterReplicationHelper;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationObserver;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
@@ -37,21 +36,16 @@ import com.liferay.portal.search.elasticsearch7.internal.settings.SettingsBuilde
 import com.liferay.portal.search.elasticsearch7.internal.util.ResourceUtil;
 import com.liferay.portal.search.engine.adapter.SearchEngineAdapter;
 import com.liferay.portal.search.engine.adapter.index.UpdateIndexSettingsIndexRequest;
-import com.liferay.portal.search.index.ConcurrentReindexManager;
 import com.liferay.portal.search.index.IndexNameBuilder;
 import com.liferay.portal.search.spi.model.index.contributor.IndexContributor;
 import com.liferay.portal.search.spi.settings.IndexSettingsContributor;
 
 import java.io.IOException;
 
-import java.text.SimpleDateFormat;
-
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.elasticsearch.action.ActionResponse;
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.IndicesClient;
@@ -67,17 +61,13 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author Michael C. Han
  */
-@Component(service = {ConcurrentReindexManager.class, IndexFactory.class})
+@Component(service = CompanyIndexFactory.class)
 public class CompanyIndexFactory
-	implements ConcurrentReindexManager, ElasticsearchConfigurationObserver,
-			   IndexFactory {
+	implements ElasticsearchConfigurationObserver, IndexFactory {
 
 	@Override
 	public int compareTo(
@@ -85,6 +75,33 @@ public class CompanyIndexFactory
 
 		return _elasticsearchConfigurationWrapper.compare(
 			this, elasticsearchConfigurationObserver);
+	}
+
+	public void createIndex(String indexName, IndicesClient indicesClient) {
+		CreateIndexRequest createIndexRequest = new CreateIndexRequest(
+			indexName);
+
+		LiferayDocumentTypeFactory liferayDocumentTypeFactory =
+			new LiferayDocumentTypeFactory(indicesClient, _jsonFactory);
+
+		_setSettings(createIndexRequest, liferayDocumentTypeFactory);
+
+		_addLiferayDocumentTypeMappings(
+			createIndexRequest, liferayDocumentTypeFactory);
+
+		try {
+			ActionResponse actionResponse = indicesClient.create(
+				createIndexRequest, RequestOptions.DEFAULT);
+
+			SearchLogHelperUtil.logActionResponse(_log, actionResponse);
+		}
+		catch (IOException ioException) {
+			throw new RuntimeException(ioException);
+		}
+
+		_updateLiferayDocumentType(indexName, liferayDocumentTypeFactory);
+
+		_executeIndexContributorsAfterCreate(indexName);
 	}
 
 	@Override
@@ -98,32 +115,34 @@ public class CompanyIndexFactory
 		createIndex(indexName, indicesClient);
 	}
 
-	@Override
-	public void createNextIndex(long companyId) throws Exception {
-		if (!FeatureFlagManagerUtil.isEnabled("LPS-177664") ||
-			(companyId == CompanyConstants.SYSTEM)) {
+	public void deleteIndex(
+		String indexName, IndicesClient indicesClient, long companyId,
+		boolean resetBothIndexNames) {
 
-			return;
+		DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(
+			indexName);
+
+		try {
+			ActionResponse actionResponse = indicesClient.delete(
+				deleteIndexRequest, RequestOptions.DEFAULT);
+
+			SearchLogHelperUtil.logActionResponse(_log, actionResponse);
+
+			if (FeatureFlagManagerUtil.isEnabled("LPS-177664") &&
+				(companyId != CompanyConstants.SYSTEM)) {
+
+				if (resetBothIndexNames) {
+					_companyLocalService.updateIndexNames(
+						companyId, null, null);
+				}
+				else {
+					_companyLocalService.updateIndexNameNext(companyId, null);
+				}
+			}
 		}
-
-		String baseIndexName = _indexNameBuilder.getIndexName(companyId);
-
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-
-		String timeStampSuffix = dateFormat.format(new Date());
-
-		String newIndexName = baseIndexName + "-" + timeStampSuffix;
-
-		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManager.getRestHighLevelClient();
-
-		if (hasIndex(restHighLevelClient.indices(), newIndexName)) {
-			return;
+		catch (Exception exception) {
+			throw new RuntimeException(exception);
 		}
-
-		createIndex(newIndexName, restHighLevelClient.indices());
-
-		_companyLocalService.updateIndexNameNext(companyId, newIndexName);
 	}
 
 	@Override
@@ -146,35 +165,43 @@ public class CompanyIndexFactory
 
 		_executeIndexContributorsBeforeRemove(indexName);
 
-		_deleteIndex(indexName, indicesClient, companyId, true);
+		deleteIndex(indexName, indicesClient, companyId, true);
 	}
 
-	@Override
-	public void deleteNextIndex(long companyId) {
-		if (!FeatureFlagManagerUtil.isEnabled("LPS-177664")) {
-			return;
-		}
-
-		Company company = _companyLocalService.fetchCompany(companyId);
-
-		if (company == null) {
-			return;
-		}
-
-		String indexName = company.getIndexNameNext();
-
-		if (!Validator.isBlank(indexName)) {
-			RestHighLevelClient restHighLevelClient =
-				_elasticsearchConnectionManager.getRestHighLevelClient();
-
-			_deleteIndex(
-				indexName, restHighLevelClient.indices(), companyId, false);
-		}
+	public String getIndexName(long companyId) {
+		return _indexNameBuilder.getIndexName(companyId);
 	}
 
 	@Override
 	public int getPriority() {
 		return 3;
+	}
+
+	public boolean hasIndex(IndicesClient indicesClient, String indexName) {
+		GetIndexRequest getIndexRequest = new GetIndexRequest(indexName);
+
+		try {
+			return indicesClient.exists(
+				getIndexRequest, RequestOptions.DEFAULT);
+		}
+		catch (IOException ioException) {
+			throw new RuntimeException(ioException);
+		}
+	}
+
+	public void loadAdditionalTypeMappings(
+		String indexName,
+		LiferayDocumentTypeFactory liferayDocumentTypeFactory) {
+
+		if (Validator.isNull(
+				_elasticsearchConfigurationWrapper.additionalTypeMappings())) {
+
+			return;
+		}
+
+		liferayDocumentTypeFactory.addTypeMappings(
+			indexName,
+			_elasticsearchConfigurationWrapper.additionalTypeMappings());
 	}
 
 	@Override
@@ -187,66 +214,6 @@ public class CompanyIndexFactory
 	@Override
 	public synchronized void registerCompanyId(long companyId) {
 		_companyIds.add(companyId);
-	}
-
-	@Override
-	public void replaceCurrentIndexWithNextIndex(long companyId)
-		throws Exception {
-
-		if (!FeatureFlagManagerUtil.isEnabled("LPS-177664") ||
-			(companyId == CompanyConstants.SYSTEM)) {
-
-			return;
-		}
-
-		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManager.getRestHighLevelClient();
-
-		IndicesAliasesRequest indicesAliasesRequest =
-			new IndicesAliasesRequest();
-
-		IndicesAliasesRequest.AliasActions addAliasActions =
-			IndicesAliasesRequest.AliasActions.add();
-
-		String baseIndexName = _indexNameBuilder.getIndexName(companyId);
-
-		addAliasActions.alias(baseIndexName);
-
-		Company company = _companyLocalService.getCompany(companyId);
-
-		String indexNameNext = company.getIndexNameNext();
-
-		addAliasActions.index(indexNameNext);
-
-		indicesAliasesRequest.addAliasAction(addAliasActions);
-
-		String removeIndex = baseIndexName;
-
-		if (!Validator.isBlank(company.getIndexNameCurrent())) {
-			removeIndex = company.getIndexNameCurrent();
-		}
-
-		IndicesAliasesRequest.AliasActions removeIndexAliasActions =
-			IndicesAliasesRequest.AliasActions.removeIndex();
-
-		removeIndexAliasActions.index(removeIndex);
-
-		indicesAliasesRequest.addAliasAction(removeIndexAliasActions);
-
-		IndicesClient indicesClient = restHighLevelClient.indices();
-
-		if (_crossClusterReplicationHelper != null) {
-			_crossClusterReplicationHelper.unfollow(removeIndex);
-		}
-
-		indicesClient.updateAliases(
-			indicesAliasesRequest, RequestOptions.DEFAULT);
-
-		_companyLocalService.updateIndexNames(companyId, indexNameNext, null);
-
-		if (_crossClusterReplicationHelper != null) {
-			_crossClusterReplicationHelper.follow(indexNameNext);
-		}
 	}
 
 	@Override
@@ -301,33 +268,6 @@ public class CompanyIndexFactory
 		_createCompanyIndexes();
 	}
 
-	protected void createIndex(String indexName, IndicesClient indicesClient) {
-		CreateIndexRequest createIndexRequest = new CreateIndexRequest(
-			indexName);
-
-		LiferayDocumentTypeFactory liferayDocumentTypeFactory =
-			new LiferayDocumentTypeFactory(indicesClient, _jsonFactory);
-
-		_setSettings(createIndexRequest, liferayDocumentTypeFactory);
-
-		_addLiferayDocumentTypeMappings(
-			createIndexRequest, liferayDocumentTypeFactory);
-
-		try {
-			ActionResponse actionResponse = indicesClient.create(
-				createIndexRequest, RequestOptions.DEFAULT);
-
-			SearchLogHelperUtil.logActionResponse(_log, actionResponse);
-		}
-		catch (IOException ioException) {
-			throw new RuntimeException(ioException);
-		}
-
-		_updateLiferayDocumentType(indexName, liferayDocumentTypeFactory);
-
-		_executeIndexContributorsAfterCreate(indexName);
-	}
-
 	@Deactivate
 	protected void deactivate() {
 		if (_indexContributorServiceTrackerList != null) {
@@ -339,37 +279,6 @@ public class CompanyIndexFactory
 		}
 
 		_elasticsearchConfigurationWrapper.unregister(this);
-	}
-
-	protected String getIndexName(long companyId) {
-		return _indexNameBuilder.getIndexName(companyId);
-	}
-
-	protected boolean hasIndex(IndicesClient indicesClient, String indexName) {
-		GetIndexRequest getIndexRequest = new GetIndexRequest(indexName);
-
-		try {
-			return indicesClient.exists(
-				getIndexRequest, RequestOptions.DEFAULT);
-		}
-		catch (IOException ioException) {
-			throw new RuntimeException(ioException);
-		}
-	}
-
-	protected void loadAdditionalTypeMappings(
-		String indexName,
-		LiferayDocumentTypeFactory liferayDocumentTypeFactory) {
-
-		if (Validator.isNull(
-				_elasticsearchConfigurationWrapper.additionalTypeMappings())) {
-
-			return;
-		}
-
-		liferayDocumentTypeFactory.addTypeMappings(
-			indexName,
-			_elasticsearchConfigurationWrapper.additionalTypeMappings());
 	}
 
 	private void _addLiferayDocumentTypeMappings(
@@ -404,36 +313,6 @@ public class CompanyIndexFactory
 						exception);
 				}
 			}
-		}
-	}
-
-	private void _deleteIndex(
-		String indexName, IndicesClient indicesClient, long companyId,
-		boolean resetBothIndexNames) {
-
-		DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(
-			indexName);
-
-		try {
-			ActionResponse actionResponse = indicesClient.delete(
-				deleteIndexRequest, RequestOptions.DEFAULT);
-
-			SearchLogHelperUtil.logActionResponse(_log, actionResponse);
-
-			if (FeatureFlagManagerUtil.isEnabled("LPS-177664") &&
-				(companyId != CompanyConstants.SYSTEM)) {
-
-				if (resetBothIndexNames) {
-					_companyLocalService.updateIndexNames(
-						companyId, null, null);
-				}
-				else {
-					_companyLocalService.updateIndexNameNext(companyId, null);
-				}
-			}
-		}
-		catch (Exception exception) {
-			throw new RuntimeException(exception);
 		}
 	}
 
@@ -653,14 +532,6 @@ public class CompanyIndexFactory
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
-
-	@Reference(
-		cardinality = ReferenceCardinality.OPTIONAL,
-		policy = ReferencePolicy.DYNAMIC,
-		policyOption = ReferencePolicyOption.GREEDY
-	)
-	private volatile CrossClusterReplicationHelper
-		_crossClusterReplicationHelper;
 
 	@Reference
 	private volatile ElasticsearchConfigurationWrapper

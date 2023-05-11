@@ -168,7 +168,7 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 			elasticsearchSearchEngine, "_elasticsearchConnectionManager",
 			elasticsearchConnectionManager);
 		ReflectionTestUtil.setFieldValue(
-			elasticsearchSearchEngine, "_indexFactory",
+			elasticsearchSearchEngine, "_companyIndexFactory",
 			_createCompanyIndexFactory(indexNameBuilder, properites));
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine, "_indexNameBuilder",

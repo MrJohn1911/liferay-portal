@@ -34,7 +34,7 @@ import com.liferay.portal.kernel.version.Version;
 import com.liferay.portal.search.ccr.CrossClusterReplicationHelper;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
-import com.liferay.portal.search.elasticsearch7.internal.index.IndexFactory;
+import com.liferay.portal.search.elasticsearch7.internal.index.CompanyIndexFactory;
 import com.liferay.portal.search.engine.ConnectionInformation;
 import com.liferay.portal.search.engine.NodeInformation;
 import com.liferay.portal.search.engine.SearchEngineInformation;
@@ -134,9 +134,10 @@ public class ElasticsearchSearchEngine implements SearchEngine {
 		RestHighLevelClient restHighLevelClient =
 			_elasticsearchConnectionManager.getRestHighLevelClient();
 
-		_indexFactory.createIndices(restHighLevelClient.indices(), companyId);
+		_companyIndexFactory.createIndices(
+			restHighLevelClient.indices(), companyId);
 
-		_indexFactory.registerCompanyId(companyId);
+		_companyIndexFactory.registerCompanyId(companyId);
 
 		_waitForYellowStatus();
 
@@ -175,10 +176,10 @@ public class ElasticsearchSearchEngine implements SearchEngine {
 			RestHighLevelClient restHighLevelClient =
 				_elasticsearchConnectionManager.getRestHighLevelClient();
 
-			_indexFactory.deleteIndices(
+			_companyIndexFactory.deleteIndices(
 				restHighLevelClient.indices(), companyId);
 
-			_indexFactory.unregisterCompanyId(companyId);
+			_companyIndexFactory.unregisterCompanyId(companyId);
 		}
 		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
@@ -403,6 +404,9 @@ public class ElasticsearchSearchEngine implements SearchEngine {
 	private static final Log _log = LogFactoryUtil.getLog(
 		ElasticsearchSearchEngine.class);
 
+	@Reference
+	private CompanyIndexFactory _companyIndexFactory;
+
 	@Reference(
 		cardinality = ReferenceCardinality.OPTIONAL,
 		policy = ReferencePolicy.DYNAMIC,
@@ -417,9 +421,6 @@ public class ElasticsearchSearchEngine implements SearchEngine {
 
 	@Reference
 	private ElasticsearchConnectionManager _elasticsearchConnectionManager;
-
-	@Reference
-	private IndexFactory _indexFactory;
 
 	@Reference
 	private IndexNameBuilder _indexNameBuilder;
