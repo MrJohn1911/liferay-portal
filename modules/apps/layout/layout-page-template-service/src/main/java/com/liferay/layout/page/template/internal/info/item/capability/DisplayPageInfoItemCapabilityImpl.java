@@ -29,6 +29,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Jorge Ferrer
  */
 @Component(
+	property = "info.item.capability.key=" + DisplayPageInfoItemCapability.KEY,
 	service = {DisplayPageInfoItemCapability.class, InfoItemCapability.class}
 )
 public class DisplayPageInfoItemCapabilityImpl

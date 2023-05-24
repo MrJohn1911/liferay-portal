@@ -15,6 +15,7 @@
 package com.liferay.asset.categories.admin.web.internal.info.item.provider;
 
 import com.liferay.asset.kernel.model.AssetCategory;
+import com.liferay.info.item.InfoItemServiceRegistry;
 import com.liferay.info.item.capability.InfoItemCapability;
 import com.liferay.info.item.provider.InfoItemCapabilitiesProvider;
 import com.liferay.layout.page.template.info.item.capability.DisplayPageInfoItemCapability;
@@ -39,7 +40,7 @@ public class AssetCategoryInfoItemCapabilitiesProvider
 			_displayPageInfoItemCapability, _templatePageInfoItemCapability);
 	}
 
-	@Reference
+	@Reference(target = "test = " + DisplayPageInfoItemCapability.KEY )
 	private DisplayPageInfoItemCapability _displayPageInfoItemCapability;
 
 	@Reference
