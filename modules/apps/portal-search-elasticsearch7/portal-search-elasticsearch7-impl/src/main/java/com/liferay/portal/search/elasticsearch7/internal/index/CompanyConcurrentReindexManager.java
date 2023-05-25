@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.ccr.CrossClusterReplicationHelper;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
+import com.liferay.portal.search.elasticsearch7.internal.index.util.CompanyIndexFactoryHelper;
 import com.liferay.portal.search.index.ConcurrentReindexManager;
 import com.liferay.portal.search.index.IndexNameBuilder;
 
@@ -65,13 +66,13 @@ public class CompanyConcurrentReindexManager
 		RestHighLevelClient restHighLevelClient =
 			_elasticsearchConnectionManager.getRestHighLevelClient();
 
-		if (_companyIndexFactory.hasIndex(
+		if (_companyIndexFactoryHelper.hasIndex(
 				restHighLevelClient.indices(), newIndexName)) {
 
 			return;
 		}
 
-		_companyIndexFactory.createIndex(
+		_companyIndexFactoryHelper.createIndex(
 			newIndexName, restHighLevelClient.indices());
 
 		_companyLocalService.updateIndexNameNext(companyId, newIndexName);
@@ -95,7 +96,7 @@ public class CompanyConcurrentReindexManager
 			RestHighLevelClient restHighLevelClient =
 				_elasticsearchConnectionManager.getRestHighLevelClient();
 
-			_companyIndexFactory.deleteIndex(
+			_companyIndexFactoryHelper.deleteIndex(
 				indexName, restHighLevelClient.indices(), companyId, false);
 		}
 	}
@@ -161,7 +162,7 @@ public class CompanyConcurrentReindexManager
 	}
 
 	@Reference
-	private CompanyIndexFactory _companyIndexFactory;
+	private CompanyIndexFactoryHelper _companyIndexFactoryHelper;
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
