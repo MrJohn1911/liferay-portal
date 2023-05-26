@@ -18,7 +18,6 @@ import com.liferay.commerce.discount.constants.CommerceDiscountConstants;
 import com.liferay.commerce.discount.model.CommerceDiscount;
 import com.liferay.commerce.discount.model.CommerceDiscountRel;
 import com.liferay.commerce.discount.service.CommerceDiscountRelLocalService;
-import com.liferay.commerce.discount.target.CommerceDiscountSKUTarget;
 import com.liferay.commerce.discount.target.CommerceDiscountTarget;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.petra.function.transform.TransformUtil;
@@ -42,13 +41,11 @@ import org.osgi.service.component.annotations.Reference;
 		"commerce.discount.target.key=" + CommerceDiscountConstants.TARGET_SKUS,
 		"commerce.discount.target.order:Integer=20"
 	},
-	service = {CommerceDiscountSKUTarget.class, CommerceDiscountTarget.class}
+	service = CommerceDiscountTarget.class
 )
 public class ApplyToSKUCommerceDiscountTargetImpl
-	extends BaseCommerceDiscountTarget
-	implements CommerceDiscountSKUTarget, CommerceDiscountTarget {
+	extends BaseCommerceDiscountTarget {
 
-	@Override
 	public void contributeDocument(
 		Document document, CommerceDiscount commerceDiscount) {
 
@@ -76,7 +73,6 @@ public class ApplyToSKUCommerceDiscountTargetImpl
 		return Type.APPLY_TO_SKU;
 	}
 
-	@Override
 	public void postProcessContextBooleanFilter(
 		BooleanFilter contextBooleanFilter, CPInstance cpInstance) {
 
