@@ -22,16 +22,13 @@ import com.liferay.commerce.discount.target.CommerceDiscountSKUTarget;
 import com.liferay.commerce.discount.target.CommerceDiscountTarget;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.search.BooleanClauseOccur;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.search.filter.ExistsFilter;
 import com.liferay.portal.kernel.search.filter.TermFilter;
-import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -48,6 +45,7 @@ import org.osgi.service.component.annotations.Reference;
 	service = {CommerceDiscountSKUTarget.class, CommerceDiscountTarget.class}
 )
 public class ApplyToSKUCommerceDiscountTargetImpl
+	extends BaseCommerceDiscountTarget
 	implements CommerceDiscountSKUTarget, CommerceDiscountTarget {
 
 	@Override
@@ -70,11 +68,7 @@ public class ApplyToSKUCommerceDiscountTargetImpl
 
 	@Override
 	public String getLabel(Locale locale) {
-		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
-			"content.Language", locale, getClass());
-
-		return _language.get(
-			resourceBundle, CommerceDiscountConstants.TARGET_SKUS);
+		return getLabel(CommerceDiscountConstants.TARGET_SKUS, locale);
 	}
 
 	@Override
@@ -109,8 +103,5 @@ public class ApplyToSKUCommerceDiscountTargetImpl
 
 	@Reference
 	private CommerceDiscountRelLocalService _commerceDiscountRelLocalService;
-
-	@Reference
-	private Language _language;
 
 }

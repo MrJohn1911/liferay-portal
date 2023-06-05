@@ -14,35 +14,34 @@
 
 package com.liferay.commerce.discount.internal.target;
 
-import com.liferay.commerce.discount.constants.CommerceDiscountConstants;
 import com.liferay.commerce.discount.target.CommerceDiscountTarget;
+import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
 import java.util.Locale;
+import java.util.ResourceBundle;
 
-import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Marco Leo
- * @author Alessio Antonio Rendina
+ * @author Joao Victor Alves
  */
-@Component(
-	property = {
-		"commerce.discount.target.key=" + CommerceDiscountConstants.TARGET_PRODUCTS,
-		"commerce.discount.target.order:Integer=20"
-	},
-	service = CommerceDiscountTarget.class
-)
-public class ApplyToProductCommerceDiscountTargetImpl
-	extends BaseCommerceDiscountTarget {
+public abstract class BaseCommerceDiscountTarget
+	implements CommerceDiscountTarget {
 
-	@Override
-	public String getKey() {
-		return CommerceDiscountConstants.TARGET_PRODUCTS;
+	public String getLabel(String key, Locale locale) {
+		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
+			"content.Language", locale, getClass());
+
+		return language.get(resourceBundle, key);
 	}
 
 	@Override
-	public String getLabel(Locale locale) {
-		return getLabel("products", locale);
+	public CommerceDiscountTarget.Type getType() {
+		return CommerceDiscountTarget.Type.APPLY_TO_PRODUCT;
 	}
+
+	@Reference
+	protected Language language;
 
 }
