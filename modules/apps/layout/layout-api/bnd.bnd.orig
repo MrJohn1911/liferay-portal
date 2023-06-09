@@ -1,0 +1,35 @@
+Bundle-Name: Liferay Layout API
+Bundle-SymbolicName: com.liferay.layout.api
+<<<<<<< HEAD
+Bundle-Version: 34.0.0
+=======
+Bundle-Version: 33.1.0
+>>>>>>> 95b0bfa75486 (LPS-183224 Baseline)
+Export-Package:\
+	com.liferay.layout.adaptive.media,\
+	com.liferay.layout.configuration,\
+	com.liferay.layout.constants,\
+	com.liferay.layout.content,\
+	com.liferay.layout.converter,\
+	com.liferay.layout.crawler,\
+	com.liferay.layout.exception,\
+	com.liferay.layout.exporter,\
+	com.liferay.layout.friendly.url,\
+	com.liferay.layout.importer,\
+	com.liferay.layout.list.permission.provider,\
+	com.liferay.layout.list.retriever,\
+	com.liferay.layout.model,\
+	com.liferay.layout.portlet.category,\
+	com.liferay.layout.portlet.preferences,\
+	com.liferay.layout.provider,\
+	com.liferay.layout.responsive,\
+	com.liferay.layout.security.permission.resource,\
+	com.liferay.layout.service,\
+	com.liferay.layout.service.persistence,\
+	com.liferay.layout.set.model.adapter,\
+	com.liferay.layout.util,\
+	com.liferay.layout.util.comparator,\
+	com.liferay.layout.util.constants,\
+	com.liferay.layout.util.structure,\
+	com.liferay.layout.util.structure.collection,\
+	com.liferay.layout.util.template

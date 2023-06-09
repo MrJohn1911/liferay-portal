@@ -50,17 +50,6 @@ public abstract class BaseCommerceDiscountProductTarget
 	}
 
 	public void postProcessContextBooleanFilter(
-		BooleanFilter contextBooleanFilter, CPDefinition cpDefinition,
-		String filter) {
-
-		TermFilter termFilter = new TermFilter(
-			filter, String.valueOf(cpDefinition.getCPDefinitionId()));
-
-		_postProcessContextBooleanFilter(
-			contextBooleanFilter, filter, termFilter, null);
-	}
-
-	public void postProcessContextBooleanFilter(
 		BooleanFilter contextBooleanFilter, long[] pricingClassIds,
 		String filter) {
 
@@ -69,32 +58,25 @@ public abstract class BaseCommerceDiscountProductTarget
 		termsFilter.addValues(ArrayUtil.toStringArray(pricingClassIds));
 
 		_postProcessContextBooleanFilter(
-			contextBooleanFilter, filter, null, termsFilter);
+			contextBooleanFilter, filter, termsFilter);
 	}
 
 	@Reference
 	protected CommerceDiscountRelLocalService commerceDiscountRelLocalService;
 
-	private void _postProcessContextBooleanFilter(
-		BooleanFilter contextBooleanFilter, String filter,
-		TermFilter termFilter, TermsFilter termsFilter) {
-
-		Filter existFilter = new ExistsFilter(filter);
+	public void postProcessContextBooleanFilter(
+		BooleanFilter contextBooleanFilter, String fieldName,
+		Filter filter) {
 
 		BooleanFilter existBooleanFilter = new BooleanFilter();
 
-		existBooleanFilter.add(existFilter, BooleanClauseOccur.MUST_NOT);
+		existBooleanFilter.add(new ExistsFilter(fieldName), BooleanClauseOccur.MUST_NOT);
 
 		BooleanFilter fieldBooleanFilter = new BooleanFilter();
 
 		fieldBooleanFilter.add(existBooleanFilter, BooleanClauseOccur.SHOULD);
 
-		if (termFilter != null) {
-			fieldBooleanFilter.add(termFilter, BooleanClauseOccur.SHOULD);
-		}
-		else {
-			fieldBooleanFilter.add(termsFilter, BooleanClauseOccur.SHOULD);
-		}
+		fieldBooleanFilter.add(filter, BooleanClauseOccur.SHOULD);
 
 		contextBooleanFilter.add(fieldBooleanFilter, BooleanClauseOccur.MUST);
 	}

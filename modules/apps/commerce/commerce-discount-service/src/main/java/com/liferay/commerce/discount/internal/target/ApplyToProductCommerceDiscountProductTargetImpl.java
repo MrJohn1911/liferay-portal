@@ -20,6 +20,7 @@ import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
 
+import com.liferay.portal.kernel.search.filter.TermFilter;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -46,8 +47,12 @@ public class ApplyToProductCommerceDiscountProductTargetImpl
 		BooleanFilter contextBooleanFilter, CPDefinition cpDefinition) {
 
 		postProcessContextBooleanFilter(
-			contextBooleanFilter, cpDefinition,
-			COMMERCE_DISCOUNT_TARGET_CP_DEFINITION_IDS);
+			contextBooleanFilter,
+			COMMERCE_DISCOUNT_TARGET_CP_DEFINITION_IDS,
+			new TermFilter(
+				COMMERCE_DISCOUNT_TARGET_CP_DEFINITION_IDS,
+				String.valueOf(cpDefinition.getCPDefinitionId()))
+			);
 	}
 
 }
