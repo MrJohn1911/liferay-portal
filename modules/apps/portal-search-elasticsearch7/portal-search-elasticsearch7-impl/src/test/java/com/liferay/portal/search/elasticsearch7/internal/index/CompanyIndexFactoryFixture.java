@@ -89,7 +89,6 @@ public class CompanyIndexFactoryFixture {
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactory, "_companyIndexFactoryHelper",
 			getCompanyIndexFactoryHelper());
-
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactory, "_elasticsearchConfigurationWrapper",
 			createElasticsearchConfigurationWrapper());
@@ -112,15 +111,12 @@ public class CompanyIndexFactoryFixture {
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactoryHelper, "_elasticsearchConfigurationWrapper",
 			createElasticsearchConfigurationWrapper());
-
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactoryHelper, "_elasticsearchConnectionManager",
 			_elasticsearchConnectionManager);
-
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactoryHelper, "_indexNameBuilder",
 			new TestIndexNameBuilder());
-
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactoryHelper, "_jsonFactory", new JSONFactoryImpl());
 
