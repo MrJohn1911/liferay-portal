@@ -199,7 +199,7 @@ public class DefaultWorkflowEngineImpl
 			executionContext.setKaleoTaskInstanceToken(
 				kaleoTimerInstanceToken.getKaleoTaskInstanceToken());
 
-			TaskNodeExecutorUtil.executeTimer(executionContext);
+			taskNodeExecutorUtil.executeTimer(executionContext);
 
 			kaleoTimerInstanceToken =
 				kaleoTimerInstanceTokenLocalService.getKaleoTimerInstanceToken(
@@ -898,5 +898,8 @@ public class DefaultWorkflowEngineImpl
 
 	@Reference
 	private WorkflowValidator _workflowValidator;
+
+	@Reference
+	private TaskNodeExecutorUtil taskNodeExecutorUtil;
 
 }

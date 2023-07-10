@@ -26,15 +26,17 @@ import com.liferay.portal.workflow.kaleo.runtime.action.KaleoActionExecutor;
 import com.liferay.portal.workflow.kaleo.runtime.internal.assignment.helper.TaskAssignerHelper;
 import com.liferay.portal.workflow.kaleo.runtime.notification.NotificationHelper;
 import com.liferay.portal.workflow.kaleo.service.KaleoTimerInstanceTokenLocalService;
+import org.osgi.service.component.annotations.Component;
 
 import java.util.List;
 
 /**
  * @author Joao Victor Alves
  */
+@Component(service = TaskNodeExecutorUtil.class)
 public class TaskNodeExecutorUtil {
 
-	public static void executeTimer(ExecutionContext executionContext)
+	public void executeTimer(ExecutionContext executionContext)
 		throws PortalException {
 
 		KaleoTimerInstanceToken kaleoTimerInstanceToken =

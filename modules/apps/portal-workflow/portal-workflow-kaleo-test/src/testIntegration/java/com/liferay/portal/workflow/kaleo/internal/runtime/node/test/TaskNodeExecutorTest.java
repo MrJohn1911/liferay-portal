@@ -20,6 +20,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DataGuard;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -81,6 +82,7 @@ import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -282,23 +284,27 @@ public class TaskNodeExecutorTest {
 
 		Bundle bundle = FrameworkUtil.getBundle(_nodeExecutor.getClass());
 
-		Class<?> clazz = bundle.loadClass(
-			"com.liferay.portal.workflow.kaleo.runtime.internal.node." +
-				"TaskNodeExecutorUtil");
+		BundleContext bundleContext = bundle.getBundleContext();
 
-		Method executeTimerMethod = ReflectionUtil.getDeclaredMethod(
-			clazz, "executeTimer", ExecutionContext.class);
+		ServiceReference<?> serviceReference = bundleContext.getServiceReference("com.liferay.portal.workflow.kaleo.runtime.internal.node.TaskNodeExecutorUtil");
 
-		executeTimerMethod.invoke(
-			_nodeExecutor,
-			new ExecutionContext(
-				kaleoInstanceToken, kaleoTimerInstanceToken, _workflowContext,
-				_serviceContext) {
+		try {
+			Object service = bundleContext.getService(serviceReference);
 
-				{
-					setKaleoTaskInstanceToken(kaleoTaskInstanceToken);
-				}
-			});
+			ReflectionTestUtil.invoke(
+				service, "executeTimer", new Class<?>[] {ExecutionContext.class},
+				new ExecutionContext(
+					kaleoInstanceToken, kaleoTimerInstanceToken, _workflowContext,
+					_serviceContext) {
+
+					{
+						setKaleoTaskInstanceToken(kaleoTaskInstanceToken);
+					}
+				});
+		}
+		finally {
+			bundleContext.ungetService(serviceReference);
+		}
 	}
 
 	private KaleoTask _getKaleoTask(String taskName) {
