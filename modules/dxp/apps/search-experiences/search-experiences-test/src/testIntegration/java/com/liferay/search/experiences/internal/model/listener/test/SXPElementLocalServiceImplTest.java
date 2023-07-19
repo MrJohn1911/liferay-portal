@@ -6,12 +6,13 @@
 package com.liferay.search.experiences.internal.model.listener.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-import com.liferay.portal.kernel.model.ModelListener;
+import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.search.experiences.rest.dto.v1_0.SXPElement;
+import com.liferay.search.experiences.service.SXPElementLocalService;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ import org.junit.runner.RunWith;
  * @author André de Oliveira
  */
 @RunWith(Arquillian.class)
-public class CompanyModelListenerTest {
+public class SXPElementLocalServiceImplTest {
 
 	@ClassRule
 	@Rule
@@ -35,7 +36,7 @@ public class CompanyModelListenerTest {
 	@Test
 	public void testSXPElements() throws Exception {
 		List<SXPElement> sxpElements = ReflectionTestUtil.getFieldValue(
-			_modelListener, "_sxpElements");
+			_sxpElementLocalService, "_sxpElements");
 
 		Assert.assertNotEquals(0, sxpElements.size());
 
@@ -45,8 +46,9 @@ public class CompanyModelListenerTest {
 	}
 
 	@Inject(
-		filter = "component.name=com.liferay.search.experiences.internal.model.listener.CompanyModelListener"
+		filter = "model.class.name=com.liferay.search.experiences.model.SXPElement",
+		type = AopService.class
 	)
-	private ModelListener<?> _modelListener;
+	private SXPElementLocalService _sxpElementLocalService;
 
 }

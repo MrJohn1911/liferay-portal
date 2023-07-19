@@ -7,7 +7,6 @@ package com.liferay.search.experiences.internal.verify;
 
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.verify.VerifyProcess;
-import com.liferay.search.experiences.internal.model.listener.CompanyModelListener;
 import com.liferay.search.experiences.service.SXPElementLocalService;
 
 import org.osgi.service.component.annotations.Component;
@@ -25,15 +24,11 @@ public class SXPServiceVerifyProcess extends VerifyProcess {
 	@Override
 	protected void doVerify() throws Exception {
 		_companyLocalService.forEachCompany(
-			company -> _companyModelListener.addSXPElements(
-				company, _sxpElementLocalService));
+			company -> _sxpElementLocalService.importSXPElements(company));
 	}
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
-
-	@Reference
-	private CompanyModelListener _companyModelListener;
 
 	@Reference
 	private SXPElementLocalService _sxpElementLocalService;
