@@ -104,8 +104,6 @@ public class JSImportMapsExtenderTopHeadDynamicInclude
 
 		_bundleContext = bundleContext;
 
-		JSImportMapsRegistryUtil.rebuildImportMaps();
-
 		modified(properties);
 	}
 

@@ -16,6 +16,7 @@ package com.liferay.frontend.js.importmaps.extender.internal.servlet.taglib.util
 
 import com.liferay.frontend.js.importmaps.extender.internal.servlet.taglib.JSImportMapsRegistration;
 import com.liferay.osgi.util.service.Snapshot;
+import com.liferay.petra.concurrent.DCLSingleton;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 
@@ -30,8 +31,9 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class JSImportMapsRegistryUtil {
 
-	public static String getImportMaps() {
-		return _importMaps.get();
+	public static String getImportMaps(JSONFactory jsonFactory) {
+		return _importMaps.getSingleton(
+			() -> JSImportMapsRegistryUtil.rebuildImportMaps(jsonFactory));
 	}
 
 	public static boolean isEmptyGlobalImportMapJSONObjects() {
@@ -42,9 +44,7 @@ public class JSImportMapsRegistryUtil {
 		return _scopedImportMapJSONObjects.isEmpty();
 	}
 
-	public static synchronized void rebuildImportMaps() {
-		JSONFactory jsonFactory = _jsonFactorySnapshot.get();
-
+	private static String rebuildImportMaps(JSONFactory jsonFactory) {
 		JSONObject jsonObject = jsonFactory.createJSONObject();
 
 		jsonObject.put(
@@ -78,7 +78,7 @@ public class JSImportMapsRegistryUtil {
 			}
 		);
 
-		_importMaps.set(jsonFactory.looseSerializeDeep(jsonObject));
+		return jsonFactory.looseSerializeDeep(jsonObject);
 	}
 
 	public static JSImportMapsRegistration register(
@@ -89,12 +89,13 @@ public class JSImportMapsRegistryUtil {
 
 			_globalImportMapJSONObjects.put(globalId, jsonObject);
 
-			rebuildImportMaps();
+			_importMaps.destroy(string -> {});
 
 			return new JSImportMapsRegistration() {
 
 				@Override
 				public void unregister() {
+					_importMaps.destroy(string -> {});
 					_globalImportMapJSONObjects.remove(globalId);
 				}
 
@@ -103,12 +104,14 @@ public class JSImportMapsRegistryUtil {
 
 		_scopedImportMapJSONObjects.put(scope, jsonObject);
 
-		rebuildImportMaps();
+		_importMaps.destroy(string -> {});
 
 		return new JSImportMapsRegistration() {
 
 			@Override
 			public void unregister() {
+
+				_importMaps.destroy(string -> {});
 				_scopedImportMapJSONObjects.remove(scope);
 			}
 
@@ -117,10 +120,8 @@ public class JSImportMapsRegistryUtil {
 
 	private static final ConcurrentMap<Long, JSONObject>
 		_globalImportMapJSONObjects = new ConcurrentHashMap<>();
-	private static final AtomicReference<String> _importMaps =
-		new AtomicReference<>();
-	private static final Snapshot<JSONFactory> _jsonFactorySnapshot =
-		new Snapshot<>(JSImportMapsRegistryUtil.class, JSONFactory.class);
+	private static final DCLSingleton<String> _importMaps =
+		new DCLSingleton<>();
 	private static final AtomicLong _nextGlobalId = new AtomicLong();
 	private static final ConcurrentMap<String, JSONObject>
 		_scopedImportMapJSONObjects = new ConcurrentHashMap<>();
