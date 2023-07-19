@@ -15,7 +15,6 @@
 package com.liferay.frontend.js.importmaps.extender.internal.servlet.taglib.util;
 
 import com.liferay.frontend.js.importmaps.extender.internal.servlet.taglib.JSImportMapsRegistration;
-import com.liferay.osgi.util.service.Snapshot;
 import com.liferay.petra.concurrent.DCLSingleton;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -24,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Joao Victor Alves
@@ -81,41 +79,31 @@ public class JSImportMapsRegistryUtil {
 		return jsonFactory.looseSerializeDeep(jsonObject);
 	}
 
-	public static JSImportMapsRegistration register(
+	public static <T> JSImportMapsRegistration register(
 		String scope, JSONObject jsonObject) {
 
 		if (scope == null) {
-			long globalId = _nextGlobalId.getAndIncrement();
+			return createJSImportMapsRegistration(
+				_nextGlobalId.getAndIncrement(), _globalImportMapJSONObjects,
+				jsonObject);
+		}
 
-			_globalImportMapJSONObjects.put(globalId, jsonObject);
+		return createJSImportMapsRegistration(
+			scope, _scopedImportMapJSONObjects, jsonObject);
+	}
+
+	private static <T> JSImportMapsRegistration createJSImportMapsRegistration(
+		T key, Map<T, JSONObject> map, JSONObject jsonObject) {
+
+			map.put(key, jsonObject);
 
 			_importMaps.destroy(string -> {});
 
-			return new JSImportMapsRegistration() {
-
-				@Override
-				public void unregister() {
-					_importMaps.destroy(string -> {});
-					_globalImportMapJSONObjects.remove(globalId);
-				}
-
-			};
-		}
-
-		_scopedImportMapJSONObjects.put(scope, jsonObject);
-
-		_importMaps.destroy(string -> {});
-
-		return new JSImportMapsRegistration() {
-
-			@Override
-			public void unregister() {
-
+			return () -> {
 				_importMaps.destroy(string -> {});
-				_scopedImportMapJSONObjects.remove(scope);
-			}
 
-		};
+				map.remove(key);
+			};
 	}
 
 	private static final ConcurrentMap<Long, JSONObject>
