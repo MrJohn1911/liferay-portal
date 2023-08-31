@@ -26,18 +26,18 @@ public class UserEntityModel extends BaseEntityModel<User> {
 	}
 
 	@Override
-	protected User getModel(long id) throws Exception {
+	public User getModel(long id) throws Exception {
 		return userLocalService.getUser(id);
+	}
+
+	@Override
+	public boolean isExcluded(User user) {
+		return _analyticsModelHelper.isUserExcluded(user);
 	}
 
 	@Override
 	protected String getPrimaryKeyName() {
 		return "userId";
-	}
-
-	@Override
-	protected boolean isExcluded(User user) {
-		return _analyticsModelHelper.isUserExcluded(user);
 	}
 
 	@Reference

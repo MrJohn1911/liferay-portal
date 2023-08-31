@@ -41,15 +41,6 @@ public class GroupModelListener extends BaseModelListener<Group> {
 		return _groupLocalService.getGroup(id);
 	}
 
-	@Override
-	protected boolean isExcluded(Group group) {
-		if (!group.isSite()) {
-			return true;
-		}
-
-		return false;
-	}
-
 	@Reference(target = "(entity.model.type=group)")
 	private EntityModel<Group> _groupEntityModel;
 

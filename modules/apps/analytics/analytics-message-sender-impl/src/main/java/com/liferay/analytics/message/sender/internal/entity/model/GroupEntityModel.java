@@ -38,8 +38,22 @@ public class GroupEntityModel extends BaseEntityModel<Group> {
 	}
 
 	@Override
+	public Group getModel(long id) throws Exception {
+		return _groupLocalService.getGroup(id);
+	}
+
+	@Override
 	public String getModelClassName() {
 		return Group.class.getName();
+	}
+
+	@Override
+	public boolean isExcluded(Group group) {
+		if (!group.isSite()) {
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -58,22 +72,8 @@ public class GroupEntityModel extends BaseEntityModel<Group> {
 	}
 
 	@Override
-	protected Group getModel(long id) throws Exception {
-		return _groupLocalService.getGroup(id);
-	}
-
-	@Override
 	protected String getPrimaryKeyName() {
 		return "groupId";
-	}
-
-	@Override
-	protected boolean isExcluded(Group group) {
-		if (!group.isSite()) {
-			return true;
-		}
-
-		return false;
 	}
 
 	private static final List<String> _attributeNames =

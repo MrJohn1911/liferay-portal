@@ -36,6 +36,11 @@ public class OrganizationEntityModel extends BaseEntityModel<Organization> {
 	}
 
 	@Override
+	public Organization getModel(long id) throws Exception {
+		return _organizationLocalService.getOrganization(id);
+	}
+
+	@Override
 	public String getModelClassName() {
 		return Organization.class.getName();
 	}
@@ -43,11 +48,6 @@ public class OrganizationEntityModel extends BaseEntityModel<Organization> {
 	@Override
 	protected ActionableDynamicQuery getActionableDynamicQuery() {
 		return _organizationLocalService.getActionableDynamicQuery();
-	}
-
-	@Override
-	protected Organization getModel(long id) throws Exception {
-		return _organizationLocalService.getOrganization(id);
 	}
 
 	@Override

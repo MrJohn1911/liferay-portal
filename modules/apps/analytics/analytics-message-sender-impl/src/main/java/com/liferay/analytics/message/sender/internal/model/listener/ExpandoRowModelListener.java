@@ -9,8 +9,6 @@ import com.liferay.analytics.message.sender.model.listener.EntityModel;
 import com.liferay.expando.kernel.model.ExpandoRow;
 import com.liferay.expando.kernel.service.ExpandoRowLocalService;
 import com.liferay.portal.kernel.model.ModelListener;
-import com.liferay.portal.kernel.model.Organization;
-import com.liferay.portal.kernel.model.User;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -29,29 +27,6 @@ public class ExpandoRowModelListener extends BaseModelListener<ExpandoRow> {
 	@Override
 	protected ExpandoRow getModel(long id) throws Exception {
 		return _expandoRowLocalService.getExpandoRow(id);
-	}
-
-	@Override
-	protected boolean isExcluded(ExpandoRow expandoRow) {
-		if (analyticsModelHelper.isCustomField(
-				Organization.class.getName(), expandoRow.getTableId())) {
-
-			return false;
-		}
-
-		if (analyticsModelHelper.isCustomField(
-				User.class.getName(), expandoRow.getTableId())) {
-
-			User user = userLocalService.fetchUser(expandoRow.getClassPK());
-
-			if (!analyticsModelHelper.isUserActive(user)) {
-				return true;
-			}
-
-			return analyticsModelHelper.isUserExcluded(user);
-		}
-
-		return true;
 	}
 
 	@Reference(target = "(entity.model.type=expandorow)")

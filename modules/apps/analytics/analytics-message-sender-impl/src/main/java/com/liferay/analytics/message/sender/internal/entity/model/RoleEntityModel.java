@@ -37,8 +37,22 @@ public class RoleEntityModel extends BaseEntityModel<Role> {
 	}
 
 	@Override
+	public Role getModel(long id) throws Exception {
+		return _roleLocalService.getRole(id);
+	}
+
+	@Override
 	public String getModelClassName() {
 		return Role.class.getName();
+	}
+
+	@Override
+	public boolean isExcluded(Role role) {
+		if (role.getType() == RoleConstants.TYPE_REGULAR) {
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override
@@ -62,22 +76,8 @@ public class RoleEntityModel extends BaseEntityModel<Role> {
 	}
 
 	@Override
-	protected Role getModel(long id) throws Exception {
-		return _roleLocalService.getRole(id);
-	}
-
-	@Override
 	protected String getPrimaryKeyName() {
 		return "roleId";
-	}
-
-	@Override
-	protected boolean isExcluded(Role role) {
-		if (role.getType() == RoleConstants.TYPE_REGULAR) {
-			return false;
-		}
-
-		return true;
 	}
 
 	private static final List<String> _attributeNames =

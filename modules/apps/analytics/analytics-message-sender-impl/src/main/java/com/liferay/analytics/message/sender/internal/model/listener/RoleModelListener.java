@@ -8,7 +8,6 @@ package com.liferay.analytics.message.sender.internal.model.listener;
 import com.liferay.analytics.message.sender.model.listener.EntityModel;
 import com.liferay.portal.kernel.model.ModelListener;
 import com.liferay.portal.kernel.model.Role;
-import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.service.RoleLocalService;
 
 import org.osgi.service.component.annotations.Component;
@@ -28,15 +27,6 @@ public class RoleModelListener extends BaseModelListener<Role> {
 	@Override
 	protected Role getModel(long id) throws Exception {
 		return _roleLocalService.getRole(id);
-	}
-
-	@Override
-	protected boolean isExcluded(Role role) {
-		if (role.getType() == RoleConstants.TYPE_REGULAR) {
-			return false;
-		}
-
-		return true;
 	}
 
 	@Reference(target = "(entity.model.type=role)")

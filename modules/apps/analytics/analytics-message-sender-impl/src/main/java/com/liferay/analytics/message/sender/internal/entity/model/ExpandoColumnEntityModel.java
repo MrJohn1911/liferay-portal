@@ -48,38 +48,12 @@ public class ExpandoColumnEntityModel extends BaseEntityModel<ExpandoColumn> {
 	}
 
 	@Override
-	protected ActionableDynamicQuery getActionableDynamicQuery() {
-		ActionableDynamicQuery actionableDynamicQuery =
-			_expandoColumnLocalService.getActionableDynamicQuery();
-
-		actionableDynamicQuery.setAddCriteriaMethod(
-			dynamicQuery -> {
-				Property tableIdProperty = PropertyFactoryUtil.forName(
-					"tableId");
-
-				dynamicQuery.add(
-					tableIdProperty.in(
-						_getTableDynamicQuery(
-							_classNameLocalService.getClassNameId(
-								Organization.class.getName()),
-							ExpandoTableConstants.DEFAULT_TABLE_NAME)));
-			});
-
-		return actionableDynamicQuery;
-	}
-
-	@Override
-	protected ExpandoColumn getModel(long id) throws Exception {
+	public ExpandoColumn getModel(long id) throws Exception {
 		return _expandoColumnLocalService.getColumn(id);
 	}
 
 	@Override
-	protected String getPrimaryKeyName() {
-		return "name";
-	}
-
-	@Override
-	protected boolean isExcluded(ExpandoColumn expandoColumn) {
+	public boolean isExcluded(ExpandoColumn expandoColumn) {
 		if (_analyticsModelHelper.isCustomField(
 				Organization.class.getName(), expandoColumn.getTableId())) {
 
@@ -113,6 +87,32 @@ public class ExpandoColumnEntityModel extends BaseEntityModel<ExpandoColumn> {
 		}
 
 		return true;
+	}
+
+	@Override
+	protected ActionableDynamicQuery getActionableDynamicQuery() {
+		ActionableDynamicQuery actionableDynamicQuery =
+			_expandoColumnLocalService.getActionableDynamicQuery();
+
+		actionableDynamicQuery.setAddCriteriaMethod(
+			dynamicQuery -> {
+				Property tableIdProperty = PropertyFactoryUtil.forName(
+					"tableId");
+
+				dynamicQuery.add(
+					tableIdProperty.in(
+						_getTableDynamicQuery(
+							_classNameLocalService.getClassNameId(
+								Organization.class.getName()),
+							ExpandoTableConstants.DEFAULT_TABLE_NAME)));
+			});
+
+		return actionableDynamicQuery;
+	}
+
+	@Override
+	protected String getPrimaryKeyName() {
+		return "name";
 	}
 
 	@Override

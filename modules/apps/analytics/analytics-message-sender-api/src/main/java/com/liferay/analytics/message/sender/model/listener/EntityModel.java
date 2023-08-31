@@ -29,4 +29,8 @@ public interface EntityModel<T extends BaseModel<T>> {
 
 	public void syncAll(long companyId) throws Exception;
 
+	public T getModel(long id) throws Exception;
+
+	public boolean isExcluded(T model);
+
 }

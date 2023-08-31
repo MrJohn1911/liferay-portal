@@ -39,17 +39,12 @@ public class ContactEntityModel extends BaseEntityModel<Contact> {
 	}
 
 	@Override
-	protected Contact getModel(long id) throws Exception {
+	public Contact getModel(long id) throws Exception {
 		return _contactLocalService.getContact(id);
 	}
 
 	@Override
-	protected String getPrimaryKeyName() {
-		return "contactId";
-	}
-
-	@Override
-	protected boolean isExcluded(Contact contact) {
+	public boolean isExcluded(Contact contact) {
 		User user = userLocalService.fetchUser(contact.getClassPK());
 
 		if (!analyticsModelHelper.isUserActive(user)) {
@@ -57,6 +52,11 @@ public class ContactEntityModel extends BaseEntityModel<Contact> {
 		}
 
 		return analyticsModelHelper.isUserExcluded(user);
+	}
+
+	@Override
+	protected String getPrimaryKeyName() {
+		return "contactId";
 	}
 
 	private static final List<String> _attributeNames = Arrays.asList(

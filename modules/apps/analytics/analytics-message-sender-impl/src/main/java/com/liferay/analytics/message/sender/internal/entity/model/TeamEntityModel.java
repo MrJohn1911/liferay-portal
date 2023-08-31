@@ -34,6 +34,11 @@ public class TeamEntityModel extends BaseEntityModel<Team> {
 	}
 
 	@Override
+	public Team getModel(long id) throws Exception {
+		return _teamLocalService.getTeam(id);
+	}
+
+	@Override
 	public String getModelClassName() {
 		return Team.class.getName();
 	}
@@ -41,11 +46,6 @@ public class TeamEntityModel extends BaseEntityModel<Team> {
 	@Override
 	protected ActionableDynamicQuery getActionableDynamicQuery() {
 		return _teamLocalService.getActionableDynamicQuery();
-	}
-
-	@Override
-	protected Team getModel(long id) throws Exception {
-		return _teamLocalService.getTeam(id);
 	}
 
 	@Override

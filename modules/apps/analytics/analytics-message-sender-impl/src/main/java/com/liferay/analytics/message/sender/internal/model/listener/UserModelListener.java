@@ -5,7 +5,6 @@
 
 package com.liferay.analytics.message.sender.internal.model.listener;
 
-import com.liferay.analytics.message.sender.internal.helper.AnalyticsModelHelper;
 import com.liferay.analytics.message.sender.model.listener.EntityModel;
 import com.liferay.portal.kernel.model.ModelListener;
 import com.liferay.portal.kernel.model.User;
@@ -28,14 +27,6 @@ public class UserModelListener extends BaseModelListener<User> {
 	protected User getModel(long id) throws Exception {
 		return userLocalService.getUser(id);
 	}
-
-	@Override
-	protected boolean isExcluded(User user) {
-		return _analyticsModelHelper.isUserExcluded(user);
-	}
-
-	@Reference
-	private AnalyticsModelHelper _analyticsModelHelper;
 
 	@Reference(target = "(entity.model.type=user)")
 	private EntityModel<User> _userEntityModel;

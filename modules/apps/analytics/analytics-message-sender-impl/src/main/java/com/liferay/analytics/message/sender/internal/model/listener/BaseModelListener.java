@@ -146,20 +146,16 @@ public abstract class BaseModelListener<T extends BaseModel<T>>
 
 	protected abstract EntityModel<T> getEntityModelListener();
 
-	protected abstract T getModel(long id) throws Exception;
+	protected T getModel(long id) throws Exception {
+		EntityModel<T> entityModelListener = getEntityModelListener();
+
+		return entityModelListener.getModel(id);
+	}
 
 	protected boolean isExcluded(T model) {
-		ShardedModel shardedModel = (ShardedModel)model;
+		EntityModel<T> entityModelListener = getEntityModelListener();
 
-		Dictionary<String, Object> analyticsConfigurationProperties =
-			analyticsConfigurationRegistry.getAnalyticsConfigurationProperties(
-				shardedModel.getCompanyId());
-
-		if (analyticsConfigurationProperties == null) {
-			return true;
-		}
-
-		return false;
+		return entityModelListener.isExcluded(model);
 	}
 
 	protected void updateConfigurationProperties(

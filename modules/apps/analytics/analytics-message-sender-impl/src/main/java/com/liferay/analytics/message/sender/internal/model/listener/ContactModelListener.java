@@ -8,7 +8,6 @@ package com.liferay.analytics.message.sender.internal.model.listener;
 import com.liferay.analytics.message.sender.model.listener.EntityModel;
 import com.liferay.portal.kernel.model.Contact;
 import com.liferay.portal.kernel.model.ModelListener;
-import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ContactLocalService;
 
 import org.osgi.service.component.annotations.Component;
@@ -28,17 +27,6 @@ public class ContactModelListener extends BaseModelListener<Contact> {
 	@Override
 	protected Contact getModel(long id) throws Exception {
 		return _contactLocalService.getContact(id);
-	}
-
-	@Override
-	protected boolean isExcluded(Contact contact) {
-		User user = userLocalService.fetchUser(contact.getClassPK());
-
-		if (!analyticsModelHelper.isUserActive(user)) {
-			return true;
-		}
-
-		return analyticsModelHelper.isUserExcluded(user);
 	}
 
 	@Reference(target = "(entity.model.type=contact)")
