@@ -32,12 +32,13 @@ import com.liferay.portal.language.LanguageImpl;
 import com.liferay.portal.model.impl.UserGroupImpl;
 import com.liferay.portal.model.impl.UserImpl;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
+import com.liferay.saml.opensaml.integration.field.expression.handler.UserFieldExpressionHandler;
 import com.liferay.saml.opensaml.integration.field.expression.handler.registry.UserFieldExpressionHandlerRegistry;
 import com.liferay.saml.opensaml.integration.field.expression.resolver.UserFieldExpressionResolver;
 import com.liferay.saml.opensaml.integration.field.expression.resolver.registry.UserFieldExpressionResolverRegistry;
 import com.liferay.saml.opensaml.integration.internal.BaseSamlTestCase;
 import com.liferay.saml.opensaml.integration.internal.field.expression.handler.DefaultUserFieldExpressionHandler;
-import com.liferay.saml.opensaml.integration.internal.field.expression.handler.MembershipsUserFieldExpressionHandler;
+import com.liferay.saml.opensaml.integration.internal.field.expression.handler.MembershipsUserFieldExpressionHandlerRegistrator;
 import com.liferay.saml.opensaml.integration.internal.processor.factory.UserProcessorFactoryImpl;
 import com.liferay.saml.opensaml.integration.internal.util.OpenSamlUtil;
 import com.liferay.saml.opensaml.integration.resolver.UserResolver;
@@ -49,6 +50,7 @@ import com.liferay.saml.runtime.exception.SubjectException;
 
 import java.io.Serializable;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -437,21 +439,41 @@ public class DefaultUserResolverTest extends BaseSamlTestCase {
 		return defaultUserFieldExpressionHandler;
 	}
 
-	private MembershipsUserFieldExpressionHandler
+	private UserFieldExpressionHandler
 		_createMembershipsUserFieldExpressionHandler(
 			UserGroupLocalService userGroupLocalService) {
 
-		MembershipsUserFieldExpressionHandler
-			membershipsUserFieldExpressionHandler =
-				new MembershipsUserFieldExpressionHandler();
 
-		ReflectionTestUtil.setFieldValue(
-			membershipsUserFieldExpressionHandler, "_processingIndex", 100);
-		ReflectionTestUtil.setFieldValue(
-			membershipsUserFieldExpressionHandler, "_userGroupLocalService",
-			userGroupLocalService);
+		try {
+			Class<?>
+				membershipsUserFieldExpressionHandlerRegistratorClass =
+				MembershipsUserFieldExpressionHandlerRegistrator.class;
 
-		return membershipsUserFieldExpressionHandler;
+			Class<?> innerClass = Class.forName(
+				membershipsUserFieldExpressionHandlerRegistratorClass.getName() +
+				"$MembershipsUserFieldExpressionHandler");
+
+			Constructor<?> constructor = innerClass.getDeclaredConstructor(
+				membershipsUserFieldExpressionHandlerRegistratorClass);
+
+			UserFieldExpressionHandler membershipsUserFieldExpressionHandler =
+				(UserFieldExpressionHandler) constructor.newInstance(
+					membershipsUserFieldExpressionHandlerRegistratorClass);
+
+			ReflectionTestUtil.setFieldValue(
+				membershipsUserFieldExpressionHandler, "_processingIndex", 100);
+			ReflectionTestUtil.setFieldValue(
+				membershipsUserFieldExpressionHandler, "_userGroupLocalService",
+				userGroupLocalService);
+
+			return membershipsUserFieldExpressionHandler;
+
+		}
+		catch (Exception exception) {
+
+		}
+
+		return null;
 	}
 
 	private void _initMatchingUserHandling() throws Exception {
@@ -734,8 +756,8 @@ public class DefaultUserResolverTest extends BaseSamlTestCase {
 	private UserFieldExpressionHandlerRegistry
 		_mockDefaultUserFieldExpressionRegistry(
 			DefaultUserFieldExpressionHandler defaultUserFieldExpressionHandler,
-			MembershipsUserFieldExpressionHandler
-				membershipsUserFieldExpressionHandler) {
+			UserFieldExpressionHandler
+				userFieldExpressionHandler) {
 
 		UserFieldExpressionHandlerRegistry userFieldExpressionHandlerRegistry =
 			Mockito.mock(UserFieldExpressionHandlerRegistry.class);
@@ -751,7 +773,7 @@ public class DefaultUserResolverTest extends BaseSamlTestCase {
 			userFieldExpressionHandlerRegistry.getFieldExpressionHandler(
 				Mockito.eq("membership"))
 		).thenReturn(
-			membershipsUserFieldExpressionHandler
+			userFieldExpressionHandler
 		);
 
 		Mockito.when(

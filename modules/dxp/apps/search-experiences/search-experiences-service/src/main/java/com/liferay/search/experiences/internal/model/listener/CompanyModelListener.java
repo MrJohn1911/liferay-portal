@@ -154,7 +154,7 @@ public class CompanyModelListener extends BaseModelListener<Company> {
 		if (_sxpElements == null) {
 			_sxpElements = _createSXPElements();
 		}
-
+x
 		return _sxpElements;
 	}
 
