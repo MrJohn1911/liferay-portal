@@ -25,7 +25,6 @@ import com.liferay.data.engine.rest.internal.content.type.DataDefinitionContentT
 import com.liferay.data.engine.rest.internal.dto.v2_0.util.DataDefinitionUtil;
 import com.liferay.data.engine.rest.internal.dto.v2_0.util.DataLayoutUtil;
 import com.liferay.data.engine.rest.internal.odata.entity.v2_0.DataDefinitionEntityModel;
-import com.liferay.data.engine.rest.internal.security.permission.resource.DataDefinitionModelResourcePermission;
 import com.liferay.data.engine.rest.internal.security.permission.resource.util.DataDefinitionModelResourcePermissionUtil;
 import com.liferay.data.engine.rest.resource.exception.DataDefinitionValidationException;
 import com.liferay.data.engine.rest.resource.v2_0.DataDefinitionResource;
@@ -148,15 +147,15 @@ public class DataDefinitionResourceImpl extends BaseDataDefinitionResourceImpl {
 
 	@Override
 	public void deleteDataDefinition(Long dataDefinitionId) throws Exception {
-		_dataDefinitionModelResourcePermission.check(
-			PermissionThreadLocal.getPermissionChecker(), dataDefinitionId,
+		DDMStructure ddmStructure = _ddmStructureLocalService.getDDMStructure(
+			dataDefinitionId);
+
+		DataDefinitionModelResourcePermissionUtil.check(
+			PermissionThreadLocal.getPermissionChecker(), ddmStructure,
 			ActionKeys.DELETE);
 
 		List<DDMStructureLink> ddmStructureLinks =
 			_ddmStructureLinkLocalService.getStructureLinks(dataDefinitionId);
-
-		DDMStructure ddmStructure = _ddmStructureLocalService.getDDMStructure(
-			dataDefinitionId);
 
 		DataDefinitionContentType dataDefinitionContentType =
 			DataDefinitionContentTypeRegistryUtil.getDataDefinitionContentType(
@@ -258,8 +257,9 @@ public class DataDefinitionResourceImpl extends BaseDataDefinitionResourceImpl {
 	public DataDefinition getDataDefinition(Long dataDefinitionId)
 		throws Exception {
 
-		_dataDefinitionModelResourcePermission.check(
-			PermissionThreadLocal.getPermissionChecker(), dataDefinitionId,
+		DataDefinitionModelResourcePermissionUtil.check(
+			PermissionThreadLocal.getPermissionChecker(),
+			_ddmStructureLocalService.getDDMStructure(dataDefinitionId),
 			ActionKeys.VIEW);
 
 		return DataDefinitionUtil.toDataDefinition(
@@ -304,8 +304,9 @@ public class DataDefinitionResourceImpl extends BaseDataDefinitionResourceImpl {
 			Long dataDefinitionId, String roleNames)
 		throws Exception {
 
-		_dataDefinitionModelResourcePermission.check(
-			PermissionThreadLocal.getPermissionChecker(), dataDefinitionId,
+		DataDefinitionModelResourcePermissionUtil.check(
+			PermissionThreadLocal.getPermissionChecker(),
+			_ddmStructureLocalService.getDDMStructure(dataDefinitionId),
 			ActionKeys.PERMISSIONS);
 
 		String resourceName = getPermissionCheckerResourceName(
@@ -339,9 +340,9 @@ public class DataDefinitionResourceImpl extends BaseDataDefinitionResourceImpl {
 			DataDefinitionContentTypeRegistryUtil.getClassNameId(contentType),
 			dataDefinitionKey);
 
-		_dataDefinitionModelResourcePermission.check(
-			PermissionThreadLocal.getPermissionChecker(),
-			ddmStructure.getStructureId(), ActionKeys.VIEW);
+		DataDefinitionModelResourcePermissionUtil.check(
+			PermissionThreadLocal.getPermissionChecker(), ddmStructure,
+			ActionKeys.VIEW);
 
 		return DataDefinitionUtil.toDataDefinition(
 			_ddmFormFieldTypeServicesRegistry, ddmStructure,
@@ -456,8 +457,9 @@ public class DataDefinitionResourceImpl extends BaseDataDefinitionResourceImpl {
 			Long dataDefinitionId, DataDefinition dataDefinition)
 		throws Exception {
 
-		_dataDefinitionModelResourcePermission.check(
-			PermissionThreadLocal.getPermissionChecker(), dataDefinitionId,
+		DataDefinitionModelResourcePermissionUtil.check(
+			PermissionThreadLocal.getPermissionChecker(),
+			_ddmStructureLocalService.getDDMStructure(dataDefinitionId),
 			ActionKeys.UPDATE);
 
 		DataLayout dataLayout = dataDefinition.getDefaultDataLayout();
@@ -1692,10 +1694,6 @@ public class DataDefinitionResourceImpl extends BaseDataDefinitionResourceImpl {
 
 	private static final EntityModel _entityModel =
 		new DataDefinitionEntityModel();
-
-	@Reference
-	private DataDefinitionModelResourcePermission
-		_dataDefinitionModelResourcePermission;
 
 	@Reference
 	private DataLayoutResource.Factory _dataLayoutResourceFactory;

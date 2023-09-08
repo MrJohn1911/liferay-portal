@@ -11,11 +11,25 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 
 /**
  * @author Joao Victor Alves
  */
 public class DataDefinitionModelResourcePermissionUtil {
+
+	public static void check(
+			PermissionChecker permissionChecker, DDMStructure ddmStructure,
+			String actionId)
+		throws PortalException {
+
+		if (!_contains(permissionChecker, ddmStructure, actionId)) {
+			throw new PrincipalException.MustHavePermission(
+				permissionChecker, _getModelResourceName(ddmStructure),
+				ddmStructure.getStructureId(), actionId);
+		}
+	}
 
 	public static void checkPortletPermission(
 			PermissionChecker permissionChecker, DDMStructure ddmStructure,
@@ -59,6 +73,31 @@ public class DataDefinitionModelResourcePermissionUtil {
 				permissionChecker, dataDefinitionContentType.getContentType(),
 				groupId, actionId);
 		}
+	}
+
+	private static boolean _contains(
+			PermissionChecker permissionChecker, DDMStructure ddmStructure,
+			String actionId)
+		throws PortalException {
+
+		DataDefinitionContentType dataDefinitionContentType =
+			DataDefinitionContentTypeRegistryUtil.getDataDefinitionContentType(
+				ddmStructure.getClassNameId());
+
+		if (dataDefinitionContentType == null) {
+			return false;
+		}
+
+		return dataDefinitionContentType.hasPermission(
+			permissionChecker, ddmStructure.getCompanyId(),
+			ddmStructure.getGroupId(), _getModelResourceName(ddmStructure),
+			ddmStructure.getStructureId(), ddmStructure.getUserId(), actionId);
+	}
+
+	private static String _getModelResourceName(DDMStructure ddmStructure) {
+		return ResourceActionsUtil.getCompositeModelName(
+			PortalUtil.getClassName(ddmStructure.getClassNameId()),
+			DDMStructure.class.getName());
 	}
 
 }
