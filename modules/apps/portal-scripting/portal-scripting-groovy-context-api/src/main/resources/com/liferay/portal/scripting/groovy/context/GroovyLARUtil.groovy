@@ -11,7 +11,7 @@ import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.exportimport.kernel.lar.UserIdStrategy;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalServiceUtil;
-import com.liferay.exportimport.kernel.service.ExportImportLocalServiceUtil;
+import com.liferay.exportimport.kernel.util.ExportImportFileHelperUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
@@ -95,7 +95,7 @@ class GroovyLARUtil {
 					ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT,
 					importLayoutSettingsMap);
 
-		ExportImportLocalServiceUtil.importLayouts(
+		ExportImportFileHelperUtil.importLayouts(
 			exportImportConfiguration, inputStream);
 	}
 
@@ -116,7 +116,7 @@ class GroovyLARUtil {
 					ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT,
 					importLayoutSettingsMap);
 
-		ExportImportLocalServiceUtil.importLayouts(
+		ExportImportFileHelperUtil.importLayouts(
 			exportImportConfiguration, inputStream);
 	}
 
@@ -146,7 +146,7 @@ class GroovyLARUtil {
 					ExportImportConfigurationConstants.TYPE_IMPORT_PORTLET,
 					importPortletSettingsMap);
 
-		ExportImportLocalServiceUtil.importPortletInfo(
+		ExportImportFileHelperUtil.importPortletInfo(
 			exportImportConfiguration, inputStream);
 	}
 

@@ -11,7 +11,7 @@ import com.liferay.exportimport.kernel.configuration.constants.ExportImportConfi
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
-import com.liferay.exportimport.kernel.service.ExportImportLocalService;
+import com.liferay.exportimport.kernel.util.ExportImportFileHelper;
 import com.liferay.friendly.url.model.FriendlyURLEntry;
 import com.liferay.friendly.url.service.FriendlyURLEntryLocalService;
 import com.liferay.layout.friendly.url.LayoutFriendlyURLEntryHelper;
@@ -142,7 +142,7 @@ public class ExportImportLocalServiceTest {
 					ExportImportConfigurationConstants.TYPE_EXPORT_LAYOUT,
 					exportLayoutSettingsMap);
 
-		File file = _exportImportLocalService.exportLayoutsAsFile(
+		File file = _exportImportFileHelper.exportLayoutsAsFile(
 			_exportImportConfiguration);
 
 		GroupTestUtil.deleteGroup(group1);
@@ -164,7 +164,7 @@ public class ExportImportLocalServiceTest {
 						ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT,
 						importLayoutSettingsMap);
 
-			_exportImportLocalService.importLayouts(
+			_exportImportFileHelper.importLayouts(
 				_exportImportConfiguration, file);
 
 			for (long layoutId : layoutIds) {
@@ -309,7 +309,7 @@ public class ExportImportLocalServiceTest {
 		_exportImportConfigurationSettingsMapFactory;
 
 	@Inject
-	private ExportImportLocalService _exportImportLocalService;
+	private ExportImportFileHelper _exportImportFileHelper;
 
 	@Inject
 	private LayoutFriendlyURLEntryHelper _layoutFriendlyURLEntryHelper;

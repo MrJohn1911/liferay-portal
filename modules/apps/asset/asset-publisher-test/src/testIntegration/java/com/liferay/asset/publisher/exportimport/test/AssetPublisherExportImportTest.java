@@ -27,13 +27,12 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
 import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationSettingsMapFactoryUtil;
 import com.liferay.exportimport.kernel.configuration.constants.ExportImportConfigurationConstants;
-import com.liferay.exportimport.kernel.controller.ExportImportController;
 import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
-import com.liferay.exportimport.kernel.service.ExportImportLocalService;
+import com.liferay.exportimport.kernel.util.ExportImportFileHelper;
 import com.liferay.exportimport.test.util.lar.BasePortletExportImportTestCase;
 import com.liferay.journal.constants.JournalArticleConstants;
 import com.liferay.journal.constants.JournalFolderConstants;
@@ -971,7 +970,7 @@ public class AssetPublisherExportImportTest
 					ExportImportConfigurationConstants.TYPE_EXPORT_LAYOUT,
 					exportLayoutSettingsMap);
 
-		larFile = _exportImportLocalService.exportLayoutsAsFile(
+		larFile = _exportImportFileHelper.exportLayoutsAsFile(
 			exportImportConfiguration);
 
 		// Import site LAR
@@ -989,7 +988,7 @@ public class AssetPublisherExportImportTest
 					ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT,
 					importLayoutSettingsMap);
 
-		_exportImportLocalService.importLayouts(
+		_exportImportFileHelper.importLayouts(
 			exportImportConfiguration, larFile);
 
 		importedLayout = _layoutLocalService.getLayoutByUuidAndGroupId(
@@ -1233,11 +1232,8 @@ public class AssetPublisherExportImportTest
 	private ExportImportConfigurationLocalService
 		_exportImportConfigurationLocalService;
 
-	@Inject(filter = "model.class.name=com.liferay.portal.kernel.model.Layout")
-	private ExportImportController _exportImportController;
-
 	@Inject
-	private ExportImportLocalService _exportImportLocalService;
+	private ExportImportFileHelper _exportImportFileHelper;
 
 	@Inject
 	private GroupLocalService _groupLocalService;

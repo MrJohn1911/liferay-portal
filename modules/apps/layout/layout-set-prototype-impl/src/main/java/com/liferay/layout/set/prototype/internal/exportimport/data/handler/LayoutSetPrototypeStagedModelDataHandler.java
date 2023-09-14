@@ -17,8 +17,8 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.UserIdStrategy;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
-import com.liferay.exportimport.kernel.service.ExportImportLocalService;
 import com.liferay.exportimport.kernel.service.ExportImportService;
+import com.liferay.exportimport.kernel.util.ExportImportFileHelper;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
@@ -353,7 +353,7 @@ public class LayoutSetPrototypeStagedModelDataHandler
 					ExportImportConfigurationConstants.TYPE_EXPORT_LAYOUT,
 					exportLayoutSettingsMap);
 
-		return _exportImportLocalService.exportLayoutsAsFile(
+		return _exportImportFileHelper.exportLayoutsAsFile(
 			exportImportConfiguration);
 	}
 
@@ -562,10 +562,10 @@ public class LayoutSetPrototypeStagedModelDataHandler
 		_exportImportConfigurationLocalService;
 
 	@Reference
-	private ExportImportHelper _exportImportHelper;
+	private ExportImportFileHelper _exportImportFileHelper;
 
 	@Reference
-	private ExportImportLocalService _exportImportLocalService;
+	private ExportImportHelper _exportImportHelper;
 
 	@Reference
 	private ExportImportService _exportImportService;

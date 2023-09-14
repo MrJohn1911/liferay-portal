@@ -11,7 +11,7 @@ import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleManagerUtil;
 import com.liferay.exportimport.kernel.lifecycle.constants.ExportImportLifecycleConstants;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
-import com.liferay.exportimport.kernel.service.ExportImportLocalService;
+import com.liferay.exportimport.kernel.util.ExportImportFileHelper;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
@@ -71,7 +71,7 @@ public class PortletStagingBackgroundTaskExecutor
 					exportImportConfiguration.getExportImportConfigurationId()),
 				exportImportConfiguration);
 
-			file = _exportImportLocalService.exportPortletInfoAsFile(
+			file = _exportImportFileHelper.exportPortletInfoAsFile(
 				exportImportConfiguration);
 
 			markBackgroundTask(
@@ -127,7 +127,7 @@ public class PortletStagingBackgroundTaskExecutor
 	}
 
 	@Reference
-	private ExportImportLocalService _exportImportLocalService;
+	private ExportImportFileHelper _exportImportFileHelper;
 
 	private class PortletStagingCallable
 		implements Callable<MissingReferences> {
@@ -143,16 +143,16 @@ public class PortletStagingBackgroundTaskExecutor
 
 		@Override
 		public MissingReferences call() throws PortalException {
-			_exportImportLocalService.importPortletDataDeletions(
+			_exportImportFileHelper.importPortletDataDeletions(
 				_exportImportConfiguration, _file);
 
 			MissingReferences missingReferences =
-				_exportImportLocalService.validateImportPortletInfo(
+				_exportImportFileHelper.validateImportPortletInfo(
 					_exportImportConfiguration, _file);
 
 			markBackgroundTask(_backgroundTaskId, "validated");
 
-			_exportImportLocalService.importPortletInfo(
+			_exportImportFileHelper.importPortletInfo(
 				_exportImportConfiguration, _file);
 
 			return missingReferences;
