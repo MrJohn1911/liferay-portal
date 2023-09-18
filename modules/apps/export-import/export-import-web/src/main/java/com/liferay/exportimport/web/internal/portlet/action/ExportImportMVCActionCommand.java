@@ -19,8 +19,8 @@ import com.liferay.exportimport.kernel.lar.MissingReference;
 import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
-import com.liferay.exportimport.kernel.service.ExportImportService;
 import com.liferay.exportimport.kernel.staging.Staging;
+import com.liferay.exportimport.kernel.util.ExportImportFileHelper;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.exception.LocaleException;
@@ -35,12 +35,16 @@ import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.permission.GroupPermission;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
@@ -224,8 +228,16 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 					ExportImportConfigurationConstants.TYPE_IMPORT_PORTLET,
 					importPortletSettingsMap);
 
-		_exportImportService.importPortletInfoInBackground(
-			exportImportConfiguration, inputStream);
+		long targetGroupId = MapUtil.getLong(
+			exportImportConfiguration.getSettingsMap(), "targetGroupId");
+
+		groupPermission.check(
+			PermissionThreadLocal.getPermissionChecker(), targetGroupId,
+			ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
+
+		_exportImportFileHelper.importPortletInfoInBackground(
+			_portal.getUserId(actionRequest), exportImportConfiguration,
+			inputStream);
 	}
 
 	protected void importData(ActionRequest actionRequest, String folderName)
@@ -318,9 +330,19 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 					ExportImportConfigurationConstants.TYPE_IMPORT_PORTLET,
 					importPortletSettingsMap);
 
-		return _exportImportService.validateImportPortletInfo(
+		long targetGroupId = MapUtil.getLong(
+			exportImportConfiguration.getSettingsMap(), "targetGroupId");
+
+		groupPermission.check(
+			PermissionThreadLocal.getPermissionChecker(), targetGroupId,
+			ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
+
+		return _exportImportFileHelper.validateImportPortletInfo(
 			exportImportConfiguration, inputStream);
 	}
+
+	@Reference
+	protected GroupPermission groupPermission;
 
 	private void _exportData(ActionRequest actionRequest, Portlet portlet)
 		throws Exception {
@@ -349,8 +371,15 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 						ExportImportConfigurationConstants.TYPE_EXPORT_PORTLET,
 						exportPortletSettingsMap);
 
-			_exportImportService.exportPortletInfoAsFileInBackground(
-				exportImportConfiguration);
+			long sourceGroupId = MapUtil.getLong(
+				exportImportConfiguration.getSettingsMap(), "sourceGroupId");
+
+			groupPermission.check(
+				PermissionThreadLocal.getPermissionChecker(), sourceGroupId,
+				ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
+
+			_exportImportFileHelper.exportPortletInfoAsFileInBackground(
+				_portal.getUserId(actionRequest), exportImportConfiguration);
 		}
 		catch (Exception exception) {
 			if (exception instanceof LARFileNameException) {
@@ -380,10 +409,10 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 		_exportImportConfigurationSettingsMapFactory;
 
 	@Reference
-	private ExportImportHelper _exportImportHelper;
+	private ExportImportFileHelper _exportImportFileHelper;
 
 	@Reference
-	private ExportImportService _exportImportService;
+	private ExportImportHelper _exportImportHelper;
 
 	@Reference
 	private GroupLocalService _groupLocalService;

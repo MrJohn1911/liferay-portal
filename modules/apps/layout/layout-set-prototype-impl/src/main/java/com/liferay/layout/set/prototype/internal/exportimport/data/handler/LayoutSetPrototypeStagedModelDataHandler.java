@@ -17,7 +17,6 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.UserIdStrategy;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
-import com.liferay.exportimport.kernel.service.ExportImportService;
 import com.liferay.exportimport.kernel.util.ExportImportFileHelper;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
@@ -47,14 +46,15 @@ import com.liferay.portal.kernel.service.LayoutPrototypeLocalService;
 import com.liferay.portal.kernel.service.LayoutSetPrototypeLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.permission.GroupPermission;
 import com.liferay.portal.kernel.service.permission.PortalPermission;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.xml.Element;
-import com.liferay.sites.kernel.util.Sites;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -501,7 +501,14 @@ public class LayoutSetPrototypeStagedModelDataHandler
 					ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT,
 					importLayoutSettingsMap);
 
-		_exportImportService.importLayouts(
+		long targetGroupId = MapUtil.getLong(
+			exportImportConfiguration.getSettingsMap(), "targetGroupId");
+
+		_groupPermission.check(
+			PermissionThreadLocal.getPermissionChecker(), targetGroupId,
+			ActionKeys.EXPORT_IMPORT_LAYOUTS);
+
+		_exportImportFileHelper.importLayouts(
 			exportImportConfiguration, inputStream);
 	}
 
@@ -568,10 +575,10 @@ public class LayoutSetPrototypeStagedModelDataHandler
 	private ExportImportHelper _exportImportHelper;
 
 	@Reference
-	private ExportImportService _exportImportService;
+	private GroupLocalService _groupLocalService;
 
 	@Reference
-	private GroupLocalService _groupLocalService;
+	private GroupPermission _groupPermission;
 
 	@Reference
 	private LayoutLocalService _layoutLocalService;
@@ -584,9 +591,6 @@ public class LayoutSetPrototypeStagedModelDataHandler
 
 	@Reference
 	private PortalPermission _portalPermission;
-
-	@Reference
-	private Sites _sites;
 
 	@Reference
 	private UserLocalService _userLocalService;

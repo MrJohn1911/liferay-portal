@@ -14,7 +14,7 @@ import com.liferay.exportimport.kernel.lar.ExportImportHelper;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationService;
-import com.liferay.exportimport.kernel.service.ExportImportService;
+import com.liferay.exportimport.kernel.util.ExportImportFileHelper;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
 import com.liferay.portal.kernel.backgroundtask.constants.BackgroundTaskConstants;
@@ -24,6 +24,9 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.TrashedModel;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.permission.GroupPermission;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.Constants;
@@ -217,10 +220,13 @@ public class EditExportConfigurationMVCActionCommand
 		exportImportConfigurationSettingsMapFactory;
 
 	@Reference
+	protected ExportImportFileHelper exportImportFileHelper;
+
+	@Reference
 	protected ExportImportHelper exportImportHelper;
 
 	@Reference
-	protected ExportImportService exportImportService;
+	protected GroupPermission groupPermission;
 
 	@Reference
 	protected Portal portal;
@@ -247,8 +253,15 @@ public class EditExportConfigurationMVCActionCommand
 			ExportImportConfigurationFactory.cloneExportImportConfiguration(
 				exportImportConfiguration);
 
-		exportImportService.exportLayoutsAsFileInBackground(
-			exportImportConfiguration);
+		long sourceGroupId = MapUtil.getLong(
+			exportImportConfiguration.getSettingsMap(), "sourceGroupId");
+
+		groupPermission.check(
+			PermissionThreadLocal.getPermissionChecker(), sourceGroupId,
+			ActionKeys.EXPORT_IMPORT_LAYOUTS);
+
+		exportImportFileHelper.exportLayoutsAsFileInBackground(
+			portal.getUserId(actionRequest), exportImportConfiguration);
 	}
 
 	private void _restoreTrashEntries(ActionRequest actionRequest)

@@ -6,23 +6,31 @@
 package com.liferay.exportimport.web.internal.portlet.action;
 
 import com.liferay.exportimport.constants.ExportImportPortletKeys;
+import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationFactory;
 import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationSettingsMapFactory;
 import com.liferay.exportimport.kernel.configuration.constants.ExportImportConfigurationConstants;
 import com.liferay.exportimport.kernel.exception.LARFileNameException;
 import com.liferay.exportimport.kernel.lar.ExportImportHelper;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
-import com.liferay.exportimport.kernel.service.ExportImportService;
+import com.liferay.exportimport.kernel.util.ExportImportFileHelper;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
+import com.liferay.portal.kernel.backgroundtask.constants.BackgroundTaskConstants;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.permission.GroupPermission;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.SessionTreeJSClicks;
@@ -64,6 +72,29 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
+		long backgroundTaskId = ParamUtil.getLong(
+			actionRequest, BackgroundTaskConstants.BACKGROUND_TASK_ID);
+
+		BackgroundTask backgroundTask = backgroundTaskManager.getBackgroundTask(
+			backgroundTaskId);
+
+		ExportImportConfiguration exportImportConfiguration =
+			exportImportConfigurationLocalService.getExportImportConfiguration(
+				MapUtil.getLong(
+					backgroundTask.getTaskContextMap(),
+					"exportImportConfigurationId"));
+
+		exportImportConfiguration =
+			ExportImportConfigurationFactory.cloneExportImportConfiguration(
+				exportImportConfiguration);
+
+		long sourceGroupId = MapUtil.getLong(
+			exportImportConfiguration.getSettingsMap(), "sourceGroupId");
+
+		groupPermission.check(
+			PermissionThreadLocal.getPermissionChecker(), sourceGroupId,
+			ActionKeys.EXPORT_IMPORT_LAYOUTS);
+
 		if (Validator.isNull(cmd)) {
 			SessionMessages.add(
 				actionRequest,
@@ -78,7 +109,8 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 		setLayoutIdMap(actionRequest);
 
 		try {
-			_exportImportService.exportLayoutsAsFileInBackground(
+			_exportImportFileHelper.exportLayoutsAsFileInBackground(
+				_portal.getUserId(actionRequest),
 				getExportImportConfiguration(actionRequest));
 
 			sendRedirect(actionRequest, actionResponse);
@@ -175,6 +207,16 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 					httpServletRequest, treeId + "SelectedNode")));
 	}
 
+	@Reference
+	protected BackgroundTaskManager backgroundTaskManager;
+
+	@Reference
+	protected ExportImportConfigurationLocalService
+		exportImportConfigurationLocalService;
+
+	@Reference
+	protected GroupPermission groupPermission;
+
 	private long[] _getLayoutIds(PortletRequest portletRequest)
 		throws Exception {
 
@@ -193,10 +235,10 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 		_exportImportConfigurationSettingsMapFactory;
 
 	@Reference
-	private ExportImportHelper _exportImportHelper;
+	private ExportImportFileHelper _exportImportFileHelper;
 
 	@Reference
-	private ExportImportService _exportImportService;
+	private ExportImportHelper _exportImportHelper;
 
 	@Reference
 	private Language _language;
