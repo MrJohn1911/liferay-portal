@@ -1848,3 +1848,25 @@ Use Component Blacklist to disable certain scheduler components. The error messa
 ### Why was this change made?
 
 Now Scheduler jobs are bootstrapped by `SchedulerJobConfiguration` objects registered as OSGi services. If a job should not be bootstrapped, the configuration object should not be registered at all. Thus, Liferay decided to no longer support this feature.
+
+---------------------------------------
+
+## Portal property `dl.file.entry.processors` removed
+- **Date:** 2023-September-19
+- **JIRA Ticket:** [LPS-188559](https://liferay.atlassian.net/browse/LPS-188559)
+
+### What changed?
+
+The portal property `dl.file.entry.processors` can no longer be set from the `portal.properties` file.
+
+### Who is affected?
+
+This affects anyone using the `dl.file.entry.processors` property to register a `DLProcessor` service.
+
+### How should I update my code?
+
+If you are providing your own non-OSGi DLProcessor implementation, convert it to an OSGi service.
+
+### Why was this change made?
+
+It is not required anymore as all the out-of-the-box implementations of DLProcessor are OSGi services now.
