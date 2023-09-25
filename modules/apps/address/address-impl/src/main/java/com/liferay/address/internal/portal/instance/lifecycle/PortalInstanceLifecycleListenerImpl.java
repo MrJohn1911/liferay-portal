@@ -5,11 +5,14 @@
 
 package com.liferay.address.internal.portal.instance.lifecycle;
 
-import com.liferay.address.internal.osgi.commands.PortalAddressOSGiCommands;
+import com.liferay.address.internal.util.CompanyCountriesUtil;
 import com.liferay.portal.instance.lifecycle.BasePortalInstanceLifecycleListener;
 import com.liferay.portal.instance.lifecycle.PortalInstanceLifecycleListener;
+import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.CountryLocalService;
+import com.liferay.portal.kernel.service.RegionLocalService;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -30,8 +33,8 @@ public class PortalInstanceLifecycleListenerImpl
 
 	@Override
 	public void portalInstanceRegistered(Company company) throws Exception {
-		_portalAddressOSGiCommands.populateCompanyCountries(
-			company.getCompanyId());
+		CompanyCountriesUtil.populateCompanyCountries(
+			company, _countryLocalService, _regionLocalService);
 	}
 
 	@Override
@@ -40,9 +43,15 @@ public class PortalInstanceLifecycleListenerImpl
 	}
 
 	@Reference
+	private CompanyLocalService _companyLocalService;
+
+	@Reference
 	private CountryLocalService _countryLocalService;
 
 	@Reference
-	private PortalAddressOSGiCommands _portalAddressOSGiCommands;
+	private JSONFactory _jsonFactory;
+
+	@Reference
+	private RegionLocalService _regionLocalService;
 
 }
