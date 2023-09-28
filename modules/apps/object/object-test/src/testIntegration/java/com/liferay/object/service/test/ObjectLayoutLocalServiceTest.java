@@ -7,7 +7,7 @@ package com.liferay.object.service.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationCategory;
-import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationRegistry;
+import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationRegistryUtil;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.constants.ObjectFieldConstants;
 import com.liferay.object.constants.ObjectLayoutBoxConstants;
@@ -449,7 +449,7 @@ public class ObjectLayoutLocalServiceTest {
 	@Test
 	public void testUpdateObjectLayout() throws Exception {
 		List<ScreenNavigationCategory> screenNavigationCategories =
-			_screenNavigationRegistry.getScreenNavigationCategories(
+			ScreenNavigationRegistryUtil.getScreenNavigationCategories(
 				_objectDefinition.getClassName(), TestPropsValues.getUser(),
 				null);
 
@@ -464,7 +464,7 @@ public class ObjectLayoutLocalServiceTest {
 			Collections.singletonList(objectLayoutTab1));
 
 		screenNavigationCategories =
-			_screenNavigationRegistry.getScreenNavigationCategories(
+			ScreenNavigationRegistryUtil.getScreenNavigationCategories(
 				_objectDefinition.getClassName(), TestPropsValues.getUser(),
 				null);
 
@@ -475,7 +475,7 @@ public class ObjectLayoutLocalServiceTest {
 		_addObjectLayout();
 
 		screenNavigationCategories =
-			_screenNavigationRegistry.getScreenNavigationCategories(
+			ScreenNavigationRegistryUtil.getScreenNavigationCategories(
 				_objectDefinition.getClassName(), TestPropsValues.getUser(),
 				null);
 
@@ -488,7 +488,7 @@ public class ObjectLayoutLocalServiceTest {
 			Arrays.asList(objectLayoutTab1));
 
 		screenNavigationCategories =
-			_screenNavigationRegistry.getScreenNavigationCategories(
+			ScreenNavigationRegistryUtil.getScreenNavigationCategories(
 				_objectDefinition.getClassName(), TestPropsValues.getUser(),
 				null);
 
@@ -644,8 +644,5 @@ public class ObjectLayoutLocalServiceTest {
 
 	@Inject
 	private ObjectLayoutTabPersistence _objectLayoutTabPersistence;
-
-	@Inject
-	private ScreenNavigationRegistry _screenNavigationRegistry;
 
 }
