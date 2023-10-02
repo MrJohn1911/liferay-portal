@@ -95,6 +95,6 @@ public class UpgradeLogContext implements LogContext {
 		"com.liferay.portal.upgrade.internal.executor.UpgradeExecutor",
 		"com.liferay.portal.upgrade.internal.release.ReleaseManagerImpl",
 		"com.liferay.portal.upgrade.internal.report.UpgradeReport",
-		"com.liferay.portal.upgrade.internal.recorder.UpgradeRecorder");
+		"com.liferay.portal.upgrade.internal.recorder.UpgradeRecorderUtil");
 
 }

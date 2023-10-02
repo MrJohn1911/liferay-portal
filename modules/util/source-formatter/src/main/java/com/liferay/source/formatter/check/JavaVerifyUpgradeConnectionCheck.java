@@ -23,7 +23,7 @@ public class JavaVerifyUpgradeConnectionCheck extends BaseFileCheck {
 
 		if (absolutePath.contains("/test/") ||
 			fileName.endsWith("DBUpgrader.java") ||
-			fileName.endsWith("UpgradeRecorder.java") ||
+			fileName.endsWith("UpgradeRecorderUtil.java") ||
 			fileName.endsWith("Test.java") ||
 			fileName.endsWith("UpgradeExecutor.java") ||
 			fileName.endsWith("UpgradeTableListener.java") ||

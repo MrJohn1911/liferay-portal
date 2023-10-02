@@ -223,7 +223,7 @@ public class DBUpgradeClient {
 			String line = null;
 
 			while ((line = bufferedReader.readLine()) != null) {
-				if (line.contains("UpgradeRecorder") &&
+				if (line.contains("UpgradeRecorderUtil") &&
 					(line.contains("fail") || line.contains("unresolved"))) {
 
 					upgradeFailed = true;
