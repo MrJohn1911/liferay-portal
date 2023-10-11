@@ -20,8 +20,8 @@ import com.liferay.osb.faro.web.internal.model.preferences.WorkspacePreferences;
 import com.liferay.osb.faro.web.internal.param.FaroParam;
 import com.liferay.osb.faro.web.internal.util.EmailReportHelper;
 import com.liferay.osb.faro.web.internal.util.JSONUtil;
+import com.liferay.osb.faro.web.internal.util.PreferencesControllerUtil;
 import com.liferay.portal.kernel.model.RoleConstants;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Collections;
@@ -46,7 +46,10 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author Matthew Kong
  */
-@Component(service = {FaroController.class, PreferencesController.class})
+@Component(
+	property = "osgi.jaxrs.application.select=(osgi.jaxrs.name=Liferay.Osb.Faro.Web)",
+	service = FaroController.class
+)
 @Path("/{groupId}/preferences")
 @Produces(MediaType.APPLICATION_JSON)
 public class PreferencesController extends BaseFaroController {
@@ -65,10 +68,12 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		long ownerId = _getOwnerId(groupId, scope);
+		long ownerId = PreferencesControllerUtil._getOwnerId(
+			groupId, scope, getUserId());
 
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, ownerId);
+		WorkspacePreferences workspacePreferences =
+			PreferencesControllerUtil._getWorkspacePreferences(
+				_faroPreferencesLocalService, groupId, ownerId);
 
 		workspacePreferences.addDistributionCardTabPreferences(
 			distributionTabId, individualSegmentId,
@@ -97,10 +102,12 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		long ownerId = _getOwnerId(groupId, scope);
+		long ownerId = PreferencesControllerUtil._getOwnerId(
+			groupId, scope, getUserId());
 
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, ownerId);
+		WorkspacePreferences workspacePreferences =
+			PreferencesControllerUtil._getWorkspacePreferences(
+				_faroPreferencesLocalService, groupId, ownerId);
 
 		Map<String, EmailReportPreferences> emailReportPreferences =
 			workspacePreferences.addEmailReportPreference(
@@ -122,7 +129,8 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		long ownerId = _getOwnerId(groupId, scope);
+		long ownerId = PreferencesControllerUtil._getOwnerId(
+			groupId, scope, getUserId());
 
 		FaroPreferences faroPreferences =
 			_faroPreferencesLocalService.fetchFaroPreferences(groupId, ownerId);
@@ -144,8 +152,11 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, _getOwnerId(groupId, scope));
+		WorkspacePreferences workspacePreferences =
+			PreferencesControllerUtil._getWorkspacePreferences(
+				_faroPreferencesLocalService, groupId,
+				PreferencesControllerUtil._getOwnerId(
+					groupId, scope, getUserId()));
 
 		return Collections.singletonMap(
 			"defaultChannelId", workspacePreferences.getDefaultChannelId());
@@ -162,8 +173,11 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, _getOwnerId(groupId, scope));
+		WorkspacePreferences workspacePreferences =
+			PreferencesControllerUtil._getWorkspacePreferences(
+				_faroPreferencesLocalService, groupId,
+				PreferencesControllerUtil._getOwnerId(
+					groupId, scope, getUserId()));
 
 		if (Validator.isNull(individualSegmentId)) {
 			IndividualDashboardPreferences individualDashboardPreferences =
@@ -195,8 +209,11 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, _getOwnerId(groupId, scope));
+		WorkspacePreferences workspacePreferences =
+			PreferencesControllerUtil._getWorkspacePreferences(
+				_faroPreferencesLocalService, groupId,
+				PreferencesControllerUtil._getOwnerId(
+					groupId, scope, getUserId()));
 
 		return workspacePreferences.getEmailReportPreferences(null);
 	}
@@ -211,8 +228,11 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, _getOwnerId(groupId, scope));
+		WorkspacePreferences workspacePreferences =
+			PreferencesControllerUtil._getWorkspacePreferences(
+				_faroPreferencesLocalService, groupId,
+				PreferencesControllerUtil._getOwnerId(
+					groupId, scope, getUserId()));
 
 		return workspacePreferences.isUpgradeModalSeen();
 	}
@@ -229,10 +249,12 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		long ownerId = _getOwnerId(groupId, scope);
+		long ownerId = PreferencesControllerUtil._getOwnerId(
+			groupId, scope, getUserId());
 
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, ownerId);
+		WorkspacePreferences workspacePreferences =
+			PreferencesControllerUtil._getWorkspacePreferences(
+				_faroPreferencesLocalService, groupId, ownerId);
 
 		workspacePreferences.removeDistributionCardTabPreferences(
 			distributionTabId, individualSegmentId);
@@ -243,23 +265,6 @@ public class PreferencesController extends BaseFaroController {
 
 		return workspacePreferences.getDistributionCardTabsPreferences(
 			individualSegmentId);
-	}
-
-	public void removeIndividualSegmentPreferences(
-			long groupId, String individualSegmentId, String scope)
-		throws Exception {
-
-		long ownerId = _getOwnerId(groupId, scope);
-
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, ownerId);
-
-		workspacePreferences.removeIndividualSegmentPreference(
-			individualSegmentId);
-
-		_faroPreferencesLocalService.savePreferences(
-			getUserId(), groupId, ownerId,
-			JSONUtil.writeValueAsString(workspacePreferences));
 	}
 
 	@POST
@@ -275,7 +280,9 @@ public class PreferencesController extends BaseFaroController {
 
 		return new FaroPreferencesDisplay(
 			_faroPreferencesLocalService.savePreferences(
-				getUserId(), groupId, _getOwnerId(groupId, scope),
+				getUserId(), groupId,
+				PreferencesControllerUtil._getOwnerId(
+					groupId, scope, getUserId()),
 				JSONUtil.writeValueAsString(preferencesFaroParam.getValue())));
 	}
 
@@ -290,10 +297,12 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		long ownerId = _getOwnerId(groupId, scope);
+		long ownerId = PreferencesControllerUtil._getOwnerId(
+			groupId, scope, getUserId());
 
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, ownerId);
+		WorkspacePreferences workspacePreferences =
+			PreferencesControllerUtil._getWorkspacePreferences(
+				_faroPreferencesLocalService, groupId, ownerId);
 
 		workspacePreferences.setDefaultChannelId(defaultChannelId);
 
@@ -315,10 +324,12 @@ public class PreferencesController extends BaseFaroController {
 			String scope)
 		throws Exception {
 
-		long ownerId = _getOwnerId(groupId, scope);
+		long ownerId = PreferencesControllerUtil._getOwnerId(
+			groupId, scope, getUserId());
 
-		WorkspacePreferences workspacePreferences = _getWorkspacePreferences(
-			groupId, ownerId);
+		WorkspacePreferences workspacePreferences =
+			PreferencesControllerUtil._getWorkspacePreferences(
+				_faroPreferencesLocalService, groupId, ownerId);
 
 		workspacePreferences.setUpgradeModalSeen(upgradeModalSeen);
 
@@ -342,34 +353,6 @@ public class PreferencesController extends BaseFaroController {
 		_emailReportHelper.sendEmail(channelId, frequency, groupId, userId);
 
 		return true;
-	}
-
-	private long _getOwnerId(long groupId, String scope) throws Exception {
-		if (StringUtil.equals(scope, FaroPreferencesConstants.SCOPE_GROUP)) {
-			return groupId;
-		}
-		else if (StringUtil.equals(
-					scope, FaroPreferencesConstants.SCOPE_USER)) {
-
-			return getUserId();
-		}
-
-		throw new Exception("Invalid scope " + scope);
-	}
-
-	private WorkspacePreferences _getWorkspacePreferences(
-			long groupId, long ownerId)
-		throws Exception {
-
-		FaroPreferences faroPreferences =
-			_faroPreferencesLocalService.fetchFaroPreferences(groupId, ownerId);
-
-		if (faroPreferences == null) {
-			return new WorkspacePreferences();
-		}
-
-		return JSONUtil.readValue(
-			faroPreferences.getPreferences(), WorkspacePreferences.class);
 	}
 
 	@Reference
