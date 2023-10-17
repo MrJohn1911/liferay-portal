@@ -19,12 +19,13 @@ import com.liferay.exportimport.kernel.lar.MissingReference;
 import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
-import com.liferay.exportimport.kernel.service.ExportImportService;
 import com.liferay.exportimport.kernel.staging.Staging;
+import com.liferay.exportimport.kernel.util.ExportImportLayoutHelper;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.exception.LocaleException;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.PortletIdException;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -35,12 +36,16 @@ import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
@@ -224,8 +229,11 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 					ExportImportConfigurationConstants.TYPE_IMPORT_PORTLET,
 					importPortletSettingsMap);
 
-		_exportImportService.importPortletInfoInBackground(
-			exportImportConfiguration, inputStream);
+		_checkPermission(exportImportConfiguration, "targetGroupId");
+
+		_exportImportLayoutHelper.importPortletInfoInBackground(
+			_portal.getUserId(actionRequest), exportImportConfiguration,
+			inputStream);
 	}
 
 	protected void importData(ActionRequest actionRequest, String folderName)
@@ -318,8 +326,20 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 					ExportImportConfigurationConstants.TYPE_IMPORT_PORTLET,
 					importPortletSettingsMap);
 
-		return _exportImportService.validateImportPortletInfo(
+		_checkPermission(exportImportConfiguration, "targetGroupId");
+
+		return _exportImportLayoutHelper.validateImportPortletInfo(
 			exportImportConfiguration, inputStream);
+	}
+
+	private void _checkPermission(
+			ExportImportConfiguration exportImportConfiguration, String string)
+		throws PortalException {
+
+		GroupPermissionUtil.check(
+			PermissionThreadLocal.getPermissionChecker(),
+			MapUtil.getLong(exportImportConfiguration.getSettingsMap(), string),
+			ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
 	}
 
 	private void _exportData(ActionRequest actionRequest, Portlet portlet)
@@ -349,8 +369,10 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 						ExportImportConfigurationConstants.TYPE_EXPORT_PORTLET,
 						exportPortletSettingsMap);
 
-			_exportImportService.exportPortletInfoAsFileInBackground(
-				exportImportConfiguration);
+			_checkPermission(exportImportConfiguration, "sourceGroupId");
+
+			_exportImportLayoutHelper.exportPortletInfoAsFileInBackground(
+				_portal.getUserId(actionRequest), exportImportConfiguration);
 		}
 		catch (Exception exception) {
 			if (exception instanceof LARFileNameException) {
@@ -383,7 +405,7 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 	private ExportImportHelper _exportImportHelper;
 
 	@Reference
-	private ExportImportService _exportImportService;
+	private ExportImportLayoutHelper _exportImportLayoutHelper;
 
 	@Reference
 	private GroupLocalService _groupLocalService;
