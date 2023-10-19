@@ -110,7 +110,9 @@ public class ContactsDemo {
 	@Reference(target = "(javax.portlet.name=faro_portlet)")
 	private Portlet _portlet;
 
-	@Reference
-	private SnapshotDemoCreatorService _snapshotDemoCreatorService;
+	@Reference(
+		target = "component.name=com.liferay.osb.faro.contacts.demo.internal.SnapshotDemoCreatorService"
+	)
+	private DemoCreatorService _snapshotDemoCreatorService;
 
 }
