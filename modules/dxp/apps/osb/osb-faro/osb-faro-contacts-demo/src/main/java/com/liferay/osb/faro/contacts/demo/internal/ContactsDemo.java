@@ -102,8 +102,10 @@ public class ContactsDemo {
 
 	private FutureTask<Void> _futureTask;
 
-	@Reference
-	private NaniteDemoCreatorService _naniteDemoCreatorService;
+	@Reference(
+		target = "(component.name=com.liferay.osb.faro.contacts.demo.internal.NaniteDemoCreatorService)"
+	)
+	private DemoCreatorService _naniteDemoCreatorService;
 
 	@Reference(target = "(javax.portlet.name=faro_portlet)")
 	private Portlet _portlet;

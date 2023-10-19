@@ -60,7 +60,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Cristina González
  * @author Matthew Kong
  */
-@Component(service = NaniteDemoCreatorService.class)
+@Component(service = DemoCreatorService.class)
 public class NaniteDemoCreatorService extends DemoCreatorService {
 
 	@Override
