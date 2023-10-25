@@ -147,22 +147,6 @@ public class DLVideoFFMPEGVideoConverterTest {
 			});
 	}
 
-	@ExpectedLogs(
-		expectedLogs = {
-			@ExpectedLog(
-				expectedLog = "ffmpeg", expectedType = ExpectedType.CONTAINS
-			),
-			@ExpectedLog(
-				expectedLog = "java.io.FileNotFoundException",
-				expectedType = ExpectedType.CONTAINS
-			),
-			@ExpectedLog(
-				expectedLog = "Unable to process",
-				expectedType = ExpectedType.CONTAINS
-			)
-		},
-		level = "ERROR", loggerClass = VideoProcessorImpl.class
-	)
 	@Test
 	public void testGeneratesVideoPreviewIfTheVideoHasOnlyAudio()
 		throws Exception {
