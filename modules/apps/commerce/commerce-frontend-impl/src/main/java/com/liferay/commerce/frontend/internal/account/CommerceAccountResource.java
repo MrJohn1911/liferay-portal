@@ -11,12 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import com.liferay.account.constants.AccountConstants;
-import com.liferay.account.model.AccountEntry;
-import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.context.CommerceContextFactory;
-import com.liferay.commerce.frontend.internal.account.model.Account;
 import com.liferay.commerce.frontend.internal.account.model.AccountList;
 import com.liferay.commerce.frontend.internal.account.model.AccountOrganization;
 import com.liferay.commerce.frontend.internal.account.model.AccountOrganizationList;
@@ -24,6 +21,7 @@ import com.liferay.commerce.frontend.internal.account.model.AccountUser;
 import com.liferay.commerce.frontend.internal.account.model.AccountUserList;
 import com.liferay.commerce.frontend.internal.account.model.Order;
 import com.liferay.commerce.frontend.internal.account.model.OrderList;
+import com.liferay.commerce.frontend.internal.helper.CommerceAccountResourceHelper;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.service.CommerceOrderService;
@@ -48,7 +46,6 @@ import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.webserver.WebServerServletToken;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.ArrayList;
@@ -75,27 +72,16 @@ import javax.ws.rs.core.UriInfo;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 
 /**
  * @author Alessio Antonio Rendina
  */
-@Component(service = CommerceAccountResource.class)
+@Component(
+	property = JaxrsWhiteboardConstants.JAX_RS_APPLICATION_SELECT + "=(osgi.jaxrs.name=CommerceUi.Application)",
+	service = Object.class
+)
 public class CommerceAccountResource {
-
-	public AccountList getAccountList(
-			long userId, long parentAccountId, int commerceSiteType,
-			String keywords, int page, int pageSize, String imagePath)
-		throws PortalException {
-
-		List<Account> accounts = _getAccounts(
-			userId, parentAccountId, commerceSiteType, keywords, page, pageSize,
-			imagePath);
-
-		return new AccountList(
-			accounts,
-			_getAccountsCount(
-				userId, parentAccountId, commerceSiteType, keywords));
-	}
 
 	public AccountOrganizationList getAccountOrganizationList(
 			long companyId, String keywords, String imagePath)
@@ -140,7 +126,7 @@ public class CommerceAccountResource {
 					getCommerceChannelGroupIdBySiteGroupId(groupId),
 				_portal.getUserId(httpServletRequest), 0, 0);
 
-			accountList = getAccountList(
+			accountList = _commerceAccountResourceHelper.getAccountList(
 				themeDisplay.getUserId(),
 				AccountConstants.PARENT_ACCOUNT_ENTRY_ID_DEFAULT,
 				commerceContext.getCommerceSiteType(), queryString, page,
@@ -274,50 +260,6 @@ public class CommerceAccountResource {
 		).build();
 	}
 
-	private List<Account> _getAccounts(
-			long userId, long parentAccountId, int commerceSiteType,
-			String keywords, int page, int pageSize, String imagePath)
-		throws PortalException {
-
-		List<Account> accounts = new ArrayList<>();
-
-		int start = (page - 1) * pageSize;
-		int end = page * pageSize;
-
-		List<AccountEntry> userAccountEntries =
-			_accountEntryLocalService.getUserAccountEntries(
-				userId, parentAccountId, keywords,
-				_commerceAccountHelper.toAccountEntryTypes(commerceSiteType),
-				_commerceAccountHelper.toAccountEntryStatus(true), start, end);
-
-		for (AccountEntry accountEntry : userAccountEntries) {
-			accounts.add(
-				new Account(
-					String.valueOf(accountEntry.getAccountEntryId()),
-					accountEntry.getName(),
-					_getLogoThumbnailSrc(accountEntry.getLogoId(), imagePath)));
-		}
-
-		return accounts;
-	}
-
-	private int _getAccountsCount(
-			long userId, Long parentAccountId, int commerceSiteType,
-			String keywords)
-		throws PortalException {
-
-		return _accountEntryLocalService.getUserAccountEntriesCount(
-			userId, parentAccountId, keywords,
-			_commerceAccountHelper.toAccountEntryTypes(commerceSiteType),
-			_commerceAccountHelper.toAccountEntryStatus(true));
-	}
-
-	private String _getLogoThumbnailSrc(long logoId, String imagePath) {
-		return StringBundler.concat(
-			imagePath, "/organization_logo?img_id=", logoId, "&t=",
-			_webServerServletToken.getToken(logoId));
-	}
-
 	private String _getOrderLinkURL(
 			long groupId, long commerceOrderId,
 			HttpServletRequest httpServletRequest)
@@ -432,7 +374,8 @@ public class CommerceAccountResource {
 				new AccountOrganization(
 					organization.getOrganizationId(), organization.getName(),
 					StringPool.BLANK,
-					_getLogoThumbnailSrc(organization.getLogoId(), imagePath)));
+					_commerceAccountResourceHelper.getLogoThumbnailSrc(
+						organization.getLogoId(), imagePath)));
 		}
 
 		return accountOrganizations;
@@ -469,10 +412,10 @@ public class CommerceAccountResource {
 		CommerceAccountResource.class);
 
 	@Reference
-	private AccountEntryLocalService _accountEntryLocalService;
+	private CommerceAccountHelper _commerceAccountHelper;
 
 	@Reference
-	private CommerceAccountHelper _commerceAccountHelper;
+	private CommerceAccountResourceHelper _commerceAccountResourceHelper;
 
 	@Reference
 	private CommerceChannelLocalService _commerceChannelLocalService;
@@ -494,8 +437,5 @@ public class CommerceAccountResource {
 
 	@Reference
 	private UserLocalService _userLocalService;
-
-	@Reference
-	private WebServerServletToken _webServerServletToken;
 
 }

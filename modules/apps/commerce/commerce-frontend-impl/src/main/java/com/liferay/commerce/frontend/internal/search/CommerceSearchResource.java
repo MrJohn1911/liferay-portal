@@ -16,11 +16,11 @@ import com.liferay.account.service.AccountGroupLocalService;
 import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.context.CommerceContextFactory;
-import com.liferay.commerce.frontend.internal.account.CommerceAccountResource;
 import com.liferay.commerce.frontend.internal.account.model.Account;
 import com.liferay.commerce.frontend.internal.account.model.AccountList;
 import com.liferay.commerce.frontend.internal.account.model.Order;
 import com.liferay.commerce.frontend.internal.account.model.OrderList;
+import com.liferay.commerce.frontend.internal.helper.CommerceAccountResourceHelper;
 import com.liferay.commerce.frontend.internal.order.CommerceOrderResource;
 import com.liferay.commerce.frontend.internal.search.model.SearchItemModel;
 import com.liferay.commerce.model.CommerceOrder;
@@ -79,12 +79,16 @@ import javax.ws.rs.core.Response;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 
 /**
  * @author Marco Leo
  * @author Alessio Antonio Rendina
  */
-@Component(service = CommerceSearchResource.class)
+@Component(
+	property = JaxrsWhiteboardConstants.JAX_RS_APPLICATION_SELECT + "=(osgi.jaxrs.name=CommerceUi.Application)",
+	service = Object.class
+)
 public class CommerceSearchResource {
 
 	@GET
@@ -350,7 +354,7 @@ public class CommerceSearchResource {
 				themeDisplay.getScopeGroupId()),
 			themeDisplay.getUserId(), 0, 0);
 
-		AccountList accountList = _commerceAccountResource.getAccountList(
+		AccountList accountList = _commerceAccountResourceHelper.getAccountList(
 			themeDisplay.getUserId(),
 			AccountConstants.PARENT_ACCOUNT_ENTRY_ID_DEFAULT,
 			commerceContext.getCommerceSiteType(), queryString, 1, 5,
@@ -542,7 +546,7 @@ public class CommerceSearchResource {
 	private CommerceAccountHelper _commerceAccountHelper;
 
 	@Reference
-	private CommerceAccountResource _commerceAccountResource;
+	private CommerceAccountResourceHelper _commerceAccountResourceHelper;
 
 	@Reference
 	private CommerceChannelLocalService _commerceChannelLocalService;
