@@ -27,7 +27,10 @@ import com.liferay.portal.kernel.exception.LocaleException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.module.service.Snapshot;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.MapUtil;
@@ -49,8 +52,18 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 
 	@Override
 	public File exportLayoutsAsFile(
+			boolean checkPermission,
 			ExportImportConfiguration exportImportConfiguration)
 		throws PortalException {
+
+		if (checkPermission) {
+			long sourceGroupId = MapUtil.getLong(
+				exportImportConfiguration.getSettingsMap(), "sourceGroupId");
+
+			GroupPermissionUtil.check(
+				PermissionThreadLocal.getPermissionChecker(), sourceGroupId,
+				ActionKeys.EXPORT_IMPORT_LAYOUTS);
+		}
 
 		try {
 			return _exportControllerLayout.export(exportImportConfiguration);
@@ -71,9 +84,27 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 	}
 
 	@Override
-	public long exportLayoutsAsFileInBackground(
-			long userId, ExportImportConfiguration exportImportConfiguration)
+	public File exportLayoutsAsFile(
+			ExportImportConfiguration exportImportConfiguration)
 		throws PortalException {
+
+		return exportLayoutsAsFile(false, exportImportConfiguration);
+	}
+
+	@Override
+	public long exportLayoutsAsFileInBackground(
+			boolean checkPermission, long userId,
+			ExportImportConfiguration exportImportConfiguration)
+		throws PortalException {
+
+		if (checkPermission) {
+			GroupPermissionUtil.check(
+				PermissionThreadLocal.getPermissionChecker(),
+				MapUtil.getLong(
+					exportImportConfiguration.getSettingsMap(),
+					"sourceGroupId"),
+				ActionKeys.EXPORT_IMPORT_LAYOUTS);
+		}
 
 		if (!DLValidatorUtil.isValidName(exportImportConfiguration.getName())) {
 			throw new LARFileNameException(exportImportConfiguration.getName());
@@ -92,6 +123,15 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 				new ServiceContext());
 
 		return backgroundTask.getBackgroundTaskId();
+	}
+
+	@Override
+	public long exportLayoutsAsFileInBackground(
+			long userId, ExportImportConfiguration exportImportConfiguration)
+		throws PortalException {
+
+		return exportLayoutsAsFileInBackground(
+			false, userId, exportImportConfiguration);
 	}
 
 	@Override
@@ -130,8 +170,18 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 
 	@Override
 	public long exportPortletInfoAsFileInBackground(
-			long userId, ExportImportConfiguration exportImportConfiguration)
+			boolean checkPermission, long userId,
+			ExportImportConfiguration exportImportConfiguration)
 		throws PortalException {
+
+		if (checkPermission) {
+			GroupPermissionUtil.check(
+				PermissionThreadLocal.getPermissionChecker(),
+				MapUtil.getLong(
+					exportImportConfiguration.getSettingsMap(),
+					"sourceGroupId"),
+				ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
+		}
 
 		String fileName = MapUtil.getString(
 			exportImportConfiguration.getSettingsMap(), "fileName");
@@ -157,6 +207,15 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 
 	@Override
 	public long exportPortletInfoAsFileInBackground(
+			long userId, ExportImportConfiguration exportImportConfiguration)
+		throws PortalException {
+
+		return exportPortletInfoAsFileInBackground(
+			false, userId, exportImportConfiguration);
+	}
+
+	@Override
+	public long exportPortletInfoAsFileInBackground(
 			long userId, long exportImportConfigurationId)
 		throws PortalException {
 
@@ -168,8 +227,18 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 
 	@Override
 	public void importLayouts(
+			boolean checkPermission,
 			ExportImportConfiguration exportImportConfiguration, File file)
 		throws PortalException {
+
+		if (checkPermission) {
+			GroupPermissionUtil.check(
+				PermissionThreadLocal.getPermissionChecker(),
+				MapUtil.getLong(
+					exportImportConfiguration.getSettingsMap(),
+					"targetGroupId"),
+				ActionKeys.EXPORT_IMPORT_LAYOUTS);
+		}
 
 		try {
 			ImportController layoutImportController =
@@ -203,9 +272,19 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 
 	@Override
 	public void importLayouts(
+			boolean checkPermission,
 			ExportImportConfiguration exportImportConfiguration,
 			InputStream inputStream)
 		throws PortalException {
+
+		if (checkPermission) {
+			GroupPermissionUtil.check(
+				PermissionThreadLocal.getPermissionChecker(),
+				MapUtil.getLong(
+					exportImportConfiguration.getSettingsMap(),
+					"targetGroupId"),
+				ActionKeys.EXPORT_IMPORT_LAYOUTS);
+		}
 
 		File file = null;
 
@@ -236,6 +315,23 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 		finally {
 			FileUtil.delete(file);
 		}
+	}
+
+	@Override
+	public void importLayouts(
+			ExportImportConfiguration exportImportConfiguration, File file)
+		throws PortalException {
+
+		importLayouts(false, exportImportConfiguration, file);
+	}
+
+	@Override
+	public void importLayouts(
+			ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
+		throws PortalException {
+
+		importLayouts(false, exportImportConfiguration, inputStream);
 	}
 
 	@Override
@@ -301,32 +397,19 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 
 	@Override
 	public long importLayoutsInBackground(
-			long userId, ExportImportConfiguration exportImportConfiguration,
-			File file)
-		throws PortalException {
-
-		BackgroundTask backgroundTask =
-			_backgroundTaskManager.addBackgroundTask(
-				userId, exportImportConfiguration.getGroupId(),
-				exportImportConfiguration.getName(),
-				BackgroundTaskExecutorNames.
-					LAYOUT_IMPORT_BACKGROUND_TASK_EXECUTOR,
-				HashMapBuilder.<String, Serializable>put(
-					"exportImportConfigurationId",
-					exportImportConfiguration.getExportImportConfigurationId()
-				).build(),
-				new ServiceContext());
-
-		backgroundTask.addAttachment(userId, file.getName(), file);
-
-		return backgroundTask.getBackgroundTaskId();
-	}
-
-	@Override
-	public long importLayoutsInBackground(
-			long userId, ExportImportConfiguration exportImportConfiguration,
+			boolean checkPermission, long userId,
+			ExportImportConfiguration exportImportConfiguration,
 			InputStream inputStream)
 		throws PortalException {
+
+		if (checkPermission) {
+			GroupPermissionUtil.check(
+				PermissionThreadLocal.getPermissionChecker(),
+				MapUtil.getLong(
+					exportImportConfiguration.getSettingsMap(),
+					"targetGroupId"),
+				ActionKeys.EXPORT_IMPORT_LAYOUTS);
+		}
 
 		File file = null;
 
@@ -358,6 +441,39 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 		finally {
 			FileUtil.delete(file);
 		}
+	}
+
+	@Override
+	public long importLayoutsInBackground(
+			long userId, ExportImportConfiguration exportImportConfiguration,
+			File file)
+		throws PortalException {
+
+		BackgroundTask backgroundTask =
+			_backgroundTaskManager.addBackgroundTask(
+				userId, exportImportConfiguration.getGroupId(),
+				exportImportConfiguration.getName(),
+				BackgroundTaskExecutorNames.
+					LAYOUT_IMPORT_BACKGROUND_TASK_EXECUTOR,
+				HashMapBuilder.<String, Serializable>put(
+					"exportImportConfigurationId",
+					exportImportConfiguration.getExportImportConfigurationId()
+				).build(),
+				new ServiceContext());
+
+		backgroundTask.addAttachment(userId, file.getName(), file);
+
+		return backgroundTask.getBackgroundTaskId();
+	}
+
+	@Override
+	public long importLayoutsInBackground(
+			long userId, ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
+		throws PortalException {
+
+		return importLayoutsInBackground(
+			false, userId, exportImportConfiguration, inputStream);
 	}
 
 	@Override
@@ -503,32 +619,19 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 
 	@Override
 	public long importPortletInfoInBackground(
-			long userId, ExportImportConfiguration exportImportConfiguration,
-			File file)
-		throws PortalException {
-
-		BackgroundTask backgroundTask =
-			_backgroundTaskManager.addBackgroundTask(
-				userId, exportImportConfiguration.getGroupId(),
-				exportImportConfiguration.getName(),
-				BackgroundTaskExecutorNames.
-					PORTLET_IMPORT_BACKGROUND_TASK_EXECUTOR,
-				HashMapBuilder.<String, Serializable>put(
-					"exportImportConfigurationId",
-					exportImportConfiguration.getExportImportConfigurationId()
-				).build(),
-				new ServiceContext());
-
-		backgroundTask.addAttachment(userId, file.getName(), file);
-
-		return backgroundTask.getBackgroundTaskId();
-	}
-
-	@Override
-	public long importPortletInfoInBackground(
-			long userId, ExportImportConfiguration exportImportConfiguration,
+			boolean checkPermission, long userId,
+			ExportImportConfiguration exportImportConfiguration,
 			InputStream inputStream)
 		throws PortalException {
+
+		if (checkPermission) {
+			GroupPermissionUtil.check(
+				PermissionThreadLocal.getPermissionChecker(),
+				MapUtil.getLong(
+					exportImportConfiguration.getSettingsMap(),
+					"targetGroupId"),
+				ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
+		}
 
 		File file = null;
 
@@ -560,6 +663,39 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 		finally {
 			FileUtil.delete(file);
 		}
+	}
+
+	@Override
+	public long importPortletInfoInBackground(
+			long userId, ExportImportConfiguration exportImportConfiguration,
+			File file)
+		throws PortalException {
+
+		BackgroundTask backgroundTask =
+			_backgroundTaskManager.addBackgroundTask(
+				userId, exportImportConfiguration.getGroupId(),
+				exportImportConfiguration.getName(),
+				BackgroundTaskExecutorNames.
+					PORTLET_IMPORT_BACKGROUND_TASK_EXECUTOR,
+				HashMapBuilder.<String, Serializable>put(
+					"exportImportConfigurationId",
+					exportImportConfiguration.getExportImportConfigurationId()
+				).build(),
+				new ServiceContext());
+
+		backgroundTask.addAttachment(userId, file.getName(), file);
+
+		return backgroundTask.getBackgroundTaskId();
+	}
+
+	@Override
+	public long importPortletInfoInBackground(
+			long userId, ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
+		throws PortalException {
+
+		return importPortletInfoInBackground(
+			false, userId, exportImportConfiguration, inputStream);
 	}
 
 	@Override
@@ -611,6 +747,53 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 
 	@Override
 	public MissingReferences validateImportLayoutsFile(
+			boolean checkPermission,
+			ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
+		throws PortalException {
+
+		if (checkPermission) {
+			GroupPermissionUtil.check(
+				PermissionThreadLocal.getPermissionChecker(),
+				MapUtil.getLong(
+					exportImportConfiguration.getSettingsMap(),
+					"targetGroupId"),
+				ActionKeys.EXPORT_IMPORT_LAYOUTS);
+		}
+
+		File file = null;
+
+		try {
+			file = FileUtil.createTempFile("lar");
+
+			FileUtil.write(file, inputStream);
+
+			return validateImportLayoutsFile(exportImportConfiguration, file);
+		}
+		catch (IOException ioException) {
+			ExportImportIOException exportImportIOException =
+				new ExportImportIOException(
+					ExportImportLayoutHelperImpl.class.getName(), ioException);
+
+			if (file != null) {
+				exportImportIOException.setFileName(file.getName());
+				exportImportIOException.setType(
+					ExportImportIOException.LAYOUT_VALIDATE_FILE);
+			}
+			else {
+				exportImportIOException.setType(
+					ExportImportIOException.LAYOUT_VALIDATE);
+			}
+
+			throw exportImportIOException;
+		}
+		finally {
+			FileUtil.delete(file);
+		}
+	}
+
+	@Override
+	public MissingReferences validateImportLayoutsFile(
 			ExportImportConfiguration exportImportConfiguration, File file)
 		throws PortalException {
 
@@ -651,6 +834,26 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 			InputStream inputStream)
 		throws PortalException {
 
+		return validateImportLayoutsFile(
+			false, exportImportConfiguration, inputStream);
+	}
+
+	@Override
+	public MissingReferences validateImportPortletInfo(
+			boolean checkPermission,
+			ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
+		throws PortalException {
+
+		if (checkPermission) {
+			GroupPermissionUtil.check(
+				PermissionThreadLocal.getPermissionChecker(),
+				MapUtil.getLong(
+					exportImportConfiguration.getSettingsMap(),
+					"targetGroupId"),
+				ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
+		}
+
 		File file = null;
 
 		try {
@@ -658,7 +861,7 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 
 			FileUtil.write(file, inputStream);
 
-			return validateImportLayoutsFile(exportImportConfiguration, file);
+			return validateImportPortletInfo(exportImportConfiguration, file);
 		}
 		catch (IOException ioException) {
 			ExportImportIOException exportImportIOException =
@@ -668,11 +871,11 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 			if (file != null) {
 				exportImportIOException.setFileName(file.getName());
 				exportImportIOException.setType(
-					ExportImportIOException.LAYOUT_VALIDATE_FILE);
+					ExportImportIOException.PORTLET_VALIDATE_FILE);
 			}
 			else {
 				exportImportIOException.setType(
-					ExportImportIOException.LAYOUT_VALIDATE);
+					ExportImportIOException.PORTLET_VALIDATE);
 			}
 
 			throw exportImportIOException;
@@ -721,35 +924,8 @@ public class ExportImportLayoutHelperImpl implements ExportImportLayoutHelper {
 			InputStream inputStream)
 		throws PortalException {
 
-		File file = null;
-
-		try {
-			file = FileUtil.createTempFile("lar");
-
-			FileUtil.write(file, inputStream);
-
-			return validateImportPortletInfo(exportImportConfiguration, file);
-		}
-		catch (IOException ioException) {
-			ExportImportIOException exportImportIOException =
-				new ExportImportIOException(
-					ExportImportLayoutHelperImpl.class.getName(), ioException);
-
-			if (file != null) {
-				exportImportIOException.setFileName(file.getName());
-				exportImportIOException.setType(
-					ExportImportIOException.PORTLET_VALIDATE_FILE);
-			}
-			else {
-				exportImportIOException.setType(
-					ExportImportIOException.PORTLET_VALIDATE);
-			}
-
-			throw exportImportIOException;
-		}
-		finally {
-			FileUtil.delete(file);
-		}
+		return validateImportPortletInfo(
+			false, exportImportConfiguration, inputStream);
 	}
 
 	private static final Snapshot<ImportController>

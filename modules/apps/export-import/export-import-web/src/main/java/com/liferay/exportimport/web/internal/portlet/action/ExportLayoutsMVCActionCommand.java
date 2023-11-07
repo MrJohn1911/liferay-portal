@@ -13,7 +13,6 @@ import com.liferay.exportimport.kernel.lar.ExportImportHelper;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
 import com.liferay.exportimport.kernel.util.ExportImportLayoutHelper;
-import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -80,7 +79,7 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 
 		try {
 			_exportImportLayoutHelper.exportLayoutsAsFileInBackground(
-				_portal.getUserId(actionRequest),
+				true, _portal.getUserId(actionRequest),
 				getExportImportConfiguration(actionRequest));
 
 			sendRedirect(actionRequest, actionResponse);
@@ -176,13 +175,6 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 				SessionTreeJSClicks.getOpenNodes(
 					httpServletRequest, treeId + "SelectedNode")));
 	}
-
-	@Reference
-	protected BackgroundTaskManager backgroundTaskManager;
-
-	@Reference
-	protected ExportImportConfigurationLocalService
-		exportImportConfigurationLocalService;
 
 	private long[] _getLayoutIds(PortletRequest portletRequest)
 		throws Exception {

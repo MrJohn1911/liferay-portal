@@ -24,9 +24,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.TrashedModel;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
-import com.liferay.portal.kernel.security.permission.ActionKeys;
-import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
-import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.Constants;
@@ -250,15 +247,8 @@ public class EditExportConfigurationMVCActionCommand
 			ExportImportConfigurationFactory.cloneExportImportConfiguration(
 				exportImportConfiguration);
 
-		long sourceGroupId = MapUtil.getLong(
-			exportImportConfiguration.getSettingsMap(), "sourceGroupId");
-
-		GroupPermissionUtil.check(
-			PermissionThreadLocal.getPermissionChecker(), sourceGroupId,
-			ActionKeys.EXPORT_IMPORT_LAYOUTS);
-
 		exportImportLayoutHelper.exportLayoutsAsFileInBackground(
-			portal.getUserId(actionRequest), exportImportConfiguration);
+			true, portal.getUserId(actionRequest), exportImportConfiguration);
 	}
 
 	private void _restoreTrashEntries(ActionRequest actionRequest)

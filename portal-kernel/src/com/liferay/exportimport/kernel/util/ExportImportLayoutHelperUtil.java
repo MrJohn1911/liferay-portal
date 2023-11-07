@@ -18,6 +18,55 @@ import java.io.InputStream;
  */
 public class ExportImportLayoutHelperUtil {
 
+	public static long exportLayoutsAsFileInBackground(
+		boolean checkPermission, long userId,
+		ExportImportConfiguration exportImportConfiguration)
+		throws PortalException {
+	}
+
+	public static long exportPortletInfoAsFileInBackground(
+		boolean checkPermission, long userId,
+		ExportImportConfiguration exportImportConfiguration)
+		throws PortalException {
+	}
+
+	public static long importLayoutsInBackground(
+		boolean checkPermission, long userId,
+		ExportImportConfiguration exportImportConfiguration,
+		InputStream inputStream)
+		throws PortalException {
+	}
+
+	public static long importPortletInfoInBackground(
+		boolean checkPermission, long userId,
+		ExportImportConfiguration exportImportConfiguration,
+		InputStream inputStream)
+		throws PortalException {
+	}
+
+	public static MissingReferences validateImportLayoutsFile(
+		boolean checkPermission,
+		ExportImportConfiguration exportImportConfiguration,
+		InputStream inputStream)
+		throws PortalException {
+	}
+
+	public static MissingReferences validateImportPortletInfo(
+		boolean checkPermission,
+		ExportImportConfiguration exportImportConfiguration,
+		InputStream inputStream)
+		throws PortalException {
+	}
+
+	public static File exportLayoutsAsFile(
+			boolean checkPermission,
+			ExportImportConfiguration exportImportConfiguration)
+		throws PortalException {
+
+		return _exportImportLayoutHelper.exportLayoutsAsFile(
+			checkPermission, exportImportConfiguration);
+	}
+
 	public static File exportLayoutsAsFile(
 			ExportImportConfiguration exportImportConfiguration)
 		throws PortalException {
@@ -64,6 +113,25 @@ public class ExportImportLayoutHelperUtil {
 
 		return _exportImportLayoutHelper.exportPortletInfoAsFileInBackground(
 			userId, exportImportConfigurationId);
+	}
+
+	public static void importLayouts(
+			boolean checkPermission,
+			ExportImportConfiguration exportImportConfiguration, File file)
+		throws PortalException {
+
+		_exportImportLayoutHelper.importLayouts(
+			checkPermission, exportImportConfiguration, file);
+	}
+
+	public static void importLayouts(
+			boolean checkPermission,
+			ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
+		throws PortalException {
+
+		_exportImportLayoutHelper.importLayouts(
+			checkPermission, exportImportConfiguration, inputStream);
 	}
 
 	public static void importLayouts(

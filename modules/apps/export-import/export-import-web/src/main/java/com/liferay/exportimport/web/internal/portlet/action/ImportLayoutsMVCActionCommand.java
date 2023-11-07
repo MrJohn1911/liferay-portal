@@ -28,14 +28,10 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.security.permission.ActionKeys;
-import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
-import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
@@ -186,10 +182,8 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 					ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT,
 					importLayoutSettingsMap);
 
-		_checkPermission(exportImportConfiguration);
-
 		_exportImportLayoutHelper.importLayoutsInBackground(
-			_portal.getUserId(actionRequest), exportImportConfiguration,
+			true, _portal.getUserId(actionRequest), exportImportConfiguration,
 			inputStream);
 	}
 
@@ -262,21 +256,8 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 					ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT,
 					importLayoutSettingsMap);
 
-		_checkPermission(exportImportConfiguration);
-
 		return _exportImportLayoutHelper.validateImportLayoutsFile(
-			exportImportConfiguration, inputStream);
-	}
-
-	private void _checkPermission(
-			ExportImportConfiguration exportImportConfiguration)
-		throws Exception {
-
-		GroupPermissionUtil.check(
-			PermissionThreadLocal.getPermissionChecker(),
-			MapUtil.getLong(
-				exportImportConfiguration.getSettingsMap(), "targetGroupId"),
-			ActionKeys.EXPORT_IMPORT_LAYOUTS);
+			true, exportImportConfiguration, inputStream);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

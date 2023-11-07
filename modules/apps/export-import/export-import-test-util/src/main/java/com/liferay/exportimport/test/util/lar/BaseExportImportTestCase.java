@@ -24,18 +24,14 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.security.permission.ActionKeys;
-import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.DateTestUtil;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
-import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LoggerTestUtil;
@@ -83,10 +79,8 @@ public abstract class BaseExportImportTestCase {
 						importLayoutSettingsMap, WorkflowConstants.STATUS_DRAFT,
 						new ServiceContext());
 
-			_checkPermission(exportImportConfiguration, "targetGroupId");
-
 			ExportImportLayoutHelperUtil.importLayouts(
-				exportImportConfiguration, larFile);
+				true, exportImportConfiguration, larFile);
 		}
 	}
 
@@ -201,10 +195,8 @@ public abstract class BaseExportImportTestCase {
 						ExportImportConfigurationConstants.TYPE_EXPORT_LAYOUT,
 						exportLayoutSettingsMap);
 
-			_checkPermission(exportImportConfiguration, "sourceGroupId");
-
 			larFile = ExportImportLayoutHelperUtil.exportLayoutsAsFile(
-				exportImportConfiguration);
+				true, exportImportConfiguration);
 		}
 	}
 
@@ -305,15 +297,5 @@ public abstract class BaseExportImportTestCase {
 	protected Layout importedLayout;
 	protected File larFile;
 	protected Layout layout;
-
-	private void _checkPermission(
-			ExportImportConfiguration exportImportConfiguration, String string)
-		throws PortalException {
-
-		GroupPermissionUtil.check(
-			PermissionThreadLocal.getPermissionChecker(),
-			MapUtil.getLong(exportImportConfiguration.getSettingsMap(), string),
-			ActionKeys.EXPORT_IMPORT_LAYOUTS);
-	}
 
 }

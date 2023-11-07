@@ -18,6 +18,16 @@ import java.io.InputStream;
 public interface ExportImportLayoutHelper {
 
 	public File exportLayoutsAsFile(
+			boolean checkPermission,
+			ExportImportConfiguration exportImportConfiguration)
+		throws PortalException;
+
+	public File exportLayoutsAsFile(
+			ExportImportConfiguration exportImportConfiguration)
+		throws PortalException;
+
+	public long exportLayoutsAsFileInBackground(
+			boolean checkPermission, long userId,
 			ExportImportConfiguration exportImportConfiguration)
 		throws PortalException;
 
@@ -34,11 +44,27 @@ public interface ExportImportLayoutHelper {
 		throws PortalException;
 
 	public long exportPortletInfoAsFileInBackground(
+			boolean checkPermission, long userId,
+			ExportImportConfiguration exportImportConfiguration)
+		throws PortalException;
+
+	public long exportPortletInfoAsFileInBackground(
 			long userId, ExportImportConfiguration exportImportConfiguration)
 		throws PortalException;
 
 	public long exportPortletInfoAsFileInBackground(
 			long userId, long exportImportConfigurationId)
+		throws PortalException;
+
+	public void importLayouts(
+			boolean checkPermission,
+			ExportImportConfiguration exportImportConfiguration, File file)
+		throws PortalException;
+
+	public void importLayouts(
+			boolean checkPermission,
+			ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
 		throws PortalException;
 
 	public void importLayouts(
@@ -57,6 +83,12 @@ public interface ExportImportLayoutHelper {
 	public long importLayoutSetPrototypeInBackground(
 			long userId, ExportImportConfiguration exportImportConfiguration,
 			File file)
+		throws PortalException;
+
+	public long importLayoutsInBackground(
+			boolean checkPermission, long userId,
+			ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
 		throws PortalException;
 
 	public long importLayoutsInBackground(
@@ -92,6 +124,12 @@ public interface ExportImportLayoutHelper {
 		throws PortalException;
 
 	public long importPortletInfoInBackground(
+			boolean checkPermission, long userId,
+			ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
+		throws PortalException;
+
+	public long importPortletInfoInBackground(
 			long userId, ExportImportConfiguration exportImportConfiguration,
 			File file)
 		throws PortalException;
@@ -116,10 +154,22 @@ public interface ExportImportLayoutHelper {
 		throws PortalException;
 
 	public MissingReferences validateImportLayoutsFile(
+			boolean checkPermission,
+			ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
+		throws PortalException;
+
+	public MissingReferences validateImportLayoutsFile(
 			ExportImportConfiguration exportImportConfiguration, File file)
 		throws PortalException;
 
 	public MissingReferences validateImportLayoutsFile(
+			ExportImportConfiguration exportImportConfiguration,
+			InputStream inputStream)
+		throws PortalException;
+
+	public MissingReferences validateImportPortletInfo(
+			boolean checkPermission,
 			ExportImportConfiguration exportImportConfiguration,
 			InputStream inputStream)
 		throws PortalException;

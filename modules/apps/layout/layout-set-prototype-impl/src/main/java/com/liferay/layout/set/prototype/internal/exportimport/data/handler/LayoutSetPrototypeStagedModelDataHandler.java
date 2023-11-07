@@ -46,12 +46,10 @@ import com.liferay.portal.kernel.service.LayoutPrototypeLocalService;
 import com.liferay.portal.kernel.service.LayoutSetPrototypeLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portal.kernel.service.permission.PortalPermissionUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.xml.Element;
@@ -501,15 +499,8 @@ public class LayoutSetPrototypeStagedModelDataHandler
 					ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT,
 					importLayoutSettingsMap);
 
-		long targetGroupId = MapUtil.getLong(
-			exportImportConfiguration.getSettingsMap(), "targetGroupId");
-
-		GroupPermissionUtil.check(
-			PermissionThreadLocal.getPermissionChecker(), targetGroupId,
-			ActionKeys.EXPORT_IMPORT_LAYOUTS);
-
 		_exportImportLayoutHelper.importLayouts(
-			exportImportConfiguration, inputStream);
+			true, exportImportConfiguration, inputStream);
 	}
 
 	private void _setLayoutSetPrototypeLinkEnabledParameter(
