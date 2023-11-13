@@ -10,6 +10,7 @@ import com.liferay.osb.faro.model.FaroProject;
 import com.liferay.osb.faro.util.FaroThreadLocal;
 import com.liferay.osb.faro.web.internal.context.GroupInfo;
 import com.liferay.osb.faro.web.internal.controller.BaseFaroController;
+import com.liferay.osb.faro.web.internal.controller.FaroController;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
@@ -46,7 +47,13 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Marcellus Tavares
  */
-@Component(service = ReportController.class)
+@Component(
+	property = {
+		"osgi.jaxrs.application.select=(osgi.jaxrs.name=Liferay.Analytics.Cloud.REST)",
+		"osgi.jaxrs.resource=true"
+	},
+	service = FaroController.class
+)
 @Path("/reports")
 @Produces(MediaType.APPLICATION_JSON)
 @RequiresNoScope
