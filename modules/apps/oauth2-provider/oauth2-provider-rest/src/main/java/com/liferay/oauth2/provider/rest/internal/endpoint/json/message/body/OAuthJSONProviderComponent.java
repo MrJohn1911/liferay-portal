@@ -7,8 +7,6 @@ package com.liferay.oauth2.provider.rest.internal.endpoint.json.message.body;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.cxf.rs.security.oauth2.provider.OAuthJSONProvider;
@@ -26,8 +24,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 		"osgi.jaxrs.application.select=(component.name=com.liferay.oauth2.provider.rest.internal.endpoint.OAuth2EndpointApplication)",
 		"osgi.jaxrs.extension=true", "osgi.jaxrs.name=OAuthJSONProvider"
 	},
-	scope = ServiceScope.PROTOTYPE,
-	service = {MessageBodyReader.class, MessageBodyWriter.class}
+	scope = ServiceScope.PROTOTYPE, service = Object.class
 )
 @Consumes("application/json")
 @Produces("application/json")
