@@ -62,9 +62,8 @@ public class DDMSearchUtil {
 	public static SearchContext buildStructureSearchContext(
 		long companyId, long[] groupIds, long userId, long classNameId,
 		Long classPK, String name, String description, String storageType,
-		Integer type, int status, int start, int end,
-		DDMPermissionSupport ddmPermissionSupport,
-		OrderByComparator<DDMStructure> orderByComparator) {
+		Integer type, int status, DDMPermissionSupport ddmPermissionSupport,
+		int start, int end, OrderByComparator<DDMStructure> orderByComparator) {
 
 		SearchContext searchContext = new SearchContext();
 
@@ -97,41 +96,40 @@ public class DDMSearchUtil {
 	public static SearchContext buildStructureSearchContext(
 		long companyId, long[] groupIds, long classNameId, Long classPK,
 		String name, String description, String storageType, Integer type,
-		int status, int start, int end,
-		DDMPermissionSupport ddmPermissionSupport,
-		OrderByComparator<DDMStructure> orderByComparator) {
+		int status, DDMPermissionSupport ddmPermissionSupport, int start,
+		int end, OrderByComparator<DDMStructure> orderByComparator) {
 
 		return buildStructureSearchContext(
 			companyId, groupIds, 0, classNameId, classPK, name, description,
-			storageType, type, status, start, end, ddmPermissionSupport,
+			storageType, type, status, ddmPermissionSupport, start, end,
 			orderByComparator);
 	}
 
 	public static SearchContext buildTemplateSearchContext(
 		long companyId, long groupId, long userId, long classNameId,
 		long classPK, long resourceClassNameId, String name, String description,
-		String type, String mode, String language, int status, int start,
-		int end, DDMPermissionSupport ddmPermissionSupport,
+		String type, String mode, String language, int status,
+		DDMPermissionSupport ddmPermissionSupport, int start, int end,
 		OrderByComparator<DDMTemplate> orderByComparator) {
 
 		return buildTemplateSearchContext(
 			companyId, new long[] {groupId}, userId, new long[] {classNameId},
 			new long[] {classPK}, resourceClassNameId, name, description, type,
-			mode, language, status, start, end, ddmPermissionSupport,
+			mode, language, status, ddmPermissionSupport, start, end,
 			orderByComparator);
 	}
 
 	public static SearchContext buildTemplateSearchContext(
 		long companyId, long groupId, long classNameId, long classPK,
 		long resourceClassNameId, String name, String description, String type,
-		String mode, String language, int status, int start, int end,
-		DDMPermissionSupport ddmPermissionSupport,
+		String mode, String language, int status,
+		DDMPermissionSupport ddmPermissionSupport, int start, int end,
 		OrderByComparator<DDMTemplate> orderByComparator) {
 
 		return buildTemplateSearchContext(
 			companyId, new long[] {groupId}, new long[] {classNameId},
 			new long[] {classPK}, resourceClassNameId, name, description, type,
-			mode, language, status, start, end, ddmPermissionSupport,
+			mode, language, status, ddmPermissionSupport, start, end,
 			orderByComparator);
 	}
 
@@ -139,9 +137,8 @@ public class DDMSearchUtil {
 		long companyId, long[] groupIds, long userId, long[] classNameIds,
 		long[] classPKs, long resourceClassNameId, String name,
 		String description, String type, String mode, String language,
-		int status, int start, int end,
-		DDMPermissionSupport ddmPermissionSupport,
-		OrderByComparator<DDMTemplate> orderByComparator) {
+		int status, DDMPermissionSupport ddmPermissionSupport, int start,
+		int end, OrderByComparator<DDMTemplate> orderByComparator) {
 
 		SearchContext searchContext = new SearchContext();
 
@@ -186,14 +183,14 @@ public class DDMSearchUtil {
 	public static SearchContext buildTemplateSearchContext(
 		long companyId, long[] groupIds, long[] classNameIds, long[] classPKs,
 		long resourceClassNameId, String name, String description, String type,
-		String mode, String language, int status, int start, int end,
-		DDMPermissionSupport ddmPermissionSupport,
+		String mode, String language, int status,
+		DDMPermissionSupport ddmPermissionSupport, int start, int end,
 		OrderByComparator<DDMTemplate> orderByComparator) {
 
 		return buildTemplateSearchContext(
 			companyId, groupIds, 0, classNameIds, classPKs, resourceClassNameId,
-			name, description, type, mode, language, status, start, end,
-			ddmPermissionSupport, orderByComparator);
+			name, description, type, mode, language, status,
+			ddmPermissionSupport, start, end, orderByComparator);
 	}
 
 	public static <T> List<T> doSearch(

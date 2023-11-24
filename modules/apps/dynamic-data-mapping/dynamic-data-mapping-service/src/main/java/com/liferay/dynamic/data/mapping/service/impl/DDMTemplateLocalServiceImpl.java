@@ -1041,8 +1041,8 @@ public class DDMTemplateLocalServiceImpl
 
 		SearchContext searchContext = DDMSearchUtil.buildTemplateSearchContext(
 			companyId, groupId, classNameId, classPK, resourceClassNameId,
-			keywords, keywords, type, mode, null, status, start, end,
-			_ddmPermissionSupport, orderByComparator);
+			keywords, keywords, type, mode, null, status, _ddmPermissionSupport,
+			start, end, orderByComparator);
 
 		return DDMSearchUtil.doSearch(
 			searchContext, DDMTemplate.class,
@@ -1103,8 +1103,8 @@ public class DDMTemplateLocalServiceImpl
 
 		SearchContext searchContext = DDMSearchUtil.buildTemplateSearchContext(
 			companyId, groupId, classNameId, classPK, resourceClassNameId, name,
-			description, type, mode, language, status, start, end,
-			_ddmPermissionSupport, orderByComparator);
+			description, type, mode, language, status, _ddmPermissionSupport,
+			start, end, orderByComparator);
 
 		return DDMSearchUtil.doSearch(
 			searchContext, DDMTemplate.class,
@@ -1159,8 +1159,8 @@ public class DDMTemplateLocalServiceImpl
 
 		SearchContext searchContext = DDMSearchUtil.buildTemplateSearchContext(
 			companyId, groupIds, classNameIds, classPKs, resourceClassNameId,
-			keywords, keywords, type, mode, null, status, start, end,
-			_ddmPermissionSupport, orderByComparator);
+			keywords, keywords, type, mode, null, status, _ddmPermissionSupport,
+			start, end, orderByComparator);
 
 		return DDMSearchUtil.doSearch(
 			searchContext, DDMTemplate.class,
@@ -1221,8 +1221,8 @@ public class DDMTemplateLocalServiceImpl
 
 		SearchContext searchContext = DDMSearchUtil.buildTemplateSearchContext(
 			companyId, groupIds, classNameIds, classPKs, resourceClassNameId,
-			name, description, type, mode, language, status, start, end,
-			_ddmPermissionSupport, orderByComparator);
+			name, description, type, mode, language, status,
+			_ddmPermissionSupport, start, end, orderByComparator);
 
 		return DDMSearchUtil.doSearch(
 			searchContext, DDMTemplate.class,
@@ -1262,8 +1262,8 @@ public class DDMTemplateLocalServiceImpl
 
 		SearchContext searchContext = DDMSearchUtil.buildTemplateSearchContext(
 			companyId, groupId, classNameId, classPK, resourceClassNameId,
-			keywords, keywords, type, mode, null, status, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS, _ddmPermissionSupport, null);
+			keywords, keywords, type, mode, null, status, _ddmPermissionSupport,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 		return DDMSearchUtil.doSearchCount(searchContext, DDMTemplate.class);
 	}
@@ -1306,8 +1306,8 @@ public class DDMTemplateLocalServiceImpl
 
 		SearchContext searchContext = DDMSearchUtil.buildTemplateSearchContext(
 			companyId, groupId, classNameId, classPK, resourceClassNameId, name,
-			description, type, mode, language, status, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS, _ddmPermissionSupport, null);
+			description, type, mode, language, status, _ddmPermissionSupport,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 		return DDMSearchUtil.doSearchCount(searchContext, DDMTemplate.class);
 	}
@@ -1345,8 +1345,8 @@ public class DDMTemplateLocalServiceImpl
 
 		SearchContext searchContext = DDMSearchUtil.buildTemplateSearchContext(
 			companyId, groupIds, classNameIds, classPKs, resourceClassNameId,
-			keywords, keywords, type, mode, null, status, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS, _ddmPermissionSupport, null);
+			keywords, keywords, type, mode, null, status, _ddmPermissionSupport,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 		return DDMSearchUtil.doSearchCount(searchContext, DDMTemplate.class);
 	}
@@ -1390,8 +1390,8 @@ public class DDMTemplateLocalServiceImpl
 
 		SearchContext searchContext = DDMSearchUtil.buildTemplateSearchContext(
 			companyId, groupIds, classNameIds, classPKs, resourceClassNameId,
-			name, description, type, mode, language, status, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS, _ddmPermissionSupport, null);
+			name, description, type, mode, language, status,
+			_ddmPermissionSupport, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 		return DDMSearchUtil.doSearchCount(searchContext, DDMTemplate.class);
 	}

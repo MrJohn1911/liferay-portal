@@ -581,7 +581,7 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 				DDMSearchUtil.buildTemplateSearchContext(
 					companyId, groupId, getUserId(), classNameId, classPK,
 					resourceClassNameId, keywords, keywords, type, mode, null,
-					status, start, end, _ddmPermissionSupport,
+					status, _ddmPermissionSupport, start, end,
 					orderByComparator);
 
 			return DDMSearchUtil.doSearch(
@@ -651,7 +651,7 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 				DDMSearchUtil.buildTemplateSearchContext(
 					companyId, groupId, getUserId(), classNameId, classPK,
 					resourceClassNameId, name, description, type, mode,
-					language, status, start, end, _ddmPermissionSupport,
+					language, status, _ddmPermissionSupport, start, end,
 					orderByComparator);
 
 			return DDMSearchUtil.doSearch(
@@ -715,7 +715,7 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 				DDMSearchUtil.buildTemplateSearchContext(
 					companyId, groupIds, getUserId(), classNameIds, classPKs,
 					resourceClassNameId, keywords, keywords, type, mode, null,
-					status, start, end, _ddmPermissionSupport,
+					status, _ddmPermissionSupport, start, end,
 					orderByComparator);
 
 			return DDMSearchUtil.doSearch(
@@ -785,7 +785,7 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 				DDMSearchUtil.buildTemplateSearchContext(
 					companyId, groupIds, getUserId(), classNameIds, classPKs,
 					resourceClassNameId, name, description, type, mode,
-					language, status, start, end, _ddmPermissionSupport,
+					language, status, _ddmPermissionSupport, start, end,
 					orderByComparator);
 
 			return DDMSearchUtil.doSearch(
@@ -834,8 +834,8 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 				DDMSearchUtil.buildTemplateSearchContext(
 					companyId, groupId, getUserId(), classNameId, classPK,
 					resourceClassNameId, keywords, keywords, type, mode, null,
-					status, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					_ddmPermissionSupport, null);
+					status, _ddmPermissionSupport, QueryUtil.ALL_POS,
+					QueryUtil.ALL_POS, null);
 
 			return DDMSearchUtil.doSearchCount(
 				searchContext, DDMTemplate.class);
@@ -887,8 +887,8 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 				DDMSearchUtil.buildTemplateSearchContext(
 					companyId, groupId, getUserId(), classNameId, classPK,
 					resourceClassNameId, name, description, type, mode, null,
-					status, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					_ddmPermissionSupport, null);
+					status, _ddmPermissionSupport, QueryUtil.ALL_POS,
+					QueryUtil.ALL_POS, null);
 
 			return DDMSearchUtil.doSearchCount(
 				searchContext, DDMTemplate.class);
@@ -935,8 +935,8 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 				DDMSearchUtil.buildTemplateSearchContext(
 					companyId, groupIds, getUserId(), classNameIds, classPKs,
 					resourceClassNameId, keywords, keywords, type, mode, null,
-					status, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					_ddmPermissionSupport, null);
+					status, _ddmPermissionSupport, QueryUtil.ALL_POS,
+					QueryUtil.ALL_POS, null);
 
 			return DDMSearchUtil.doSearchCount(
 				searchContext, DDMTemplate.class);
@@ -988,8 +988,8 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 				DDMSearchUtil.buildTemplateSearchContext(
 					companyId, groupIds, getUserId(), classNameIds, classPKs,
 					resourceClassNameId, name, description, type, mode,
-					language, status, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					_ddmPermissionSupport, null);
+					language, status, _ddmPermissionSupport, QueryUtil.ALL_POS,
+					QueryUtil.ALL_POS, null);
 
 			return DDMSearchUtil.doSearchCount(
 				searchContext, DDMTemplate.class);

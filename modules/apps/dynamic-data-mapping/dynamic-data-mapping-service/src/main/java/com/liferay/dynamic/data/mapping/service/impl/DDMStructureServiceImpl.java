@@ -309,8 +309,8 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, null,
 					StringPool.BLANK, StringPool.BLANK, StringPool.BLANK, null,
-					status, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					_ddmPermissionSupport, null);
+					status, _ddmPermissionSupport, QueryUtil.ALL_POS,
+					QueryUtil.ALL_POS, null);
 
 			return DDMSearchUtil.doSearch(
 				searchContext, DDMStructure.class,
@@ -335,7 +335,7 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, null,
 					StringPool.BLANK, StringPool.BLANK, StringPool.BLANK, null,
-					status, start, end, _ddmPermissionSupport,
+					status, _ddmPermissionSupport, start, end,
 					orderByComparator);
 
 			return DDMSearchUtil.doSearch(
@@ -440,8 +440,8 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 			SearchContext searchContext =
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, classPK,
-					keywords, keywords, StringPool.BLANK, null, status, start,
-					end, _ddmPermissionSupport, orderByComparator);
+					keywords, keywords, StringPool.BLANK, null, status,
+					_ddmPermissionSupport, start, end, orderByComparator);
 
 			return DDMSearchUtil.doSearch(
 				searchContext, DDMStructure.class,
@@ -496,8 +496,8 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 			SearchContext searchContext =
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, null,
-					keywords, keywords, StringPool.BLANK, type, status, start,
-					end, _ddmPermissionSupport, orderByComparator);
+					keywords, keywords, StringPool.BLANK, type, status,
+					_ddmPermissionSupport, start, end, orderByComparator);
 
 			return DDMSearchUtil.doSearch(
 				searchContext, DDMStructure.class,
@@ -550,8 +550,8 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 			SearchContext searchContext =
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, null,
-					keywords, keywords, StringPool.BLANK, null, status, start,
-					end, _ddmPermissionSupport, orderByComparator);
+					keywords, keywords, StringPool.BLANK, null, status,
+					_ddmPermissionSupport, start, end, orderByComparator);
 
 			return DDMSearchUtil.doSearch(
 				searchContext, DDMStructure.class,
@@ -611,8 +611,8 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 			SearchContext searchContext =
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, null, name,
-					description, storageType, type, status, start, end,
-					_ddmPermissionSupport, orderByComparator);
+					description, storageType, type, status,
+					_ddmPermissionSupport, start, end, orderByComparator);
 
 			return DDMSearchUtil.doSearch(
 				searchContext, DDMStructure.class,
@@ -638,7 +638,7 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, classPK,
 					keywords, keywords, StringPool.BLANK, null, status,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, _ddmPermissionSupport,
+					_ddmPermissionSupport, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
 					null);
 
 			return DDMSearchUtil.doSearchCount(
@@ -676,7 +676,7 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, null,
 					keywords, keywords, StringPool.BLANK, null, status,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, _ddmPermissionSupport,
+					_ddmPermissionSupport, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
 					null);
 
 			return DDMSearchUtil.doSearchCount(
@@ -716,7 +716,7 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, null,
 					keywords, keywords, StringPool.BLANK, type, status,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, _ddmPermissionSupport,
+					_ddmPermissionSupport, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
 					null);
 
 			return DDMSearchUtil.doSearchCount(
@@ -760,8 +760,9 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 			SearchContext searchContext =
 				DDMSearchUtil.buildStructureSearchContext(
 					companyId, groupIds, getUserId(), classNameId, null, name,
-					description, storageType, type, status, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, _ddmPermissionSupport, null);
+					description, storageType, type, status,
+					_ddmPermissionSupport, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+					null);
 
 			return DDMSearchUtil.doSearchCount(
 				searchContext, DDMStructure.class);
