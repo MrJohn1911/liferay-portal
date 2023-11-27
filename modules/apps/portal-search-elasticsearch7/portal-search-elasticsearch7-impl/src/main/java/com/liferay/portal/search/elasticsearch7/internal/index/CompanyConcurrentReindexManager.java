@@ -16,7 +16,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.ccr.CrossClusterReplicationHelper;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.index.ConcurrentReindexManager;
 import com.liferay.portal.search.index.IndexNameBuilder;
 
@@ -60,7 +60,7 @@ public class CompanyConcurrentReindexManager
 		String newIndexName = baseIndexName + "-" + timeStampSuffix;
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
+			_elasticsearchConnectionManager.getRestHighLevelClient();
 
 		if (_companyIndexFactoryHelper.hasIndex(
 				restHighLevelClient.indices(), newIndexName)) {
@@ -90,7 +90,7 @@ public class CompanyConcurrentReindexManager
 
 		if (!Validator.isBlank(indexName)) {
 			RestHighLevelClient restHighLevelClient =
-				_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
+				_elasticsearchConnectionManager.getRestHighLevelClient();
 
 			if (_log.isInfoEnabled()) {
 				_log.info("Deleting next index " + indexName);
@@ -113,7 +113,7 @@ public class CompanyConcurrentReindexManager
 		Company company = _companyLocalService.getCompany(companyId);
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
+			_elasticsearchConnectionManager.getRestHighLevelClient();
 
 		IndicesClient indicesClient = restHighLevelClient.indices();
 
@@ -233,8 +233,7 @@ public class CompanyConcurrentReindexManager
 	private CompanyLocalService _companyLocalService;
 
 	@Reference
-	private ElasticsearchConnectionManagerImpl
-		_elasticsearchConnectionManagerImpl;
+	private ElasticsearchConnectionManager _elasticsearchConnectionManager;
 
 	@Reference
 	private IndexNameBuilder _indexNameBuilder;

@@ -58,18 +58,18 @@ public class ElasticsearchConnectionManagerImplTest {
 	public void setUp() {
 		_resetAndSetUpMocks();
 
-		_elasticsearchConnectionManagerImpl =
-			_createElasticsearchConnectionManager(
-				_sidecarElasticsearchConnection,
-				_remoteElasticsearchConnection1,
-				_remoteElasticsearchConnection2,
-				_remoteElasticsearchConnection3);
+		_elasticsearchConnectionManager = _createElasticsearchConnectionManager(
+			_sidecarElasticsearchConnection, _remoteElasticsearchConnection1,
+			_remoteElasticsearchConnection2, _remoteElasticsearchConnection3);
 	}
 
 	@Test
 	public void testActivateRemoteModeDisabled() {
+		ElasticsearchConnectionManager elasticsearchConnectionManager =
+			Mockito.spy(_elasticsearchConnectionManager);
+
 		ElasticsearchConnectionManagerImpl elasticsearchConnectionManagerImpl =
-			Mockito.spy(_elasticsearchConnectionManagerImpl);
+			(ElasticsearchConnectionManagerImpl)elasticsearchConnectionManager;
 
 		elasticsearchConnectionManagerImpl.activate(
 			SystemBundleUtil.getBundleContext());
@@ -101,8 +101,11 @@ public class ElasticsearchConnectionManagerImplTest {
 			"test"
 		);
 
+		ElasticsearchConnectionManager elasticsearchConnectionManager =
+			Mockito.spy(_elasticsearchConnectionManager);
+
 		ElasticsearchConnectionManagerImpl elasticsearchConnectionManagerImpl =
-			Mockito.spy(_elasticsearchConnectionManagerImpl);
+			(ElasticsearchConnectionManagerImpl)elasticsearchConnectionManager;
 
 		elasticsearchConnectionManagerImpl.activate(
 			SystemBundleUtil.getBundleContext());
@@ -140,8 +143,11 @@ public class ElasticsearchConnectionManagerImplTest {
 			new String[] {"http://localhost:9200"}
 		);
 
+		ElasticsearchConnectionManager elasticsearchConnectionManager =
+			Mockito.spy(_elasticsearchConnectionManager);
+
 		ElasticsearchConnectionManagerImpl elasticsearchConnectionManagerImpl =
-			Mockito.spy(_elasticsearchConnectionManagerImpl);
+			(ElasticsearchConnectionManagerImpl)elasticsearchConnectionManager;
 
 		elasticsearchConnectionManagerImpl.activate(
 			SystemBundleUtil.getBundleContext());
@@ -175,7 +181,7 @@ public class ElasticsearchConnectionManagerImplTest {
 			true
 		);
 
-		_elasticsearchConnectionManagerImpl.addElasticsearchConnection(
+		_elasticsearchConnectionManager.addElasticsearchConnection(
 			elasticsearchConnection);
 
 		Mockito.verify(
@@ -203,7 +209,7 @@ public class ElasticsearchConnectionManagerImplTest {
 			false
 		);
 
-		_elasticsearchConnectionManagerImpl.addElasticsearchConnection(
+		_elasticsearchConnectionManager.addElasticsearchConnection(
 			elasticsearchConnection);
 
 		Mockito.verify(
@@ -231,10 +237,10 @@ public class ElasticsearchConnectionManagerImplTest {
 			true
 		);
 
-		_elasticsearchConnectionManagerImpl.addElasticsearchConnection(
+		_elasticsearchConnectionManager.addElasticsearchConnection(
 			elasticsearchConnection);
 
-		_elasticsearchConnectionManagerImpl.getElasticsearchConnection(
+		_elasticsearchConnectionManager.getElasticsearchConnection(
 			elasticsearchConnection.getConnectionId());
 
 		Mockito.verify(
@@ -262,7 +268,7 @@ public class ElasticsearchConnectionManagerImplTest {
 			false
 		);
 
-		_elasticsearchConnectionManagerImpl.addElasticsearchConnection(
+		_elasticsearchConnectionManager.addElasticsearchConnection(
 			elasticsearchConnection);
 
 		Mockito.verify(
@@ -278,7 +284,7 @@ public class ElasticsearchConnectionManagerImplTest {
 	public void testGetElasticsearchConnectionWithRemoteModeDisabled() {
 		Assert.assertEquals(
 			_sidecarElasticsearchConnection,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection());
+			_elasticsearchConnectionManager.getElasticsearchConnection());
 	}
 
 	@Test
@@ -287,7 +293,7 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_defaultRemoteElasticsearchConnection,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection());
+			_elasticsearchConnectionManager.getElasticsearchConnection());
 	}
 
 	@Test
@@ -297,28 +303,26 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection1,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection());
+			_elasticsearchConnectionManager.getElasticsearchConnection());
 
 		_setRemoteConnectionId(_REMOTE_2_CONNECTION_ID);
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection());
+			_elasticsearchConnectionManager.getElasticsearchConnection());
 	}
 
 	@Test
 	public void testGetExplicitElasticsearchConnectionWhenConnectionDoesNotExist() {
 		Assert.assertEquals(
 			null,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection(
-				"none"));
+			_elasticsearchConnectionManager.getElasticsearchConnection("none"));
 	}
 
 	@Test
 	public void testGetExplicitElasticsearchConnectionWhenConnectionIdNull() {
 		try {
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection(
-				null);
+			_elasticsearchConnectionManager.getElasticsearchConnection(null);
 
 			Assert.fail();
 		}
@@ -332,7 +336,7 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection(
+			_elasticsearchConnectionManager.getElasticsearchConnection(
 				_REMOTE_2_CONNECTION_ID));
 	}
 
@@ -340,12 +344,12 @@ public class ElasticsearchConnectionManagerImplTest {
 	public void testGetExplicitElasticsearchConnectionWithRemoteModeDisabled() {
 		Assert.assertEquals(
 			_remoteElasticsearchConnection1,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection(
+			_elasticsearchConnectionManager.getElasticsearchConnection(
 				_REMOTE_1_CONNECTION_ID));
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection(
+			_elasticsearchConnectionManager.getElasticsearchConnection(
 				_REMOTE_2_CONNECTION_ID));
 	}
 
@@ -355,12 +359,12 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection1,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection(
+			_elasticsearchConnectionManager.getElasticsearchConnection(
 				_REMOTE_1_CONNECTION_ID));
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection(
+			_elasticsearchConnectionManager.getElasticsearchConnection(
 				_REMOTE_2_CONNECTION_ID));
 	}
 
@@ -371,14 +375,14 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2,
-			_elasticsearchConnectionManagerImpl.getElasticsearchConnection(
+			_elasticsearchConnectionManager.getElasticsearchConnection(
 				_REMOTE_2_CONNECTION_ID));
 	}
 
 	@Test
 	public void testGetExplicitRestHighLevelClientWhenRestClientNull() {
 		try {
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient(
+			_elasticsearchConnectionManager.getRestHighLevelClient(
 				_REMOTE_3_CONNECTION_ID);
 
 			Assert.fail();
@@ -398,19 +402,19 @@ public class ElasticsearchConnectionManagerImplTest {
 	public void testGetExplicitRestHighLevelClientWithRemoteModeDisabled() {
 		Assert.assertEquals(
 			_remoteElasticsearchConnection1.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient(
+			_elasticsearchConnectionManager.getRestHighLevelClient(
 				_REMOTE_1_CONNECTION_ID));
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient(
+			_elasticsearchConnectionManager.getRestHighLevelClient(
 				_REMOTE_2_CONNECTION_ID));
 	}
 
 	@Test
 	public void testGetExplicitRestHighLevelClientWithRemoteModeDisabledAndConnectionDoesNotExist() {
 		try {
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient("none");
+			_elasticsearchConnectionManager.getRestHighLevelClient("none");
 
 			Assert.fail();
 		}
@@ -431,7 +435,7 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient(
+			_elasticsearchConnectionManager.getRestHighLevelClient(
 				_REMOTE_2_CONNECTION_ID));
 	}
 
@@ -439,7 +443,7 @@ public class ElasticsearchConnectionManagerImplTest {
 	public void testGetExplicitRestHighLevelClientWithRemoteModeDisabledAndIdNull() {
 		Assert.assertEquals(
 			_sidecarElasticsearchConnection.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient(null));
+			_elasticsearchConnectionManager.getRestHighLevelClient(null));
 	}
 
 	@Test
@@ -448,12 +452,12 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection1.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient(
+			_elasticsearchConnectionManager.getRestHighLevelClient(
 				_REMOTE_1_CONNECTION_ID));
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient(
+			_elasticsearchConnectionManager.getRestHighLevelClient(
 				_REMOTE_2_CONNECTION_ID));
 	}
 
@@ -462,7 +466,7 @@ public class ElasticsearchConnectionManagerImplTest {
 		_enableRemoteMode();
 
 		try {
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient("none");
+			_elasticsearchConnectionManager.getRestHighLevelClient("none");
 
 			Assert.fail();
 		}
@@ -484,7 +488,7 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient(
+			_elasticsearchConnectionManager.getRestHighLevelClient(
 				_REMOTE_2_CONNECTION_ID));
 	}
 
@@ -494,14 +498,14 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_defaultRemoteElasticsearchConnection.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient(null));
+			_elasticsearchConnectionManager.getRestHighLevelClient(null));
 	}
 
 	@Test
 	public void testGetRestHighLevelClientWithRemoteModeDisabled() {
 		Assert.assertEquals(
 			_sidecarElasticsearchConnection.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient());
+			_elasticsearchConnectionManager.getRestHighLevelClient());
 	}
 
 	@Test
@@ -510,13 +514,13 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_sidecarElasticsearchConnection.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient());
+			_elasticsearchConnectionManager.getRestHighLevelClient());
 
 		_setRemoteConnectionId(_REMOTE_2_CONNECTION_ID);
 
 		Assert.assertEquals(
 			_sidecarElasticsearchConnection.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient());
+			_elasticsearchConnectionManager.getRestHighLevelClient());
 	}
 
 	@Test
@@ -525,7 +529,7 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_defaultRemoteElasticsearchConnection.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient());
+			_elasticsearchConnectionManager.getRestHighLevelClient());
 	}
 
 	@Test
@@ -535,13 +539,13 @@ public class ElasticsearchConnectionManagerImplTest {
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection1.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient());
+			_elasticsearchConnectionManager.getRestHighLevelClient());
 
 		_setRemoteConnectionId(_REMOTE_2_CONNECTION_ID);
 
 		Assert.assertEquals(
 			_remoteElasticsearchConnection2.getRestHighLevelClient(),
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient());
+			_elasticsearchConnectionManager.getRestHighLevelClient());
 	}
 
 	@Test
@@ -555,7 +559,7 @@ public class ElasticsearchConnectionManagerImplTest {
 			"test"
 		);
 
-		_elasticsearchConnectionManagerImpl.removeElasticsearchConnection(
+		_elasticsearchConnectionManager.removeElasticsearchConnection(
 			elasticsearchConnection.getConnectionId());
 
 		Mockito.verify(
@@ -565,7 +569,7 @@ public class ElasticsearchConnectionManagerImplTest {
 
 	@Test
 	public void testRemoveConnectionThatExistsWithConnectionId() {
-		_elasticsearchConnectionManagerImpl.removeElasticsearchConnection(
+		_elasticsearchConnectionManager.removeElasticsearchConnection(
 			_remoteElasticsearchConnection1.getConnectionId());
 
 		Mockito.verify(
@@ -575,10 +579,10 @@ public class ElasticsearchConnectionManagerImplTest {
 
 	@Test
 	public void testRemoveConnectionWithNullConnectionId() {
-		_elasticsearchConnectionManagerImpl.removeElasticsearchConnection(null);
+		_elasticsearchConnectionManager.removeElasticsearchConnection(null);
 	}
 
-	private ElasticsearchConnectionManagerImpl
+	private ElasticsearchConnectionManager
 		_createElasticsearchConnectionManager(
 			ElasticsearchConnection remoteElasticsearchConnection1,
 			ElasticsearchConnection remoteElasticsearchConnection2,
@@ -622,7 +626,7 @@ public class ElasticsearchConnectionManagerImplTest {
 			false
 		);
 
-		_elasticsearchConnectionManagerImpl.addElasticsearchConnection(
+		_elasticsearchConnectionManager.addElasticsearchConnection(
 			_defaultRemoteElasticsearchConnection);
 	}
 
@@ -777,8 +781,7 @@ public class ElasticsearchConnectionManagerImplTest {
 	private final ElasticsearchConfigurationWrapper
 		_elasticsearchConfigurationWrapper = Mockito.mock(
 			ElasticsearchConfigurationWrapper.class);
-	private ElasticsearchConnectionManagerImpl
-		_elasticsearchConnectionManagerImpl;
+	private ElasticsearchConnectionManager _elasticsearchConnectionManager;
 	private final Http _http = Mockito.mock(Http.class);
 	private final ElasticsearchConnection _remoteElasticsearchConnection1 =
 		Mockito.mock(ElasticsearchConnection.class);

@@ -13,7 +13,7 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationObserver;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch7.internal.index.util.IndexFactoryCompanyIdRegistryUtil;
 import com.liferay.portal.search.engine.adapter.SearchEngineAdapter;
 import com.liferay.portal.search.engine.adapter.index.UpdateIndexSettingsIndexRequest;
@@ -121,8 +121,7 @@ public class CompanyIndexFactory
 
 			try {
 				RestHighLevelClient restHighLevelClient =
-					_elasticsearchConnectionManagerImpl.
-						getRestHighLevelClient();
+					_elasticsearchConnectionManager.getRestHighLevelClient();
 
 				createIndices(restHighLevelClient.indices(), companyId);
 			}
@@ -199,8 +198,7 @@ public class CompanyIndexFactory
 		_elasticsearchConfigurationWrapper;
 
 	@Reference
-	private ElasticsearchConnectionManagerImpl
-		_elasticsearchConnectionManagerImpl;
+	private ElasticsearchConnectionManager _elasticsearchConnectionManager;
 
 	@Reference
 	private IndexNameBuilder _indexNameBuilder;

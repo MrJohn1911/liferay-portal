@@ -9,7 +9,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.elasticsearch7.internal.ElasticsearchSearchEngine;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnection;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionFixture;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import org.elasticsearch.client.RestHighLevelClient;
@@ -71,16 +71,16 @@ public class ElasticsearchSearchEngineReconnectTest {
 
 		_reconnect(
 			_elasticsearchSearchEngineFixture.
-				getElasticsearchConnectionManagerImpl());
+				getElasticsearchConnectionManager());
 
 		elasticsearchSearchEngine.initialize(companyId);
 	}
 
 	private void _reconnect(
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManagerImpl) {
+		ElasticsearchConnectionManager elasticsearchConnectionManager) {
 
 		ElasticsearchConnection elasticsearchConnection =
-			elasticsearchConnectionManagerImpl.getElasticsearchConnection();
+			elasticsearchConnectionManager.getElasticsearchConnection();
 
 		elasticsearchConnection.close();
 

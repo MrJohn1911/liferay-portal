@@ -12,7 +12,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationObserver;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionBuilder;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchInstancePaths;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchInstancePathsBuilder;
 import com.liferay.portal.search.elasticsearch7.internal.connection.constants.ConnectionConstants;
@@ -62,7 +62,7 @@ public class SidecarManager implements ElasticsearchConfigurationObserver {
 
 	protected void applyConfigurations() {
 		if (elasticsearchConfigurationWrapper.isProductionModeEnabled()) {
-			elasticsearchConnectionManagerImpl.removeElasticsearchConnection(
+			elasticsearchConnectionManager.removeElasticsearchConnection(
 				ConnectionConstants.SIDECAR_CONNECTION_ID);
 		}
 		else {
@@ -110,7 +110,7 @@ public class SidecarManager implements ElasticsearchConfigurationObserver {
 				}
 			);
 
-			elasticsearchConnectionManagerImpl.addElasticsearchConnection(
+			elasticsearchConnectionManager.addElasticsearchConnection(
 				elasticsearchConnectionBuilder.build());
 
 			_startupSuccessful = true;
@@ -131,8 +131,7 @@ public class SidecarManager implements ElasticsearchConfigurationObserver {
 		elasticsearchConfigurationWrapper;
 
 	@Reference
-	protected ElasticsearchConnectionManagerImpl
-		elasticsearchConnectionManagerImpl;
+	protected ElasticsearchConnectionManager elasticsearchConnectionManager;
 
 	@Reference
 	protected ProcessExecutor processExecutor;

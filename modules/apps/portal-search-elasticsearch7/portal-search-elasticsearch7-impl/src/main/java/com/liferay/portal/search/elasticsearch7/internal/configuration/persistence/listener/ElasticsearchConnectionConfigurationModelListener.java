@@ -16,7 +16,7 @@ import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConnectionConfiguration;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch7.internal.connection.constants.ConnectionConstants;
 
 import java.util.Dictionary;
@@ -42,7 +42,7 @@ public class ElasticsearchConnectionConfigurationModelListener
 		throws ConfigurationModelListenerException {
 
 		try {
-			elasticsearchConnectionManagerImpl.removeElasticsearchConnection(
+			elasticsearchConnectionManager.removeElasticsearchConnection(
 				_getConnectionId(pid));
 		}
 		catch (Exception exception) {
@@ -76,8 +76,7 @@ public class ElasticsearchConnectionConfigurationModelListener
 	protected ConfigurationAdmin configurationAdmin;
 
 	@Reference
-	protected ElasticsearchConnectionManagerImpl
-		elasticsearchConnectionManagerImpl;
+	protected ElasticsearchConnectionManager elasticsearchConnectionManager;
 
 	private String _getConnectionId(String pid) throws Exception {
 		Configuration configuration = configurationAdmin.getConfiguration(
@@ -165,8 +164,8 @@ public class ElasticsearchConnectionConfigurationModelListener
 			if ((previousConnectionId != null) &&
 				!previousConnectionId.equals(connectionId)) {
 
-				elasticsearchConnectionManagerImpl.
-					removeElasticsearchConnection(previousConnectionId);
+				elasticsearchConnectionManager.removeElasticsearchConnection(
+					previousConnectionId);
 			}
 
 			return;
