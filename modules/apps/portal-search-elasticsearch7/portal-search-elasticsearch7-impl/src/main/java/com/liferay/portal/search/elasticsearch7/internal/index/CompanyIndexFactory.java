@@ -121,7 +121,8 @@ public class CompanyIndexFactory
 
 			try {
 				RestHighLevelClient restHighLevelClient =
-					_elasticsearchConnectionManager.getRestHighLevelClient();
+					_elasticsearchConnectionManagerImpl.
+						getRestHighLevelClient();
 
 				createIndices(restHighLevelClient.indices(), companyId);
 			}
@@ -198,7 +199,8 @@ public class CompanyIndexFactory
 		_elasticsearchConfigurationWrapper;
 
 	@Reference
-	private ElasticsearchConnectionManagerImpl _elasticsearchConnectionManager;
+	private ElasticsearchConnectionManagerImpl
+		_elasticsearchConnectionManagerImpl;
 
 	@Reference
 	private IndexNameBuilder _indexNameBuilder;

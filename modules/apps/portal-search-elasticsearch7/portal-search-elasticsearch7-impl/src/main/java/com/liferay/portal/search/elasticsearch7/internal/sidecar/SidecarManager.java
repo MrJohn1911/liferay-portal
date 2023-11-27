@@ -62,7 +62,7 @@ public class SidecarManager implements ElasticsearchConfigurationObserver {
 
 	protected void applyConfigurations() {
 		if (elasticsearchConfigurationWrapper.isProductionModeEnabled()) {
-			elasticsearchConnectionManager.removeElasticsearchConnection(
+			elasticsearchConnectionManagerImpl.removeElasticsearchConnection(
 				ConnectionConstants.SIDECAR_CONNECTION_ID);
 		}
 		else {
@@ -110,7 +110,7 @@ public class SidecarManager implements ElasticsearchConfigurationObserver {
 				}
 			);
 
-			elasticsearchConnectionManager.addElasticsearchConnection(
+			elasticsearchConnectionManagerImpl.addElasticsearchConnection(
 				elasticsearchConnectionBuilder.build());
 
 			_startupSuccessful = true;
@@ -131,7 +131,8 @@ public class SidecarManager implements ElasticsearchConfigurationObserver {
 		elasticsearchConfigurationWrapper;
 
 	@Reference
-	protected ElasticsearchConnectionManagerImpl elasticsearchConnectionManager;
+	protected ElasticsearchConnectionManagerImpl
+		elasticsearchConnectionManagerImpl;
 
 	@Reference
 	protected ProcessExecutor processExecutor;

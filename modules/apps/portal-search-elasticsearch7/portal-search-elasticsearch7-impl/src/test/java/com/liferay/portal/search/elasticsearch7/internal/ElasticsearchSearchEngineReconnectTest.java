@@ -70,16 +70,16 @@ public class ElasticsearchSearchEngineReconnectTest {
 
 		_reconnect(
 			_elasticsearchSearchEngineFixture.
-				getElasticsearchConnectionManager());
+				getElasticsearchConnectionManagerImpl());
 
 		elasticsearchSearchEngine.initialize(companyId);
 	}
 
 	private void _reconnect(
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManager) {
+		ElasticsearchConnectionManagerImpl elasticsearchConnectionManagerImpl) {
 
 		ElasticsearchConnection elasticsearchConnection =
-			elasticsearchConnectionManager.getElasticsearchConnection();
+			elasticsearchConnectionManagerImpl.getElasticsearchConnection();
 
 		elasticsearchConnection.close();
 

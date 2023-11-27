@@ -35,7 +35,8 @@ public class ConnectionIdConfigurationFieldOptionsProvider
 		List<Option> options = new ArrayList<>();
 
 		for (ElasticsearchConnection elasticsearchConnection :
-				elasticsearchConnectionManager.getElasticsearchConnections()) {
+				elasticsearchConnectionManagerImpl.
+					getElasticsearchConnections()) {
 
 			String connectionId = elasticsearchConnection.getConnectionId();
 
@@ -68,6 +69,7 @@ public class ConnectionIdConfigurationFieldOptionsProvider
 	}
 
 	@Reference
-	protected ElasticsearchConnectionManagerImpl elasticsearchConnectionManager;
+	protected ElasticsearchConnectionManagerImpl
+		elasticsearchConnectionManagerImpl;
 
 }
