@@ -11,7 +11,7 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchClientResolver;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionNotInitializedException;
 import com.liferay.portal.search.elasticsearch7.internal.connection.IndexName;
@@ -33,19 +33,19 @@ import org.osgi.framework.FrameworkUtil;
 public class CompanyIndexFactoryFixture {
 
 	public CompanyIndexFactoryFixture(
-		ElasticsearchClientResolver elasticsearchClientResolver,
+		ElasticsearchConnectionManager elasticsearchConnectionManager,
 		String indexName) {
 
-		_elasticsearchClientResolver = elasticsearchClientResolver;
+		_elasticsearchConnectionManager = elasticsearchConnectionManager;
 		_indexName = indexName;
 
 		_frameworkUtilMockedStatic = _createFrameworkUtil();
 
-		_elasticsearchConnectionManager = Mockito.mock(
+		_elasticsearchConnectionManagerImpl = Mockito.mock(
 			ElasticsearchConnectionManagerImpl.class);
 
 		Mockito.when(
-			_elasticsearchConnectionManager.getRestHighLevelClient()
+			_elasticsearchConnectionManagerImpl.getRestHighLevelClient()
 		).thenThrow(
 			ElasticsearchConnectionNotInitializedException.class
 		);
@@ -55,7 +55,7 @@ public class CompanyIndexFactoryFixture {
 		CompanyIndexFactory companyIndexFactory = getCompanyIndexFactory();
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchClientResolver.getRestHighLevelClient();
+			_elasticsearchConnectionManager.getRestHighLevelClient();
 
 		companyIndexFactory.createIndices(
 			restHighLevelClient.indices(), RandomTestUtil.randomLong());
@@ -65,7 +65,7 @@ public class CompanyIndexFactoryFixture {
 		CompanyIndexFactory companyIndexFactory = getCompanyIndexFactory();
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchClientResolver.getRestHighLevelClient();
+			_elasticsearchConnectionManager.getRestHighLevelClient();
 
 		companyIndexFactory.deleteIndices(
 			restHighLevelClient.indices(), RandomTestUtil.randomLong());
@@ -111,7 +111,7 @@ public class CompanyIndexFactoryFixture {
 			createElasticsearchConfigurationWrapper());
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactoryHelper, "_elasticsearchConnectionManager",
-			_elasticsearchConnectionManager);
+			_elasticsearchConnectionManagerImpl);
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactoryHelper, "_indexNameBuilder",
 			new TestIndexNameBuilder());
@@ -190,9 +190,10 @@ public class CompanyIndexFactoryFixture {
 
 	private CompanyIndexFactory _companyIndexFactory;
 	private CompanyIndexFactoryHelper _companyIndexFactoryHelper;
-	private final ElasticsearchClientResolver _elasticsearchClientResolver;
-	private final ElasticsearchConnectionManagerImpl
+	private final ElasticsearchConnectionManager
 		_elasticsearchConnectionManager;
+	private final ElasticsearchConnectionManagerImpl
+		_elasticsearchConnectionManagerImpl;
 	private MockedStatic<FrameworkUtil> _frameworkUtilMockedStatic;
 	private final String _indexName;
 
