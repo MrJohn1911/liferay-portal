@@ -42,7 +42,7 @@ public class ElasticsearchConnectionConfigurationModelListener
 		throws ConfigurationModelListenerException {
 
 		try {
-			elasticsearchConnectionManager.removeElasticsearchConnection(
+			elasticsearchConnectionManagerImpl.removeElasticsearchConnection(
 				_getConnectionId(pid));
 		}
 		catch (Exception exception) {
@@ -76,7 +76,8 @@ public class ElasticsearchConnectionConfigurationModelListener
 	protected ConfigurationAdmin configurationAdmin;
 
 	@Reference
-	protected ElasticsearchConnectionManagerImpl elasticsearchConnectionManager;
+	protected ElasticsearchConnectionManagerImpl
+		elasticsearchConnectionManagerImpl;
 
 	private String _getConnectionId(String pid) throws Exception {
 		Configuration configuration = configurationAdmin.getConfiguration(
@@ -164,8 +165,8 @@ public class ElasticsearchConnectionConfigurationModelListener
 			if ((previousConnectionId != null) &&
 				!previousConnectionId.equals(connectionId)) {
 
-				elasticsearchConnectionManager.removeElasticsearchConnection(
-					previousConnectionId);
+				elasticsearchConnectionManagerImpl.
+					removeElasticsearchConnection(previousConnectionId);
 			}
 
 			return;

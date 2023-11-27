@@ -60,7 +60,7 @@ public class CompanyConcurrentReindexManager
 		String newIndexName = baseIndexName + "-" + timeStampSuffix;
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManager.getRestHighLevelClient();
+			_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
 
 		if (_companyIndexFactoryHelper.hasIndex(
 				restHighLevelClient.indices(), newIndexName)) {
@@ -90,7 +90,7 @@ public class CompanyConcurrentReindexManager
 
 		if (!Validator.isBlank(indexName)) {
 			RestHighLevelClient restHighLevelClient =
-				_elasticsearchConnectionManager.getRestHighLevelClient();
+				_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
 
 			if (_log.isInfoEnabled()) {
 				_log.info("Deleting next index " + indexName);
@@ -113,7 +113,7 @@ public class CompanyConcurrentReindexManager
 		Company company = _companyLocalService.getCompany(companyId);
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManager.getRestHighLevelClient();
+			_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
 
 		IndicesClient indicesClient = restHighLevelClient.indices();
 
@@ -233,7 +233,8 @@ public class CompanyConcurrentReindexManager
 	private CompanyLocalService _companyLocalService;
 
 	@Reference
-	private ElasticsearchConnectionManagerImpl _elasticsearchConnectionManager;
+	private ElasticsearchConnectionManagerImpl
+		_elasticsearchConnectionManagerImpl;
 
 	@Reference
 	private IndexNameBuilder _indexNameBuilder;

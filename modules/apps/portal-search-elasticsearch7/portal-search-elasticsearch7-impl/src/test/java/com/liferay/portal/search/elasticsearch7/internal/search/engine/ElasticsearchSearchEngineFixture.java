@@ -13,9 +13,9 @@ import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConfiguration;
 import com.liferay.portal.search.elasticsearch7.internal.ElasticsearchSearchEngine;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchClientResolver;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnection;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionFixture;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
 import com.liferay.portal.search.elasticsearch7.internal.index.CompanyIdIndexNameBuilder;
 import com.liferay.portal.search.elasticsearch7.internal.index.CompanyIndexFactory;
@@ -46,8 +46,10 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 		_elasticsearchConnectionFixture = elasticsearchConnectionFixture;
 	}
 
-	public ElasticsearchConnectionManagerImpl getElasticsearchConnectionManager() {
-		return _elasticsearchConnectionManager;
+	public ElasticsearchConnectionManagerImpl
+		getElasticsearchConnectionManagerImpl() {
+
+		return _elasticsearchConnectionManagerImpl;
 	}
 
 	public ElasticsearchSearchEngine getElasticsearchSearchEngine() {
@@ -73,13 +75,14 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 
 		_frameworkUtilMockedStatic = _createFrameworkUtil();
 
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManager =
-			_createElasticsearchConnectionManager(
+		ElasticsearchConnectionManagerImpl elasticsearchConnectionManagerImpl =
+			_createElasticsearchConnectionManagerImpl(
 				elasticsearchConnectionFixture);
 
-		_elasticsearchConnectionManager = elasticsearchConnectionManager;
+		_elasticsearchConnectionManagerImpl =
+			elasticsearchConnectionManagerImpl;
 		_elasticsearchSearchEngine = _createElasticsearchSearchEngine(
-			elasticsearchConnectionFixture, elasticsearchConnectionManager,
+			elasticsearchConnectionFixture, elasticsearchConnectionManagerImpl,
 			Mockito.mock(IndexConfigurationDynamicUpdatesExecutor.class),
 			indexNameBuilder,
 			elasticsearchConnectionFixture.
@@ -165,7 +168,7 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 	}
 
 	private ElasticsearchConnectionManagerImpl
-		_createElasticsearchConnectionManager(
+		_createElasticsearchConnectionManagerImpl(
 			ElasticsearchConnectionFixture elasticsearchConnectionFixture) {
 
 		return new ElasticsearchConnectionManagerImpl() {
@@ -188,8 +191,8 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 	}
 
 	private ElasticsearchSearchEngine _createElasticsearchSearchEngine(
-		ElasticsearchClientResolver elasticsearchClientResolver,
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManager,
+		ElasticsearchConnectionManager elasticsearchClientResolver,
+		ElasticsearchConnectionManagerImpl elasticsearchConnectionManagerImpl,
 		IndexConfigurationDynamicUpdatesExecutor
 			indexConfigurationDynamicUpdatesExecutor,
 		IndexNameBuilder indexNameBuilder, Map<String, Object> properites) {
@@ -199,7 +202,7 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine, "_elasticsearchConnectionManager",
-			elasticsearchConnectionManager);
+			elasticsearchConnectionManagerImpl);
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine,
 			"_indexConfigurationDynamicUpdatesExecutor",
@@ -241,12 +244,13 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 	}
 
 	private SearchEngineAdapter _createSearchEngineAdapter(
-		ElasticsearchClientResolver elasticsearchClientResolver) {
+		ElasticsearchConnectionManager elasticsearchConnectionManager) {
 
 		_elasticsearchEngineAdapterFixture =
 			new ElasticsearchEngineAdapterFixture() {
 				{
-					setElasticsearchClientResolver(elasticsearchClientResolver);
+					setElasticsearchClientResolver(
+						elasticsearchConnectionManager);
 				}
 			};
 
@@ -259,7 +263,8 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 	private CompanyIndexFactoryHelper _companyIndexFactoryHelper;
 	private final ElasticsearchConnectionFixture
 		_elasticsearchConnectionFixture;
-	private ElasticsearchConnectionManagerImpl _elasticsearchConnectionManager;
+	private ElasticsearchConnectionManagerImpl
+		_elasticsearchConnectionManagerImpl;
 	private ElasticsearchEngineAdapterFixture
 		_elasticsearchEngineAdapterFixture;
 	private ElasticsearchSearchEngine _elasticsearchSearchEngine;

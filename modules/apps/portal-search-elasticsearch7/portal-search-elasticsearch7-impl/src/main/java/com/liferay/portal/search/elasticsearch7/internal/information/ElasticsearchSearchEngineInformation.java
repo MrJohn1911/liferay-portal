@@ -67,7 +67,7 @@ public class ElasticsearchSearchEngineInformation
 			new LinkedList<>();
 
 		ElasticsearchConnection elasticsearchConnection =
-			elasticsearchConnectionManager.getElasticsearchConnection();
+			elasticsearchConnectionManagerImpl.getElasticsearchConnection();
 
 		_addMainConnection(elasticsearchConnection, connectionInformationList);
 
@@ -88,10 +88,11 @@ public class ElasticsearchSearchEngineInformation
 		}
 
 		ElasticsearchConnection localClusterElasticsearchConnection =
-			elasticsearchConnectionManager.getElasticsearchConnection(true);
+			elasticsearchConnectionManagerImpl.getElasticsearchConnection(true);
 
 		if (elasticsearchConfigurationWrapper.isProductionModeEnabled() &&
-			elasticsearchConnectionManager.isCrossClusterReplicationEnabled() &&
+			elasticsearchConnectionManagerImpl.
+				isCrossClusterReplicationEnabled() &&
 			!elasticsearchConnection.equals(
 				localClusterElasticsearchConnection)) {
 
@@ -122,14 +123,14 @@ public class ElasticsearchSearchEngineInformation
 	public String getNodesString() {
 		try {
 			String clusterNodesString = _getClusterNodesString(
-				elasticsearchConnectionManager.getRestHighLevelClient());
+				elasticsearchConnectionManagerImpl.getRestHighLevelClient());
 
 			if (elasticsearchConfigurationWrapper.isProductionModeEnabled() &&
-				elasticsearchConnectionManager.
+				elasticsearchConnectionManagerImpl.
 					isCrossClusterReplicationEnabled()) {
 
 				String localClusterNodesString = _getClusterNodesString(
-					elasticsearchConnectionManager.getRestHighLevelClient(
+					elasticsearchConnectionManagerImpl.getRestHighLevelClient(
 						null, true));
 
 				if (!Validator.isBlank(localClusterNodesString)) {
@@ -169,7 +170,8 @@ public class ElasticsearchSearchEngineInformation
 		elasticsearchConfigurationWrapper;
 
 	@Reference
-	protected ElasticsearchConnectionManagerImpl elasticsearchConnectionManager;
+	protected ElasticsearchConnectionManagerImpl
+		elasticsearchConnectionManagerImpl;
 
 	@Reference
 	protected NodeInformationBuilderFactory nodeInformationBuilderFactory;
@@ -196,7 +198,7 @@ public class ElasticsearchSearchEngineInformation
 			String connectionId = (String)properties.get("connectionId");
 
 			_addConnectionInformation(
-				elasticsearchConnectionManager.getElasticsearchConnection(
+				elasticsearchConnectionManagerImpl.getElasticsearchConnection(
 					connectionId),
 				connectionInformationList, null);
 		}
@@ -266,9 +268,10 @@ public class ElasticsearchSearchEngineInformation
 		String[] labels = {"read", "write"};
 
 		if (elasticsearchConfigurationWrapper.isProductionModeEnabled() &&
-			elasticsearchConnectionManager.isCrossClusterReplicationEnabled() &&
+			elasticsearchConnectionManagerImpl.
+				isCrossClusterReplicationEnabled() &&
 			!elasticsearchConnection.equals(
-				elasticsearchConnectionManager.getElasticsearchConnection(
+				elasticsearchConnectionManagerImpl.getElasticsearchConnection(
 					true))) {
 
 			labels = new String[] {"write"};

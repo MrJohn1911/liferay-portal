@@ -161,7 +161,7 @@ public class ElasticsearchSearchEngine
 		_waitForYellowStatus();
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManager.getRestHighLevelClient();
+			_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
 
 		boolean created = _indexFactory.createIndices(
 			restHighLevelClient.indices(), companyId);
@@ -224,7 +224,7 @@ public class ElasticsearchSearchEngine
 
 		try {
 			RestHighLevelClient restHighLevelClient =
-				_elasticsearchConnectionManager.getRestHighLevelClient();
+				_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
 
 			_indexFactory.deleteIndices(
 				restHighLevelClient.indices(), companyId);
@@ -397,7 +397,7 @@ public class ElasticsearchSearchEngine
 			XContentType.JSON);
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManager.getRestHighLevelClient();
+			_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
 
 		IngestClient ingestClient = restHighLevelClient.ingest();
 
@@ -485,7 +485,8 @@ public class ElasticsearchSearchEngine
 		_elasticsearchConfigurationWrapper;
 
 	@Reference
-	private ElasticsearchConnectionManagerImpl _elasticsearchConnectionManager;
+	private ElasticsearchConnectionManagerImpl
+		_elasticsearchConnectionManagerImpl;
 
 	@Reference
 	private IndexConfigurationDynamicUpdatesExecutor

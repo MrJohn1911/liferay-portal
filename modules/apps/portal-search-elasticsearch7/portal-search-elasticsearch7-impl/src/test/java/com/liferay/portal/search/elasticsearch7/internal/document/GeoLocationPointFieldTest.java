@@ -7,7 +7,7 @@ package com.liferay.portal.search.elasticsearch7.internal.document;
 
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.search.Field;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchClientResolver;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch7.internal.connection.helper.IndexCreationHelper;
 import com.liferay.portal.search.elasticsearch7.internal.indexing.ElasticsearchIndexingFixture;
 import com.liferay.portal.search.elasticsearch7.internal.indexing.LiferayElasticsearchIndexingFixtureFactory;
@@ -97,9 +97,9 @@ public class GeoLocationPointFieldTest extends BaseIndexingTestCase {
 		implements IndexCreationHelper {
 
 		public CustomFieldLiferayIndexCreationHelper(
-			ElasticsearchClientResolver elasticsearchClientResolver) {
+			ElasticsearchConnectionManager elasticsearchConnectionManager) {
 
-			_elasticsearchClientResolver = elasticsearchClientResolver;
+			_elasticsearchConnectionManager = elasticsearchConnectionManager;
 		}
 
 		@Override
@@ -123,7 +123,7 @@ public class GeoLocationPointFieldTest extends BaseIndexingTestCase {
 			putMappingRequest.source(source, XContentType.JSON);
 
 			RestHighLevelClient restHighLevelClient =
-				_elasticsearchClientResolver.getRestHighLevelClient();
+				_elasticsearchConnectionManager.getRestHighLevelClient();
 
 			IndicesClient indicesClient = restHighLevelClient.indices();
 
@@ -136,7 +136,8 @@ public class GeoLocationPointFieldTest extends BaseIndexingTestCase {
 			}
 		}
 
-		private final ElasticsearchClientResolver _elasticsearchClientResolver;
+		private final ElasticsearchConnectionManager
+			_elasticsearchConnectionManager;
 
 	}
 
