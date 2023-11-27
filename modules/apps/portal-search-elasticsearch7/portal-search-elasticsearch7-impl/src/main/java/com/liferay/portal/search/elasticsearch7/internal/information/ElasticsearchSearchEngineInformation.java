@@ -18,7 +18,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConnectionConfiguration;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnection;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.engine.ConnectionInformation;
 import com.liferay.portal.search.engine.ConnectionInformationBuilder;
 import com.liferay.portal.search.engine.ConnectionInformationBuilderFactory;
@@ -67,7 +67,7 @@ public class ElasticsearchSearchEngineInformation
 			new LinkedList<>();
 
 		ElasticsearchConnection elasticsearchConnection =
-			elasticsearchConnectionManagerImpl.getElasticsearchConnection();
+			elasticsearchConnectionManager.getElasticsearchConnection();
 
 		_addMainConnection(elasticsearchConnection, connectionInformationList);
 
@@ -88,11 +88,10 @@ public class ElasticsearchSearchEngineInformation
 		}
 
 		ElasticsearchConnection localClusterElasticsearchConnection =
-			elasticsearchConnectionManagerImpl.getElasticsearchConnection(true);
+			elasticsearchConnectionManager.getElasticsearchConnection(true);
 
 		if (elasticsearchConfigurationWrapper.isProductionModeEnabled() &&
-			elasticsearchConnectionManagerImpl.
-				isCrossClusterReplicationEnabled() &&
+			elasticsearchConnectionManager.isCrossClusterReplicationEnabled() &&
 			!elasticsearchConnection.equals(
 				localClusterElasticsearchConnection)) {
 
@@ -123,14 +122,14 @@ public class ElasticsearchSearchEngineInformation
 	public String getNodesString() {
 		try {
 			String clusterNodesString = _getClusterNodesString(
-				elasticsearchConnectionManagerImpl.getRestHighLevelClient());
+				elasticsearchConnectionManager.getRestHighLevelClient());
 
 			if (elasticsearchConfigurationWrapper.isProductionModeEnabled() &&
-				elasticsearchConnectionManagerImpl.
+				elasticsearchConnectionManager.
 					isCrossClusterReplicationEnabled()) {
 
 				String localClusterNodesString = _getClusterNodesString(
-					elasticsearchConnectionManagerImpl.getRestHighLevelClient(
+					elasticsearchConnectionManager.getRestHighLevelClient(
 						null, true));
 
 				if (!Validator.isBlank(localClusterNodesString)) {
@@ -170,8 +169,7 @@ public class ElasticsearchSearchEngineInformation
 		elasticsearchConfigurationWrapper;
 
 	@Reference
-	protected ElasticsearchConnectionManagerImpl
-		elasticsearchConnectionManagerImpl;
+	protected ElasticsearchConnectionManager elasticsearchConnectionManager;
 
 	@Reference
 	protected NodeInformationBuilderFactory nodeInformationBuilderFactory;
@@ -198,7 +196,7 @@ public class ElasticsearchSearchEngineInformation
 			String connectionId = (String)properties.get("connectionId");
 
 			_addConnectionInformation(
-				elasticsearchConnectionManagerImpl.getElasticsearchConnection(
+				elasticsearchConnectionManager.getElasticsearchConnection(
 					connectionId),
 				connectionInformationList, null);
 		}
@@ -268,10 +266,9 @@ public class ElasticsearchSearchEngineInformation
 		String[] labels = {"read", "write"};
 
 		if (elasticsearchConfigurationWrapper.isProductionModeEnabled() &&
-			elasticsearchConnectionManagerImpl.
-				isCrossClusterReplicationEnabled() &&
+			elasticsearchConnectionManager.isCrossClusterReplicationEnabled() &&
 			!elasticsearchConnection.equals(
-				elasticsearchConnectionManagerImpl.getElasticsearchConnection(
+				elasticsearchConnectionManager.getElasticsearchConnection(
 					true))) {
 
 			labels = new String[] {"write"};

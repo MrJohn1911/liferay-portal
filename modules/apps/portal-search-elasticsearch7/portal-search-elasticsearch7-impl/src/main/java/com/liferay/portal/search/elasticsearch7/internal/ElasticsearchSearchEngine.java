@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.version.Version;
 import com.liferay.portal.search.ccr.CrossClusterReplicationHelper;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationObserver;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
+import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch7.internal.index.IndexConfigurationDynamicUpdatesExecutor;
 import com.liferay.portal.search.elasticsearch7.internal.index.IndexFactory;
 import com.liferay.portal.search.engine.ConnectionInformation;
@@ -149,7 +149,7 @@ public class ElasticsearchSearchEngine
 		_waitForYellowStatus();
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
+			_elasticsearchConnectionManager.getRestHighLevelClient();
 
 		boolean created = _indexFactory.createIndices(
 			restHighLevelClient.indices(), companyId);
@@ -200,7 +200,7 @@ public class ElasticsearchSearchEngine
 
 		try {
 			RestHighLevelClient restHighLevelClient =
-				_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
+				_elasticsearchConnectionManager.getRestHighLevelClient();
 
 			_indexFactory.deleteIndices(
 				restHighLevelClient.indices(), companyId);
@@ -397,7 +397,7 @@ public class ElasticsearchSearchEngine
 			XContentType.JSON);
 
 		RestHighLevelClient restHighLevelClient =
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient();
+			_elasticsearchConnectionManager.getRestHighLevelClient();
 
 		IngestClient ingestClient = restHighLevelClient.ingest();
 
@@ -485,8 +485,7 @@ public class ElasticsearchSearchEngine
 		_elasticsearchConfigurationWrapper;
 
 	@Reference
-	private ElasticsearchConnectionManagerImpl
-		_elasticsearchConnectionManagerImpl;
+	private ElasticsearchConnectionManager _elasticsearchConnectionManager;
 
 	@Reference
 	private IndexConfigurationDynamicUpdatesExecutor

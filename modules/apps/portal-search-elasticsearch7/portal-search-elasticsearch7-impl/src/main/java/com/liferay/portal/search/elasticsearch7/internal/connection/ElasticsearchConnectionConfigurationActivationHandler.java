@@ -62,7 +62,7 @@ public class ElasticsearchConnectionConfigurationActivationHandler {
 			elasticsearchConnectionConfiguration.username()
 		);
 
-		elasticsearchConnectionManagerImpl.addElasticsearchConnection(
+		elasticsearchConnectionManager.addElasticsearchConnection(
 			elasticsearchConnectionBuilder.build());
 	}
 
@@ -86,8 +86,7 @@ public class ElasticsearchConnectionConfigurationActivationHandler {
 	}
 
 	@Reference
-	protected ElasticsearchConnectionManagerImpl
-		elasticsearchConnectionManagerImpl;
+	protected ElasticsearchConnectionManager elasticsearchConnectionManager;
 
 	@Reference
 	protected Http http;

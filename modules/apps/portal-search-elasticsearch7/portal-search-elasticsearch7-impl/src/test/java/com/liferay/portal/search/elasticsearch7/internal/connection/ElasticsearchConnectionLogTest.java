@@ -70,7 +70,7 @@ public class ElasticsearchConnectionLogTest {
 
 	@Test
 	public void testLogLevel() throws Exception {
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManagerImpl =
+		ElasticsearchConnectionManager elasticsearchConnectionManager =
 			new ElasticsearchConnectionManagerImpl() {
 				{
 					elasticsearchConfigurationWrapper =
@@ -78,7 +78,7 @@ public class ElasticsearchConnectionLogTest {
 				}
 			};
 
-		elasticsearchConnectionManagerImpl.applyConfigurations();
+		elasticsearchConnectionManager.applyConfigurations();
 
 		Mockito.verify(
 			_searchLogHelper
