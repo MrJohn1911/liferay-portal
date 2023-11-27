@@ -6,6 +6,7 @@
 package com.liferay.portal.search.elasticsearch7.internal.connection;
 
 import com.liferay.portal.kernel.module.util.SystemBundleUtil;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.search.elasticsearch7.configuration.RESTClientLoggerLevel;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
@@ -65,10 +66,12 @@ public class ElasticsearchConnectionManagerImplTest {
 
 	@Test
 	public void testActivateRemoteModeDisabled() {
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManager =
+		ElasticsearchConnectionManager elasticsearchConnectionManager =
 			Mockito.spy(_elasticsearchConnectionManager);
 
-		elasticsearchConnectionManager.activate(
+		ReflectionTestUtil.invoke(
+			elasticsearchConnectionManager, "activate",
+			new Class<?>[] {BundleContext.class},
 			SystemBundleUtil.getBundleContext());
 
 		Mockito.verify(
@@ -98,10 +101,12 @@ public class ElasticsearchConnectionManagerImplTest {
 			"test"
 		);
 
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManager =
+		ElasticsearchConnectionManager elasticsearchConnectionManager =
 			Mockito.spy(_elasticsearchConnectionManager);
 
-		elasticsearchConnectionManager.activate(
+		ReflectionTestUtil.invoke(
+			elasticsearchConnectionManager, "activate",
+			new Class<?>[] {BundleContext.class},
 			SystemBundleUtil.getBundleContext());
 
 		Mockito.verify(
@@ -137,10 +142,12 @@ public class ElasticsearchConnectionManagerImplTest {
 			new String[] {"http://localhost:9200"}
 		);
 
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManager =
+		ElasticsearchConnectionManager elasticsearchConnectionManager =
 			Mockito.spy(_elasticsearchConnectionManager);
 
-		elasticsearchConnectionManager.activate(
+		ReflectionTestUtil.invoke(
+			elasticsearchConnectionManager, "activate",
+			new Class<?>[] {BundleContext.class},
 			SystemBundleUtil.getBundleContext());
 
 		Mockito.verify(
@@ -573,14 +580,14 @@ public class ElasticsearchConnectionManagerImplTest {
 		_elasticsearchConnectionManager.removeElasticsearchConnection(null);
 	}
 
-	private ElasticsearchConnectionManagerImpl
+	private ElasticsearchConnectionManager
 		_createElasticsearchConnectionManager(
 			ElasticsearchConnection remoteElasticsearchConnection1,
 			ElasticsearchConnection remoteElasticsearchConnection2,
 			ElasticsearchConnection remoteElasticsearchConnection3,
 			ElasticsearchConnection sidecarElasticsearchConnection) {
 
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManager =
+		ElasticsearchConnectionManager elasticsearchConnectionManager =
 			new ElasticsearchConnectionManagerImpl() {
 				{
 					elasticsearchConfigurationWrapper =
@@ -598,7 +605,9 @@ public class ElasticsearchConnectionManagerImplTest {
 		elasticsearchConnectionManager.addElasticsearchConnection(
 			sidecarElasticsearchConnection);
 
-		elasticsearchConnectionManager.activate(
+		ReflectionTestUtil.invoke(
+			elasticsearchConnectionManager, "activate",
+			new Class<?>[] {BundleContext.class},
 			SystemBundleUtil.getBundleContext());
 
 		return elasticsearchConnectionManager;
@@ -772,7 +781,7 @@ public class ElasticsearchConnectionManagerImplTest {
 	private final ElasticsearchConfigurationWrapper
 		_elasticsearchConfigurationWrapper = Mockito.mock(
 			ElasticsearchConfigurationWrapper.class);
-	private ElasticsearchConnectionManagerImpl _elasticsearchConnectionManager;
+	private ElasticsearchConnectionManager _elasticsearchConnectionManager;
 	private final Http _http = Mockito.mock(Http.class);
 	private final ElasticsearchConnection _remoteElasticsearchConnection1 =
 		Mockito.mock(ElasticsearchConnection.class);

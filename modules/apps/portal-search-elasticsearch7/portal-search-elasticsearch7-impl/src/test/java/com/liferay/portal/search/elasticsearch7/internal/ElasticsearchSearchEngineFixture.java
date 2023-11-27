@@ -45,9 +45,7 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 		_elasticsearchConnectionFixture = elasticsearchConnectionFixture;
 	}
 
-	public ElasticsearchConnectionManagerImpl
-		getElasticsearchConnectionManager() {
-
+	public ElasticsearchConnectionManager getElasticsearchConnectionManager() {
 		return _elasticsearchConnectionManager;
 	}
 
@@ -74,7 +72,7 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 
 		_frameworkUtilMockedStatic = _createFrameworkUtil();
 
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManager =
+		ElasticsearchConnectionManager elasticsearchConnectionManager =
 			_createElasticsearchConnectionManager(
 				elasticsearchConnectionFixture);
 
@@ -165,7 +163,7 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 		return _companyIndexFactory;
 	}
 
-	private ElasticsearchConnectionManagerImpl
+	private ElasticsearchConnectionManager
 		_createElasticsearchConnectionManager(
 			ElasticsearchConnectionFixture elasticsearchConnectionFixture) {
 
@@ -189,8 +187,8 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 	}
 
 	private ElasticsearchSearchEngine _createElasticsearchSearchEngine(
-		ElasticsearchConnectionManager elasticsearchClientResolver,
-		ElasticsearchConnectionManagerImpl elasticsearchConnectionManager,
+		ElasticsearchConnectionManager elasticsearchConnectionManager,
+		ElasticsearchConnectionManager elasticsearchConnectionManager1,
 		IndexConfigurationDynamicUpdatesExecutor
 			indexConfigurationDynamicUpdatesExecutor,
 		IndexNameBuilder indexNameBuilder, Map<String, Object> properites) {
@@ -200,7 +198,7 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine, "_elasticsearchConnectionManager",
-			elasticsearchConnectionManager);
+			elasticsearchConnectionManager1);
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine,
 			"_indexConfigurationDynamicUpdatesExecutor",
@@ -213,7 +211,7 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 			(IndexNameBuilder)String::valueOf);
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine, "_searchEngineAdapter",
-			_createSearchEngineAdapter(elasticsearchClientResolver));
+			_createSearchEngineAdapter(elasticsearchConnectionManager));
 
 		return elasticsearchSearchEngine;
 	}
@@ -261,7 +259,7 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 	private CompanyIndexFactoryHelper _companyIndexFactoryHelper;
 	private final ElasticsearchConnectionFixture
 		_elasticsearchConnectionFixture;
-	private ElasticsearchConnectionManagerImpl _elasticsearchConnectionManager;
+	private ElasticsearchConnectionManager _elasticsearchConnectionManager;
 	private ElasticsearchEngineAdapterFixture
 		_elasticsearchEngineAdapterFixture;
 	private ElasticsearchSearchEngine _elasticsearchSearchEngine;
