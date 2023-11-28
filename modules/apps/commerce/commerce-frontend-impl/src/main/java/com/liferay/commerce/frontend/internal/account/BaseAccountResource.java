@@ -10,11 +10,11 @@ import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.commerce.frontend.internal.account.model.Account;
 import com.liferay.commerce.frontend.internal.account.model.AccountList;
 import com.liferay.commerce.util.CommerceAccountHelper;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.webserver.WebServerServletToken;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.osgi.service.component.annotations.Reference;
@@ -29,8 +29,6 @@ public abstract class BaseAccountResource {
 			String keywords, int page, int pageSize, String imagePath)
 		throws PortalException {
 
-		List<Account> accounts = new ArrayList<>();
-
 		int start = (page - 1) * pageSize;
 		int end = page * pageSize;
 
@@ -40,16 +38,13 @@ public abstract class BaseAccountResource {
 				commerceAccountHelper.toAccountEntryTypes(commerceSiteType),
 				commerceAccountHelper.toAccountEntryStatus(true), start, end);
 
-		for (AccountEntry accountEntry : userAccountEntries) {
-			accounts.add(
-				new Account(
+		return new AccountList(
+			TransformUtil.transform(
+				userAccountEntries,
+				accountEntry -> new Account(
 					String.valueOf(accountEntry.getAccountEntryId()),
 					accountEntry.getName(),
-					getLogoThumbnailSrc(accountEntry.getLogoId(), imagePath)));
-		}
-
-		return new AccountList(
-			accounts,
+					getLogoThumbnailSrc(accountEntry.getLogoId(), imagePath))),
 			_getAccountsCount(
 				userId, parentAccountId, commerceSiteType, keywords));
 	}
