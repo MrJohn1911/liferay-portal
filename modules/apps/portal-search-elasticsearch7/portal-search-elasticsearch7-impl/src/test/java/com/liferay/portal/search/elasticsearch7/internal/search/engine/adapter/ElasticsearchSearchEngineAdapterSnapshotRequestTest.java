@@ -299,7 +299,7 @@ public class ElasticsearchSearchEngineAdapterSnapshotRequestTest {
 		SnapshotRequestExecutorFixture snapshotRequestExecutorFixture =
 			new SnapshotRequestExecutorFixture() {
 				{
-					setElasticsearchClientResolver(
+					setElasticsearchConnectionManager(
 						elasticsearchConnectionManager);
 				}
 			};

@@ -43,7 +43,7 @@ public class SnapshotRequestExecutorFixture {
 		};
 	}
 
-	protected void setElasticsearchClientResolver(
+	protected void setElasticsearchConnectionManager(
 		ElasticsearchConnectionManager elasticsearchConnectionManager) {
 
 		_elasticsearchConnectionManager = elasticsearchConnectionManager;

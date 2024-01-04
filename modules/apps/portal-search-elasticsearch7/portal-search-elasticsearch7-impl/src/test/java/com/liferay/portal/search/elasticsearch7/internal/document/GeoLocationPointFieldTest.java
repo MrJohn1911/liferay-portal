@@ -64,7 +64,8 @@ public class GeoLocationPointFieldTest extends BaseIndexingTestCase {
 
 		elasticsearchIndexingFixture.setIndexCreationHelper(
 			new CustomFieldLiferayIndexCreationHelper(
-				elasticsearchIndexingFixture.getElasticsearchClientResolver()));
+				elasticsearchIndexingFixture.
+					getElasticsearchConnectionManager()));
 
 		return elasticsearchIndexingFixture;
 	}

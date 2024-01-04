@@ -193,7 +193,7 @@ public class SynonymFiltersTest {
 		IndexRequestExecutorFixture indexRequestExecutorFixture =
 			new IndexRequestExecutorFixture() {
 				{
-					setElasticsearchClientResolver(
+					setElasticsearchConnectionManager(
 						elasticsearchConnectionManager);
 				}
 			};

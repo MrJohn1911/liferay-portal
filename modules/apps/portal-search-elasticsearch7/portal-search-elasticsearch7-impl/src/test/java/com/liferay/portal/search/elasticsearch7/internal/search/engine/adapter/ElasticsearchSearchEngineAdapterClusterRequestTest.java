@@ -153,7 +153,7 @@ public class ElasticsearchSearchEngineAdapterClusterRequestTest {
 		ClusterRequestExecutorFixture clusterRequestExecutorFixture =
 			new ClusterRequestExecutorFixture() {
 				{
-					setElasticsearchClientResolver(
+					setElasticsearchConnectionManager(
 						elasticsearchConnectionManager);
 				}
 			};

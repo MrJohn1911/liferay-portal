@@ -76,7 +76,7 @@ public class IndexCreator {
 		}
 	}
 
-	protected void setElasticsearchClientResolver(
+	protected void setElasticsearchConnectionManager(
 		ElasticsearchConnectionManager elasticsearchConnectionManager) {
 
 		_elasticsearchConnectionManager = elasticsearchConnectionManager;

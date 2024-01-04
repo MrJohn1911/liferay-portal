@@ -87,7 +87,7 @@ public class IndexRequestExecutorFixture {
 				_elasticsearchConnectionManager, indicesOptionsTranslator));
 	}
 
-	protected void setElasticsearchClientResolver(
+	protected void setElasticsearchConnectionManager(
 		ElasticsearchConnectionManager elasticsearchConnectionManager) {
 
 		_elasticsearchConnectionManager = elasticsearchConnectionManager;

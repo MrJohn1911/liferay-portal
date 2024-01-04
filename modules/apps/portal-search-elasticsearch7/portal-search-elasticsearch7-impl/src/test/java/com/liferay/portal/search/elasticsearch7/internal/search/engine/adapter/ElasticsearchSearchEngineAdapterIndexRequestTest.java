@@ -550,7 +550,7 @@ public class ElasticsearchSearchEngineAdapterIndexRequestTest {
 		IndexRequestExecutorFixture indexRequestExecutorFixture =
 			new IndexRequestExecutorFixture() {
 				{
-					setElasticsearchClientResolver(
+					setElasticsearchConnectionManager(
 						elasticsearchConnectionManager);
 				}
 			};

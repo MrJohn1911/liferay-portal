@@ -66,7 +66,7 @@ public class ElasticsearchSearchEngineAdapterLoggingTest {
 		_elasticsearchEngineAdapterFixture =
 			new ElasticsearchEngineAdapterFixture() {
 				{
-					setElasticsearchClientResolver(
+					setElasticsearchConnectionManager(
 						_elasticsearchConnectionFixture);
 				}
 			};

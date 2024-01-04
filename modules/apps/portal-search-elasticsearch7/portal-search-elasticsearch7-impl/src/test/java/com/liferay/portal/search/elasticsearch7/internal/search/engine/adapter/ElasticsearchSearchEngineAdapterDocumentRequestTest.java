@@ -611,7 +611,7 @@ public class ElasticsearchSearchEngineAdapterDocumentRequestTest {
 		DocumentRequestExecutorFixture documentRequestExecutorFixture =
 			new DocumentRequestExecutorFixture() {
 				{
-					setElasticsearchClientResolver(
+					setElasticsearchConnectionManager(
 						elasticsearchConnectionManager);
 					setElasticsearchDocumentFactory(
 						elasticsearchDocumentFactory);

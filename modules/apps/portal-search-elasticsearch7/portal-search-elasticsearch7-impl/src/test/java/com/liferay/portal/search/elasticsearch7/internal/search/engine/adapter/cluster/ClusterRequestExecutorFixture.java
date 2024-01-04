@@ -41,7 +41,7 @@ public class ClusterRequestExecutorFixture {
 				_elasticsearchConnectionManager));
 	}
 
-	protected void setElasticsearchClientResolver(
+	protected void setElasticsearchConnectionManager(
 		ElasticsearchConnectionManager elasticsearchConnectionManager) {
 
 		_elasticsearchConnectionManager = elasticsearchConnectionManager;

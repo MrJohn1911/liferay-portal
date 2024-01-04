@@ -418,7 +418,8 @@ public class ElasticsearchSearchEngineAdapterSearchRequestTest {
 
 		_searchRequestExecutorFixture = new SearchRequestExecutorFixture() {
 			{
-				setElasticsearchClientResolver(elasticsearchConnectionManager);
+				setElasticsearchConnectionManager(
+					elasticsearchConnectionManager);
 			}
 		};
 

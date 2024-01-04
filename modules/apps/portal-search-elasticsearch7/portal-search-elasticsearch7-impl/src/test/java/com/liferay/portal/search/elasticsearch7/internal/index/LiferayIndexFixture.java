@@ -31,7 +31,7 @@ public class LiferayIndexFixture {
 
 		_indexCreator = new IndexCreator() {
 			{
-				setElasticsearchClientResolver(elasticsearchFixture);
+				setElasticsearchConnectionManager(elasticsearchFixture);
 				setLiferayMappingsAddedToIndex(true);
 			}
 		};

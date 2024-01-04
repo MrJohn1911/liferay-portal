@@ -29,7 +29,7 @@ public class DocumentRequestExecutorFixture {
 			_elasticsearchConnectionManager, _elasticsearchDocumentFactory);
 	}
 
-	protected void setElasticsearchClientResolver(
+	protected void setElasticsearchConnectionManager(
 		ElasticsearchConnectionManager elasticsearchConnectionManager) {
 
 		_elasticsearchConnectionManager = elasticsearchConnectionManager;

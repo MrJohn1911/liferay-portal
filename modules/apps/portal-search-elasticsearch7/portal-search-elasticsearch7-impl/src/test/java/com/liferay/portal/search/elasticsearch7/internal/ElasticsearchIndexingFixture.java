@@ -52,7 +52,7 @@ public class ElasticsearchIndexingFixture implements IndexingFixture {
 		return _companyId;
 	}
 
-	public ElasticsearchConnectionManager getElasticsearchClientResolver() {
+	public ElasticsearchConnectionManager getElasticsearchConnectionManager() {
 		return _elasticsearchFixture;
 	}
 
@@ -158,7 +158,8 @@ public class ElasticsearchIndexingFixture implements IndexingFixture {
 
 		return new ElasticsearchEngineAdapterFixture() {
 			{
-				setElasticsearchClientResolver(elasticsearchConnectionManager);
+				setElasticsearchConnectionManager(
+					elasticsearchConnectionManager);
 				setFacetProcessor(facetProcessor);
 			}
 		};
@@ -211,7 +212,7 @@ public class ElasticsearchIndexingFixture implements IndexingFixture {
 	private void _createIndex(IndexNameBuilder indexNameBuilder) {
 		IndexCreator indexCreator = new IndexCreator() {
 			{
-				setElasticsearchClientResolver(_elasticsearchFixture);
+				setElasticsearchConnectionManager(_elasticsearchFixture);
 				setIndexCreationHelper(_indexCreationHelper);
 				setLiferayMappingsAddedToIndex(_liferayMappingsAddedToIndex);
 			}
