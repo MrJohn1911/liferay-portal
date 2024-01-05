@@ -31,6 +31,8 @@ public class JavaScriptAwarePortalWebResourcesCleaner {
 	protected void activate(BundleContext bundleContext)
 		throws InvalidSyntaxException {
 
+		System.out.println("teste");
+
 		_serviceListener = serviceEvent -> {
 			ServiceReference<?> serviceReference =
 				serviceEvent.getServiceReference();
