@@ -72,13 +72,11 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 
 		_frameworkUtilMockedStatic = _createFrameworkUtil();
 
-		ElasticsearchConnectionManager elasticsearchConnectionManager =
-			_createElasticsearchConnectionManager(
-				elasticsearchConnectionFixture);
+		_elasticsearchConnectionManager = _createElasticsearchConnectionManager(
+			elasticsearchConnectionFixture);
 
-		_elasticsearchConnectionManager = elasticsearchConnectionManager;
 		_elasticsearchSearchEngine = _createElasticsearchSearchEngine(
-			elasticsearchConnectionFixture, elasticsearchConnectionManager,
+			_elasticsearchConnectionManager,
 			Mockito.mock(IndexConfigurationDynamicUpdatesExecutor.class),
 			indexNameBuilder,
 			elasticsearchConnectionFixture.
@@ -188,24 +186,23 @@ public class ElasticsearchSearchEngineFixture implements SearchEngineFixture {
 
 	private ElasticsearchSearchEngine _createElasticsearchSearchEngine(
 		ElasticsearchConnectionManager elasticsearchConnectionManager,
-		ElasticsearchConnectionManager elasticsearchConnectionManager1,
 		IndexConfigurationDynamicUpdatesExecutor
 			indexConfigurationDynamicUpdatesExecutor,
-		IndexNameBuilder indexNameBuilder, Map<String, Object> properites) {
+		IndexNameBuilder indexNameBuilder, Map<String, Object> properties) {
 
 		ElasticsearchSearchEngine elasticsearchSearchEngine =
 			new ElasticsearchSearchEngine();
 
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine, "_elasticsearchConnectionManager",
-			elasticsearchConnectionManager1);
+			elasticsearchConnectionManager);
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine,
 			"_indexConfigurationDynamicUpdatesExecutor",
 			indexConfigurationDynamicUpdatesExecutor);
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine, "_indexFactory",
-			_createCompanyIndexFactory(indexNameBuilder, properites));
+			_createCompanyIndexFactory(indexNameBuilder, properties));
 		ReflectionTestUtil.setFieldValue(
 			elasticsearchSearchEngine, "_indexNameBuilder",
 			(IndexNameBuilder)String::valueOf);
