@@ -12,8 +12,6 @@ import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManagerImpl;
-import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionNotInitializedException;
 import com.liferay.portal.search.elasticsearch7.internal.connection.IndexName;
 import com.liferay.portal.search.index.IndexNameBuilder;
 
@@ -40,15 +38,6 @@ public class CompanyIndexFactoryFixture {
 		_indexName = indexName;
 
 		_frameworkUtilMockedStatic = _createFrameworkUtil();
-
-		_elasticsearchConnectionManagerImpl = Mockito.mock(
-			ElasticsearchConnectionManagerImpl.class);
-
-		Mockito.when(
-			_elasticsearchConnectionManagerImpl.getRestHighLevelClient()
-		).thenThrow(
-			ElasticsearchConnectionNotInitializedException.class
-		);
 	}
 
 	public void createIndices() {
@@ -111,7 +100,7 @@ public class CompanyIndexFactoryFixture {
 			createElasticsearchConfigurationWrapper());
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactoryHelper, "_elasticsearchConnectionManager",
-			_elasticsearchConnectionManagerImpl);
+			_elasticsearchConnectionManager);
 		ReflectionTestUtil.setFieldValue(
 			_companyIndexFactoryHelper, "_indexNameBuilder",
 			new TestIndexNameBuilder());
@@ -192,8 +181,6 @@ public class CompanyIndexFactoryFixture {
 	private CompanyIndexFactoryHelper _companyIndexFactoryHelper;
 	private final ElasticsearchConnectionManager
 		_elasticsearchConnectionManager;
-	private final ElasticsearchConnectionManagerImpl
-		_elasticsearchConnectionManagerImpl;
 	private MockedStatic<FrameworkUtil> _frameworkUtilMockedStatic;
 	private final String _indexName;
 
