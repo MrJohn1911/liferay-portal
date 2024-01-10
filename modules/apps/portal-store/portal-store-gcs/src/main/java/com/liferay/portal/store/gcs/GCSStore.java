@@ -16,7 +16,6 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
-import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageBatch;
 import com.google.cloud.storage.StorageBatchResult;
@@ -26,7 +25,6 @@ import com.google.cloud.storage.StorageOptions;
 import com.liferay.document.library.kernel.exception.NoSuchFileException;
 import com.liferay.document.library.kernel.store.Store;
 import com.liferay.document.library.kernel.store.StoreArea;
-import com.liferay.document.library.kernel.store.StoreAreaProcessor;
 import com.liferay.document.library.kernel.util.comparator.VersionNumberComparator;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.io.StreamUtil;
@@ -35,7 +33,6 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -48,15 +45,11 @@ import java.io.InputStream;
 
 import java.nio.channels.Channels;
 
-import java.time.Instant;
-import java.time.temporal.TemporalAmount;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -74,9 +67,9 @@ import org.threeten.bp.Duration;
 	configurationPid = "com.liferay.portal.store.gcs.configuration.GCSStoreConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
 	property = "store.type=com.liferay.portal.store.gcs.GCSStore",
-	service = {Store.class, StoreAreaProcessor.class}
+	service = Store.class
 )
-public class GCSStore implements Store, StoreAreaProcessor {
+public class GCSStore implements Store {
 
 	@Override
 	public void addFile(
@@ -105,111 +98,13 @@ public class GCSStore implements Store, StoreAreaProcessor {
 	}
 
 	@Override
-	public String cleanUpDeletedStoreArea(
-		long companyId, int deletionQuota, Predicate<String> predicate,
-		String startOffset, TemporalAmount temporalAmount) {
-
-		return _processStoreArea(
-			companyId, deletionQuota, blob -> predicate.test(blob.getName()),
-			startOffset, StoreArea.DELETED, temporalAmount);
-	}
-
-	@Override
-	public String cleanUpNewStoreArea(
-		long companyId, int evictionQuota, Predicate<String> predicate,
-		String startOffset, TemporalAmount temporalAmount) {
-
-		return _processStoreArea(
-			companyId, evictionQuota,
-			blob -> {
-				if (predicate.test(blob.getName())) {
-					return copy(
-						blob.getName(),
-						StoreArea.NEW.relocate(
-							blob.getName(), StoreArea.DELETED));
-				}
-
-				return copy(
-					blob.getName(),
-					StoreArea.NEW.relocate(blob.getName(), StoreArea.LIVE));
-			},
-			startOffset, StoreArea.NEW, temporalAmount);
-	}
-
-	@Override
-	public boolean copy(String sourceFileName, String destinationFileName) {
-		try {
-			if (!FeatureFlagManagerUtil.isEnabled("LPS-174816")) {
-				return true;
-			}
-
-			CopyWriter copyWriter = _gcsStore.copy(
-				Storage.CopyRequest.newBuilder(
-				).setSource(
-					_gcsStoreConfiguration.bucketName(), sourceFileName
-				).setTarget(
-					BlobId.of(
-						_gcsStoreConfiguration.bucketName(),
-						destinationFileName)
-				).build());
-
-			while (!copyWriter.isDone()) {
-				copyWriter.copyChunk();
-			}
-
-			return true;
-		}
-		catch (StorageException storageException) {
-			if (_log.isInfoEnabled()) {
-				_log.info(storageException);
-			}
-
-			return false;
-		}
-	}
-
-	@Override
-	public boolean copyDirectory(
-		long companyId, long repositoryId, String dirName,
-		StoreArea[] sourceStoreAreas, StoreArea destinationStoreArea) {
-
-		try {
-			if (!FeatureFlagManagerUtil.isEnabled("LPS-174816")) {
-				return true;
-			}
-
-			for (StoreArea sourceStoreArea : sourceStoreAreas) {
-				String[] filePaths = StoreArea.withStoreArea(
-					sourceStoreArea,
-					() -> _getFilePaths(companyId, repositoryId, dirName));
-
-				for (String filePath : filePaths) {
-					copy(
-						filePath,
-						sourceStoreArea.relocate(
-							filePath, destinationStoreArea));
-				}
-			}
-
-			return true;
-		}
-		catch (StorageException storageException) {
-			if (_log.isInfoEnabled()) {
-				_log.info(storageException);
-			}
-
-			return false;
-		}
-	}
-
-	@Override
 	public void deleteDirectory(
 		long companyId, long repositoryId, String dirName) {
 
 		String path = _getDirectoryKey(companyId, repositoryId, dirName);
 
 		try {
-			Page<Blob> blobPage = _gcsStore.list(
+			Page<Blob> blobPage = _gcsStorage.list(
 				_gcsStoreConfiguration.bucketName(),
 				Storage.BlobListOption.pageSize(_PAGE_SIZE),
 				Storage.BlobListOption.prefix(path));
@@ -218,7 +113,7 @@ public class GCSStore implements Store, StoreAreaProcessor {
 
 			List<StorageBatchResult<Boolean>> results = new ArrayList<>();
 
-			StorageBatch storageBatch = _gcsStore.batch();
+			StorageBatch storageBatch = _gcsStorage.batch();
 
 			try {
 				blobs.forEach(
@@ -252,7 +147,7 @@ public class GCSStore implements Store, StoreAreaProcessor {
 		long companyId, long repositoryId, String fileName,
 		String versionLabel) {
 
-		_gcsStore.delete(
+		_gcsStorage.delete(
 			BlobId.of(
 				_gcsStoreConfiguration.bucketName(),
 				_getHeadVersionLabel(
@@ -265,7 +160,7 @@ public class GCSStore implements Store, StoreAreaProcessor {
 			String versionLabel)
 		throws NoSuchFileException {
 
-		Blob blob = _gcsStore.get(
+		Blob blob = _gcsStorage.get(
 			BlobId.of(
 				_gcsStoreConfiguration.bucketName(),
 				_getHeadVersionLabel(
@@ -288,7 +183,9 @@ public class GCSStore implements Store, StoreAreaProcessor {
 				StringPool.SLASH;
 
 		return TransformUtil.transform(
-			_getFilePaths(companyId, repositoryId, dirName),
+			getFilePaths(
+				_gcsStorage.get(_gcsStoreConfiguration.bucketName()), companyId,
+				repositoryId, dirName),
 			filePath -> filePath.substring(
 				filePath.indexOf(prefix) + prefix.length(),
 				filePath.lastIndexOf(StringPool.SLASH)),
@@ -304,7 +201,7 @@ public class GCSStore implements Store, StoreAreaProcessor {
 		String headVersionLabel = _getHeadVersionLabel(
 			companyId, repositoryId, fileName, versionLabel);
 
-		Blob blob = _gcsStore.get(
+		Blob blob = _gcsStorage.get(
 			BlobId.of(_gcsStoreConfiguration.bucketName(), headVersionLabel));
 
 		if (blob == null) {
@@ -320,7 +217,9 @@ public class GCSStore implements Store, StoreAreaProcessor {
 		long companyId, long repositoryId, String fileName) {
 
 		return TransformUtil.transform(
-			_getFilePaths(companyId, repositoryId, fileName),
+			getFilePaths(
+				_gcsStorage.get(_gcsStoreConfiguration.bucketName()), companyId,
+				repositoryId, fileName),
 			path -> {
 				String[] parts = StringUtil.split(path, CharPool.SLASH);
 
@@ -337,7 +236,7 @@ public class GCSStore implements Store, StoreAreaProcessor {
 		String path = _getFileVersionKey(
 			companyId, repositoryId, fileName, versionLabel);
 
-		Page<Blob> blobPage = _gcsStore.list(
+		Page<Blob> blobPage = _gcsStorage.list(
 			_gcsStoreConfiguration.bucketName(),
 			Storage.BlobListOption.pageSize(1),
 			Storage.BlobListOption.prefix(path));
@@ -358,12 +257,46 @@ public class GCSStore implements Store, StoreAreaProcessor {
 
 			_initEncryption();
 
-			_initGCSStore();
+			_initGCSStore(_gcsStoreConfiguration);
 		}
 		catch (PortalException portalException) {
 			throw new IllegalStateException(
 				"Unable to initialize GCS store", portalException);
 		}
+	}
+
+	protected String[] getFilePaths(
+		Bucket bucket, long companyId, long repositoryId, String dirName) {
+
+		List<String> filePaths = new ArrayList<>();
+
+		String path = null;
+
+		if (Validator.isNull(dirName) ||
+			dirName.equals(StringPool.FORWARD_SLASH)) {
+
+			path = StoreArea.getCurrentStoreAreaPath(companyId, repositoryId);
+		}
+		else {
+			path = StoreArea.getCurrentStoreAreaPath(
+				companyId, repositoryId, dirName);
+		}
+
+		Page<Blob> blobPage = bucket.list(Storage.BlobListOption.prefix(path));
+
+		Iterable<Blob> blobs = blobPage.iterateAll();
+
+		blobs.forEach(blob -> filePaths.add(blob.getName()));
+
+		return filePaths.toArray(new String[0]);
+	}
+
+	protected Storage getGcsStorage() {
+		return _gcsStorage;
+	}
+
+	protected GCSStoreConfiguration getGcsStoreConfiguration() {
+		return _gcsStoreConfiguration;
 	}
 
 	private StorageBatchResult<Boolean> _deleteBlob(
@@ -400,33 +333,6 @@ public class GCSStore implements Store, StoreAreaProcessor {
 			companyId, repositoryId, fileName);
 	}
 
-	private String[] _getFilePaths(
-		long companyId, long repositoryId, String dirName) {
-
-		List<String> filePaths = new ArrayList<>();
-
-		Bucket bucket = _gcsStore.get(_gcsStoreConfiguration.bucketName());
-
-		String path = null;
-
-		if (Validator.isNull(dirName) ||
-			dirName.equals(StringPool.FORWARD_SLASH)) {
-
-			path = _getRepositoryKey(companyId, repositoryId);
-		}
-		else {
-			path = _getDirectoryKey(companyId, repositoryId, dirName);
-		}
-
-		Page<Blob> blobPage = bucket.list(Storage.BlobListOption.prefix(path));
-
-		Iterable<Blob> blobs = blobPage.iterateAll();
-
-		blobs.forEach(blob -> filePaths.add(blob.getName()));
-
-		return filePaths.toArray(new String[0]);
-	}
-
 	private String _getFileVersionKey(
 		long companyId, long repositoryId, String fileName,
 		String versionLabel) {
@@ -446,7 +352,9 @@ public class GCSStore implements Store, StoreAreaProcessor {
 
 		String path = _getFileKey(companyId, repositoryId, fileName);
 
-		String[] fileNames = _getFilePaths(companyId, repositoryId, path);
+		String[] fileNames = getFilePaths(
+			_gcsStorage.get(_gcsStoreConfiguration.bucketName()), companyId,
+			repositoryId, path);
 
 		if ((fileNames == null) || (fileNames.length == 0)) {
 			if (_log.isDebugEnabled()) {
@@ -472,16 +380,12 @@ public class GCSStore implements Store, StoreAreaProcessor {
 		return blob.reader(_decryptBlobBlobSourceOption);
 	}
 
-	private String _getRepositoryKey(long companyId, long repositoryId) {
-		return StoreArea.getCurrentStoreAreaPath(companyId, repositoryId);
-	}
-
 	private WriteChannel _getWriteChannel(BlobInfo blobInfo) {
 		if (_encryptStorageBlobWriteOption == null) {
-			return _gcsStore.writer(blobInfo);
+			return _gcsStorage.writer(blobInfo);
 		}
 
-		return _gcsStore.writer(blobInfo, _encryptStorageBlobWriteOption);
+		return _gcsStorage.writer(blobInfo, _encryptStorageBlobWriteOption);
 	}
 
 	private void _initEncryption() {
@@ -508,8 +412,12 @@ public class GCSStore implements Store, StoreAreaProcessor {
 		}
 	}
 
-	private void _initGCSStore() throws PortalException {
-		String serviceAccountKey = _gcsStoreConfiguration.serviceAccountKey();
+	private void _initGCSStore(GCSStoreConfiguration gcsStoreConfiguration)
+		throws PortalException {
+
+		String serviceAccountKey = gcsStoreConfiguration.serviceAccountKey();
+
+		GoogleCredentials googleCredentials;
 
 		try {
 			if (Validator.isBlank(serviceAccountKey)) {
@@ -519,11 +427,11 @@ public class GCSStore implements Store, StoreAreaProcessor {
 							"service account key was not set");
 				}
 
-				_googleCredentials =
+				googleCredentials =
 					ServiceAccountCredentials.getApplicationDefault();
 			}
 			else {
-				_googleCredentials = ServiceAccountCredentials.fromStream(
+				googleCredentials = ServiceAccountCredentials.fromStream(
 					new ByteArrayInputStream(serviceAccountKey.getBytes()));
 			}
 		}
@@ -534,105 +442,30 @@ public class GCSStore implements Store, StoreAreaProcessor {
 
 		StorageOptions storageOptions = StorageOptions.newBuilder(
 		).setCredentials(
-			_googleCredentials
+			googleCredentials
 		).setRetrySettings(
 			RetrySettings.newBuilder(
 			).setInitialRetryDelay(
-				Duration.ofMillis(_gcsStoreConfiguration.initialRetryDelay())
+				Duration.ofMillis(gcsStoreConfiguration.initialRetryDelay())
 			).setInitialRpcTimeout(
-				Duration.ofMillis(_gcsStoreConfiguration.initialRPCTimeout())
+				Duration.ofMillis(gcsStoreConfiguration.initialRPCTimeout())
 			).setJittered(
-				_gcsStoreConfiguration.retryJitter()
+				gcsStoreConfiguration.retryJitter()
 			).setMaxAttempts(
-				_gcsStoreConfiguration.maxRetryAttempts()
+				gcsStoreConfiguration.maxRetryAttempts()
 			).setMaxRetryDelay(
-				Duration.ofMillis(_gcsStoreConfiguration.maxRetryDelay())
+				Duration.ofMillis(gcsStoreConfiguration.maxRetryDelay())
 			).setMaxRpcTimeout(
-				Duration.ofMillis(_gcsStoreConfiguration.maxRPCTimeout())
+				Duration.ofMillis(gcsStoreConfiguration.maxRPCTimeout())
 			).setRetryDelayMultiplier(
-				_gcsStoreConfiguration.retryDelayMultiplier()
+				gcsStoreConfiguration.retryDelayMultiplier()
 			).setRpcTimeoutMultiplier(
-				_gcsStoreConfiguration.rpcTimeoutMultiplier()
+				gcsStoreConfiguration.rpcTimeoutMultiplier()
 			).build()
 		).build();
 
-		_gcsStore = storageOptions.getService();
+		_gcsStorage = storageOptions.getService();
 	}
-
-	private String _processStoreArea(
-		long companyId, int evictionQuota, Predicate<Blob> predicate,
-		String startOffset, StoreArea storeArea,
-		TemporalAmount temporalAmount) {
-
-		if (!FeatureFlagManagerUtil.isEnabled("LPS-174816")) {
-			return StringPool.BLANK;
-		}
-
-		Bucket bucket = _gcsStore.get(_gcsStoreConfiguration.bucketName());
-		int evictedBlobQuota = Math.max(evictionQuota, 1);
-		int evictedBlobsCount = 0;
-		Instant instant = Instant.now();
-		String lastVisitedBlobName = startOffset;
-		StorageBatch storageBatch = _gcsStore.batch();
-
-		int pageSize = Math.max(evictedBlobQuota * 2, 10);
-		int visitedPageLimit = Math.max(evictedBlobQuota / 10, 10);
-
-		while ((evictedBlobQuota > 0) && (visitedPageLimit > 0)) {
-			boolean emptyPage = true;
-
-			Page<Blob> blobPage = bucket.list(
-				Storage.BlobListOption.fields(
-					Storage.BlobField.ID, Storage.BlobField.NAME,
-					Storage.BlobField.UPDATED),
-				Storage.BlobListOption.pageSize(pageSize),
-				Storage.BlobListOption.prefix(storeArea.getPath(companyId)),
-				Storage.BlobListOption.startOffset(lastVisitedBlobName));
-
-			for (Blob blob : blobPage.getValues()) {
-				Instant updateTimeInstant = Instant.ofEpochMilli(
-					blob.getUpdateTime());
-
-				Instant evictionInstant = updateTimeInstant.plus(
-					temporalAmount);
-
-				if (evictionInstant.isBefore(instant) && predicate.test(blob)) {
-					storageBatch.delete(blob.getBlobId());
-
-					evictedBlobQuota--;
-					evictedBlobsCount++;
-				}
-
-				emptyPage = false;
-
-				lastVisitedBlobName = blob.getName();
-			}
-
-			if (evictedBlobsCount >= _EVICTED_BATCH_SIZE) {
-				storageBatch.submit();
-
-				evictedBlobsCount = 0;
-
-				storageBatch = _gcsStore.batch();
-			}
-
-			if (emptyPage) {
-				lastVisitedBlobName = StringPool.BLANK;
-
-				break;
-			}
-
-			visitedPageLimit--;
-		}
-
-		if (evictedBlobsCount > 0) {
-			storageBatch.submit();
-		}
-
-		return lastVisitedBlobName;
-	}
-
-	private static final int _EVICTED_BATCH_SIZE = 10;
 
 	private static final long _PAGE_SIZE = 50L;
 
@@ -642,8 +475,7 @@ public class GCSStore implements Store, StoreAreaProcessor {
 	private Blob.BlobSourceOption _decryptBlobBlobSourceOption;
 	private Storage.BlobSourceOption _decryptStorageBlobSourceOption;
 	private Storage.BlobWriteOption _encryptStorageBlobWriteOption;
-	private Storage _gcsStore;
+	private Storage _gcsStorage;
 	private volatile GCSStoreConfiguration _gcsStoreConfiguration;
-	private GoogleCredentials _googleCredentials;
 
 }
