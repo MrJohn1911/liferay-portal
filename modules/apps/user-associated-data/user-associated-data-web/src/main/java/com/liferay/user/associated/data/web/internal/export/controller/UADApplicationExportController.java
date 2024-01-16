@@ -7,9 +7,13 @@ package com.liferay.user.associated.data.web.internal.export.controller;
 
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageSender;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
+import com.liferay.portal.kernel.backgroundtask.constants.BackgroundTaskConstants;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.SystemProperties;
@@ -20,7 +24,6 @@ import com.liferay.portal.kernel.zip.ZipWriter;
 import com.liferay.portal.kernel.zip.ZipWriterFactory;
 import com.liferay.user.associated.data.display.UADDisplay;
 import com.liferay.user.associated.data.exporter.UADExporter;
-import com.liferay.user.associated.data.web.internal.export.background.task.UADExportBackgroundTaskStatusMessageSender;
 import com.liferay.user.associated.data.web.internal.registry.UADRegistry;
 
 import java.io.File;
@@ -43,7 +46,7 @@ public class UADApplicationExportController {
 
 	public File export(String applicationKey, long userId) throws Exception {
 		try {
-			_uadExportBackgroundTaskStatusMessageSender.sendStatusMessage(
+			_sendStatusMessage(
 				"application", applicationKey,
 				_getApplicationDataCount(applicationKey, userId));
 
@@ -79,8 +82,7 @@ public class UADApplicationExportController {
 								applicationKey, uadRegistryKey, entry),
 							zipReader.getEntryAsInputStream(entry));
 
-						_uadExportBackgroundTaskStatusMessageSender.
-							sendStatusMessage("entity", uadRegistryKey);
+						_sendStatusMessage("entity", uadRegistryKey);
 					}
 				}
 				catch (IOException ioException) {
@@ -172,12 +174,41 @@ public class UADApplicationExportController {
 					StringPool.SLASH + fileName));
 	}
 
+	private void _sendStatusMessage(String messageType, String entityName) {
+		Message message = new Message();
+
+		message.put(
+			BackgroundTaskConstants.BACKGROUND_TASK_ID,
+			BackgroundTaskThreadLocal.getBackgroundTaskId());
+		message.put("entityName", entityName);
+		message.put("messageType", messageType);
+
+		_backgroundTaskStatusMessageSender.sendBackgroundTaskStatusMessage(
+			message);
+	}
+
+	private void _sendStatusMessage(
+		String messageType, String applicationKey, long total) {
+
+		Message message = new Message();
+
+		message.put(
+			BackgroundTaskConstants.BACKGROUND_TASK_ID,
+			BackgroundTaskThreadLocal.getBackgroundTaskId());
+		message.put("applicationDataTotal", total);
+		message.put("applicationKey", applicationKey);
+		message.put("messageType", messageType);
+
+		_backgroundTaskStatusMessageSender.sendBackgroundTaskStatusMessage(
+			message);
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		UADApplicationExportController.class);
 
 	@Reference
-	private UADExportBackgroundTaskStatusMessageSender
-		_uadExportBackgroundTaskStatusMessageSender;
+	private BackgroundTaskStatusMessageSender
+		_backgroundTaskStatusMessageSender;
 
 	@Reference
 	private UADRegistry _uadRegistry;
