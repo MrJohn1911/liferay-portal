@@ -3,32 +3,30 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.user.associated.data.web.internal.helper;
+package com.liferay.user.associated.data.web.internal.util;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.user.associated.data.anonymizer.UADAnonymousUserProvider;
 
 import java.util.Objects;
 
 import javax.portlet.PortletRequest;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
 /**
  * @author Drew Brokke
  */
-@Component(service = SelectedUserHelper.class)
-public class SelectedUserHelper {
+public class SelectedUserUtil {
 
-	public User getSelectedUser(PortletRequest portletRequest)
+	public static User getSelectedUser(
+			PortletRequest portletRequest,
+			UADAnonymousUserProvider uadAnonymousUserProvider)
 		throws PortalException {
 
-		User selectedUser = portal.getSelectedUser(portletRequest);
+		User selectedUser = PortalUtil.getSelectedUser(portletRequest);
 
-		if (Objects.equals(portal.getUser(portletRequest), selectedUser)) {
+		if (Objects.equals(PortalUtil.getUser(portletRequest), selectedUser)) {
 			throw new PortalException(
 				"The selected user cannot be the logged in user");
 		}
@@ -41,18 +39,15 @@ public class SelectedUserHelper {
 		return selectedUser;
 	}
 
-	public long getSelectedUserId(PortletRequest portletRequest)
+	public static long getSelectedUserId(
+			PortletRequest portletRequest,
+			UADAnonymousUserProvider uadAnonymousUserProvider)
 		throws PortalException {
 
-		User selectedUser = getSelectedUser(portletRequest);
+		User selectedUser = getSelectedUser(
+			portletRequest, uadAnonymousUserProvider);
 
 		return selectedUser.getUserId();
 	}
-
-	@Reference
-	protected Portal portal;
-
-	@Reference
-	protected UADAnonymousUserProvider uadAnonymousUserProvider;
 
 }

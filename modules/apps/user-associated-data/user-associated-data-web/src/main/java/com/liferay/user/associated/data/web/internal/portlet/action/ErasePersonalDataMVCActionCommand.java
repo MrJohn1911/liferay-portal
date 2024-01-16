@@ -18,9 +18,10 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.user.associated.data.anonymizer.UADAnonymousUserProvider;
 import com.liferay.user.associated.data.constants.UserAssociatedDataPortletKeys;
-import com.liferay.user.associated.data.web.internal.helper.SelectedUserHelper;
 import com.liferay.user.associated.data.web.internal.helper.UADApplicationSummaryHelper;
+import com.liferay.user.associated.data.web.internal.util.SelectedUserUtil;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -47,7 +48,8 @@ public class ErasePersonalDataMVCActionCommand
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		User selectedUser = _selectedUserHelper.getSelectedUser(actionRequest);
+		User selectedUser = SelectedUserUtil.getSelectedUser(
+			actionRequest, _uadAnonymousUserProvider);
 
 		if (selectedUser.isActive()) {
 			_userGroupLocalService.clearUserUserGroups(
@@ -111,7 +113,7 @@ public class ErasePersonalDataMVCActionCommand
 	private Portal _portal;
 
 	@Reference
-	private SelectedUserHelper _selectedUserHelper;
+	private UADAnonymousUserProvider _uadAnonymousUserProvider;
 
 	@Reference
 	private UADApplicationSummaryHelper _uadApplicationSummaryHelper;

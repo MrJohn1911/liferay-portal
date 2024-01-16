@@ -22,11 +22,12 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.taglib.aui.AUIUtil;
 import com.liferay.user.associated.data.anonymizer.UADAnonymizer;
+import com.liferay.user.associated.data.anonymizer.UADAnonymousUserProvider;
 import com.liferay.user.associated.data.constants.UserAssociatedDataPortletKeys;
 import com.liferay.user.associated.data.display.UADDisplay;
-import com.liferay.user.associated.data.web.internal.helper.SelectedUserHelper;
 import com.liferay.user.associated.data.web.internal.helper.UADApplicationSummaryHelper;
 import com.liferay.user.associated.data.web.internal.registry.UADRegistry;
+import com.liferay.user.associated.data.web.internal.util.SelectedUserUtil;
 
 import java.io.Serializable;
 
@@ -187,13 +188,15 @@ public abstract class BaseUADMVCActionCommand extends BaseMVCActionCommand {
 	protected User getSelectedUser(ActionRequest actionRequest)
 		throws PortalException {
 
-		return selectedUserHelper.getSelectedUser(actionRequest);
+		return SelectedUserUtil.getSelectedUser(
+			actionRequest, uadAnonymousUserProvider);
 	}
 
 	protected long getSelectedUserId(ActionRequest actionRequest)
 		throws PortalException {
 
-		return selectedUserHelper.getSelectedUserId(actionRequest);
+		return SelectedUserUtil.getSelectedUserId(
+			actionRequest, uadAnonymousUserProvider);
 	}
 
 	protected UADAnonymizer<?> getUADAnonymizer(
@@ -246,7 +249,7 @@ public abstract class BaseUADMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	@Reference
-	protected SelectedUserHelper selectedUserHelper;
+	protected UADAnonymousUserProvider uadAnonymousUserProvider;
 
 	@Reference
 	protected UADApplicationSummaryHelper uadApplicationSummaryHelper;
