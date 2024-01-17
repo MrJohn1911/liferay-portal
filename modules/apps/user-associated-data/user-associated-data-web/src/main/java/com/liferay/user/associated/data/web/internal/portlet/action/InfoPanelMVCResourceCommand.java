@@ -26,7 +26,6 @@ import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Drew Brokke
@@ -128,7 +127,6 @@ public class InfoPanelMVCResourceCommand extends BaseMVCResourceCommand {
 		include(resourceRequest, resourceResponse, "/info_panel.jsp");
 	}
 
-	@Reference
-	private UADRegistry _uadRegistry;
+	private final UADRegistry _uadRegistry = UADRegistry.getInstance();
 
 }

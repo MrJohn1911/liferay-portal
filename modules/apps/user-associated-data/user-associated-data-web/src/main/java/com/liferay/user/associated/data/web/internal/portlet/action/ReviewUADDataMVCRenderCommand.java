@@ -181,7 +181,7 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 			ScopeDisplay scopeDisplay = new ScopeDisplay(
 				scope, groupIds,
 				UADApplicationSummaryUtil.getUADApplicationSummaryDisplays(
-					_uadRegistry, user.getUserId(), groupIds));
+					user.getUserId(), groupIds));
 
 			scopeDisplays.add(scopeDisplay);
 		}
@@ -224,7 +224,7 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 
 	private int _getTotalUADEntitiesCount(User user) {
 		return UADApplicationSummaryUtil.getTotalReviewableUADEntitiesCount(
-			_uadRegistry, user.getUserId());
+			user.getUserId());
 	}
 
 	private UADInfoPanelDisplay _getUADInfoPanelDisplay(
@@ -252,7 +252,7 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 
 		if (Validator.isNull(uadRegistryKey)) {
 			uadRegistryKey = UADApplicationSummaryUtil.getDefaultUADRegistryKey(
-				applicationKey, _uadRegistry);
+				applicationKey);
 		}
 
 		return uadRegistryKey;
@@ -319,7 +319,6 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 	@Reference
 	private UADAnonymousUserProvider _uadAnonymousUserProvider;
 
-	@Reference
-	private UADRegistry _uadRegistry;
+	private final UADRegistry _uadRegistry = UADRegistry.getInstance();
 
 }

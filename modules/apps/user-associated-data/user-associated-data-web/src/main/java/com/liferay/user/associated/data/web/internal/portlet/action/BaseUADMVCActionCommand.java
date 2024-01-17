@@ -66,12 +66,12 @@ public abstract class BaseUADMVCActionCommand extends BaseMVCActionCommand {
 
 		int totalNonreviewableUADEntitiesCount =
 			UADApplicationSummaryUtil.getTotalNonreviewableUADEntitiesCount(
-				uadRegistry, selectedUserId);
+				selectedUserId);
 
 		if (totalNonreviewableUADEntitiesCount == 0) {
 			int totalReviewableUADEntitiesCount =
 				UADApplicationSummaryUtil.getTotalReviewableUADEntitiesCount(
-					uadRegistry, selectedUserId);
+					selectedUserId);
 
 			if (totalReviewableUADEntitiesCount == 0) {
 				mvcRenderCommandName =
@@ -109,12 +109,12 @@ public abstract class BaseUADMVCActionCommand extends BaseMVCActionCommand {
 
 		int totalReviewableUADEntitiesCount =
 			UADApplicationSummaryUtil.getTotalReviewableUADEntitiesCount(
-				uadRegistry, selectedUserId);
+				selectedUserId);
 
 		if (totalReviewableUADEntitiesCount == 0) {
 			int totalNonreviewableUADEntitiesCount =
 				UADApplicationSummaryUtil.getTotalNonreviewableUADEntitiesCount(
-					uadRegistry, selectedUserId);
+					selectedUserId);
 
 			if (totalNonreviewableUADEntitiesCount == 0) {
 				mvcRenderCommandName =
@@ -251,8 +251,7 @@ public abstract class BaseUADMVCActionCommand extends BaseMVCActionCommand {
 	@Reference
 	protected UADAnonymousUserProvider uadAnonymousUserProvider;
 
-	@Reference
-	protected UADRegistry uadRegistry;
+	protected final UADRegistry uadRegistry = UADRegistry.getInstance();
 
 	private String _getUADRegistryKey(
 		ActionRequest actionRequest, String entityType) {

@@ -111,9 +111,7 @@ public class UADExportBackgroundTaskExecutor
 		_backgroundTaskStatusMessageTranslator;
 	private final UADApplicationExportController
 		_uadApplicationExportController = new UADApplicationExportController();
-
-	@Reference
-	private UADRegistry _uadRegistry;
+	private final UADRegistry _uadRegistry = UADRegistry.getInstance();
 
 	@Reference
 	private UserLocalService _userLocalService;

@@ -24,16 +24,16 @@ import java.util.List;
  */
 public class UADApplicationSummaryUtil {
 
-	public static String getDefaultUADRegistryKey(
-		String applicationKey, UADRegistry uadRegistry) {
-
+	public static String getDefaultUADRegistryKey(String applicationKey) {
 		List<UADDisplay<?>> uadDisplays;
 
 		if (applicationKey.equals("all-applications")) {
-			uadDisplays = ListUtil.fromCollection(uadRegistry.getUADDisplays());
+			uadDisplays = ListUtil.fromCollection(
+				_uadRegistry.getUADDisplays());
 		}
 		else {
-			uadDisplays = uadRegistry.getApplicationUADDisplays(applicationKey);
+			uadDisplays = _uadRegistry.getApplicationUADDisplays(
+				applicationKey);
 		}
 
 		UADDisplay<?> uadDisplay = uadDisplays.get(0);
@@ -45,18 +45,14 @@ public class UADApplicationSummaryUtil {
 		return uadDisplay.getTypeKey();
 	}
 
-	public static int getTotalNonreviewableUADEntitiesCount(
-		UADRegistry uadRegistry, long userId) {
-
+	public static int getTotalNonreviewableUADEntitiesCount(long userId) {
 		return _getNonreviewableUADEntitiesCount(
-			uadRegistry.getNonreviewableUADAnonymizers(), userId);
+			_uadRegistry.getNonreviewableUADAnonymizers(), userId);
 	}
 
-	public static int getTotalReviewableUADEntitiesCount(
-		UADRegistry uadRegistry, long userId) {
-
+	public static int getTotalReviewableUADEntitiesCount(long userId) {
 		return _getReviewableUADEntitiesCount(
-			uadRegistry.getUADDisplays(), userId);
+			_uadRegistry.getUADDisplays(), userId);
 	}
 
 	public static UADApplicationSummaryDisplay getUADApplicationSummaryDisplay(
@@ -74,8 +70,7 @@ public class UADApplicationSummaryUtil {
 	}
 
 	public static List<UADApplicationSummaryDisplay>
-		getUADApplicationSummaryDisplays(
-			UADRegistry uadRegistry, long userId, long[] groupIds) {
+		getUADApplicationSummaryDisplays(long userId, long[] groupIds) {
 
 		List<UADApplicationSummaryDisplay> uadApplicationSummaryDisplays =
 			new ArrayList<>();
@@ -93,12 +88,12 @@ public class UADApplicationSummaryUtil {
 		int count = 0;
 
 		for (String applicationKey :
-				uadRegistry.getApplicationUADDisplaysKeySet()) {
+				_uadRegistry.getApplicationUADDisplaysKeySet()) {
 
 			List<UADDisplay<?>> applicationUADDisplays = new ArrayList<>();
 
 			for (UADDisplay<?> uadDisplay :
-					uadRegistry.getApplicationUADDisplays(applicationKey)) {
+					_uadRegistry.getApplicationUADDisplays(applicationKey)) {
 
 				if (ArrayUtil.isNotEmpty(groupIds) ==
 						uadDisplay.isSiteScoped()) {
@@ -186,5 +181,7 @@ public class UADApplicationSummaryUtil {
 
 		return sum;
 	}
+
+	private static final UADRegistry _uadRegistry = UADRegistry.getInstance();
 
 }

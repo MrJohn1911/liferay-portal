@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Pei-Jung Lan
@@ -97,7 +96,6 @@ public class UADApplicationExportHelper {
 	private static final Log _log = LogFactoryUtil.getLog(
 		UADApplicationExportHelper.class);
 
-	@Reference
-	private UADRegistry _uadRegistry;
+	private final UADRegistry _uadRegistry = UADRegistry.getInstance();
 
 }

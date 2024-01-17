@@ -148,7 +148,6 @@ public class ViewUADHierarchyMVCRenderCommand implements MVCRenderCommand {
 	@Reference
 	private UADAnonymousUserProvider _uadAnonymousUserProvider;
 
-	@Reference
-	private UADRegistry _uadRegistry;
+	private final UADRegistry _uadRegistry = UADRegistry.getInstance();
 
 }

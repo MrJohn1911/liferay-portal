@@ -20,7 +20,6 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.user.associated.data.anonymizer.UADAnonymousUserProvider;
 import com.liferay.user.associated.data.constants.UserAssociatedDataPortletKeys;
-import com.liferay.user.associated.data.web.internal.registry.UADRegistry;
 import com.liferay.user.associated.data.web.internal.util.SelectedUserUtil;
 import com.liferay.user.associated.data.web.internal.util.UADApplicationSummaryUtil;
 
@@ -84,12 +83,12 @@ public class ErasePersonalDataMVCActionCommand
 
 		int totalReviewableUADEntitiesCount =
 			UADApplicationSummaryUtil.getTotalReviewableUADEntitiesCount(
-				_uadRegistry, selectedUser.getUserId());
+				selectedUser.getUserId());
 
 		if (totalReviewableUADEntitiesCount == 0) {
 			int totalNonreviewableUADEntitiesCount =
 				UADApplicationSummaryUtil.getTotalNonreviewableUADEntitiesCount(
-					_uadRegistry, selectedUser.getUserId());
+					selectedUser.getUserId());
 
 			if (totalNonreviewableUADEntitiesCount == 0) {
 				mvcRenderCommandName =
@@ -114,9 +113,6 @@ public class ErasePersonalDataMVCActionCommand
 
 	@Reference
 	private UADAnonymousUserProvider _uadAnonymousUserProvider;
-
-	@Reference
-	private UADRegistry _uadRegistry;
 
 	@Reference
 	private UserGroupLocalService _userGroupLocalService;

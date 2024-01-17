@@ -24,15 +24,41 @@ import java.util.Set;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 
 /**
  * @author William Newbury
  */
-@Component(service = UADRegistry.class)
 public class UADRegistry {
+
+	public static UADRegistry getInstance() {
+		if (_uadRegistry == null) {
+			_uadRegistry = new UADRegistry();
+		}
+
+		return _uadRegistry;
+	}
+
+	public UADRegistry() {
+		Bundle bundle = FrameworkUtil.getBundle(UADRegistry.class);
+
+		BundleContext bundleContext = bundle.getBundleContext();
+
+		_bundleUADAnonymizerServiceTrackerMap = _getMultiValueServiceTrackerMap(
+			bundleContext,
+			(Class<UADAnonymizer<?>>)(Class<?>)UADAnonymizer.class);
+		_bundleUADDisplayServiceTrackerMap = _getMultiValueServiceTrackerMap(
+			bundleContext, (Class<UADDisplay<?>>)(Class<?>)UADDisplay.class);
+		_bundleUADHierarchyDeclarationServiceTrackerMap =
+			_getUADHierachyDeclarationServiceTrackerMap(
+				bundleContext, UADHierarchyDeclaration.class);
+		_uadAnonymizerServiceTrackerMap = _getSingleValueServiceTrackerMap(
+			bundleContext,
+			(Class<UADAnonymizer<?>>)(Class<?>)UADAnonymizer.class);
+		_uadDisplayServiceTrackerMap = _getSingleValueServiceTrackerMap(
+			bundleContext, (Class<UADDisplay<?>>)(Class<?>)UADDisplay.class);
+		_uadExporterServiceTrackerMap = _getSingleValueServiceTrackerMap(
+			bundleContext, (Class<UADExporter<?>>)(Class<?>)UADExporter.class);
+	}
 
 	public List<UADAnonymizer<?>> getApplicationUADAnonymizers(
 		String applicationKey) {
@@ -116,35 +142,6 @@ public class UADRegistry {
 		return new UADHierarchyDisplay(uadHierarchyDeclaration, this);
 	}
 
-	@Activate
-	protected void activate(BundleContext bundleContext) {
-		_bundleUADAnonymizerServiceTrackerMap = _getMultiValueServiceTrackerMap(
-			bundleContext,
-			(Class<UADAnonymizer<?>>)(Class<?>)UADAnonymizer.class);
-		_bundleUADDisplayServiceTrackerMap = _getMultiValueServiceTrackerMap(
-			bundleContext, (Class<UADDisplay<?>>)(Class<?>)UADDisplay.class);
-		_bundleUADHierarchyDeclarationServiceTrackerMap =
-			_getUADHierachyDeclarationServiceTrackerMap(
-				bundleContext, UADHierarchyDeclaration.class);
-		_uadAnonymizerServiceTrackerMap = _getSingleValueServiceTrackerMap(
-			bundleContext,
-			(Class<UADAnonymizer<?>>)(Class<?>)UADAnonymizer.class);
-		_uadDisplayServiceTrackerMap = _getSingleValueServiceTrackerMap(
-			bundleContext, (Class<UADDisplay<?>>)(Class<?>)UADDisplay.class);
-		_uadExporterServiceTrackerMap = _getSingleValueServiceTrackerMap(
-			bundleContext, (Class<UADExporter<?>>)(Class<?>)UADExporter.class);
-	}
-
-	@Deactivate
-	protected void deactivate() {
-		_bundleUADAnonymizerServiceTrackerMap.close();
-		_bundleUADDisplayServiceTrackerMap.close();
-		_bundleUADHierarchyDeclarationServiceTrackerMap.close();
-		_uadAnonymizerServiceTrackerMap.close();
-		_uadDisplayServiceTrackerMap.close();
-		_uadExporterServiceTrackerMap.close();
-	}
-
 	private <T extends UADComponent> ServiceTrackerMap<String, List<T>>
 		_getMultiValueServiceTrackerMap(
 			BundleContext bundleContext, Class<T> clazz) {
@@ -218,17 +215,19 @@ public class UADRegistry {
 			applicationKey);
 	}
 
-	private ServiceTrackerMap<String, List<UADAnonymizer<?>>>
+	private static UADRegistry _uadRegistry;
+
+	private final ServiceTrackerMap<String, List<UADAnonymizer<?>>>
 		_bundleUADAnonymizerServiceTrackerMap;
-	private ServiceTrackerMap<String, List<UADDisplay<?>>>
+	private final ServiceTrackerMap<String, List<UADDisplay<?>>>
 		_bundleUADDisplayServiceTrackerMap;
-	private ServiceTrackerMap<String, UADHierarchyDeclaration>
+	private final ServiceTrackerMap<String, UADHierarchyDeclaration>
 		_bundleUADHierarchyDeclarationServiceTrackerMap;
-	private ServiceTrackerMap<String, UADAnonymizer<?>>
+	private final ServiceTrackerMap<String, UADAnonymizer<?>>
 		_uadAnonymizerServiceTrackerMap;
-	private ServiceTrackerMap<String, UADDisplay<?>>
+	private final ServiceTrackerMap<String, UADDisplay<?>>
 		_uadDisplayServiceTrackerMap;
-	private ServiceTrackerMap<String, UADExporter<?>>
+	private final ServiceTrackerMap<String, UADExporter<?>>
 		_uadExporterServiceTrackerMap;
 
 }
