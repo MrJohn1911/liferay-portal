@@ -40,6 +40,7 @@ import java.util.Dictionary;
 import java.util.Locale;
 
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -160,7 +161,7 @@ public class UADAnonymousUserProviderImpl implements UADAnonymousUserProvider {
 
 	private User _getAnonymousUser(long companyId) throws Exception {
 		Configuration configuration = _anonymousUserConfigurationRetriever.get(
-			companyId);
+			_configurationAdmin, companyId);
 
 		if (configuration == null) {
 			User anonymousUser = _addAnonymousUser(companyId);
@@ -213,6 +214,9 @@ public class UADAnonymousUserProviderImpl implements UADAnonymousUserProvider {
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
+
+	@Reference
+	private ConfigurationAdmin _configurationAdmin;
 
 	@Reference
 	private ConfigurationProvider _configurationProvider;

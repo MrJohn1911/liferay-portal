@@ -19,6 +19,7 @@ import java.util.Dictionary;
 import java.util.ResourceBundle;
 
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -66,7 +67,7 @@ public class AnonymousUserConfigurationModelListener
 		throws Exception {
 
 		Configuration configuration = _anonymousUserConfigurationRetriever.get(
-			companyId);
+			_configurationAdmin, companyId);
 
 		if ((configuration == null) || pid.equals(configuration.getPid())) {
 			return;
@@ -89,6 +90,9 @@ public class AnonymousUserConfigurationModelListener
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
+
+	@Reference
+	private ConfigurationAdmin _configurationAdmin;
 
 	@Reference
 	private UserLocalService _userLocalService;

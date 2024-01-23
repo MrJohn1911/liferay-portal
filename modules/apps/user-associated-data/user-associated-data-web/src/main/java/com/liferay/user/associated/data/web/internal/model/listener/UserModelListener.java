@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -39,7 +40,7 @@ public class UserModelListener extends BaseModelListener<User> {
 		throws InvalidSyntaxException, IOException {
 
 		Configuration configuration = _anonymousUserConfigurationRetriever.get(
-			companyId, userId);
+			_configurationAdmin, companyId, userId);
 
 		if (configuration == null) {
 			return;
@@ -51,5 +52,8 @@ public class UserModelListener extends BaseModelListener<User> {
 	@Reference
 	private AnonymousUserConfigurationRetriever
 		_anonymousUserConfigurationRetriever;
+
+	@Reference
+	private ConfigurationAdmin _configurationAdmin;
 
 }
