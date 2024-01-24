@@ -6,7 +6,7 @@
 package com.liferay.portal.kernel.feature.flag;
 
 import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.module.service.Snapshot;
@@ -26,7 +26,7 @@ public class FeatureFlagManagerUtil {
 	public static String getJSON(long companyId) {
 		return _withFeatureFlagManager(
 			featureFlagManager -> featureFlagManager.getJSON(companyId),
-			() -> _JSON);
+			FeatureFlagManagerUtil::_getJSON);
 	}
 
 	public static boolean isEnabled(long companyId, String key) {
@@ -53,6 +53,14 @@ public class FeatureFlagManagerUtil {
 			() -> GetterUtil.getBoolean(PropsUtil.get("feature.flag." + key)));
 	}
 
+	private static String _getJSON() {
+		JSONFactory jsonFactory = _jsonFactorySnapshot.get();
+
+		return String.valueOf(
+			jsonFactory.createJSONObject(
+				PropsUtil.getProperties("feature.flag.", true)));
+	}
+
 	private static <T> T _withFeatureFlagManager(
 		Function<FeatureFlagManager, T> function, Supplier<T> supplier) {
 
@@ -76,15 +84,13 @@ public class FeatureFlagManagerUtil {
 		return supplier.get();
 	}
 
-	private static final String _JSON = String.valueOf(
-		JSONFactoryUtil.createJSONObject(
-			PropsUtil.getProperties("feature.flag.", true)));
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		FeatureFlagManagerUtil.class);
 
 	private static final Snapshot<FeatureFlagManager>
 		_featureFlagManagerSnapshot = new Snapshot<>(
 			FeatureFlagManagerUtil.class, FeatureFlagManager.class);
+	private static final Snapshot<JSONFactory> _jsonFactorySnapshot =
+		new Snapshot<>(FeatureFlagManagerUtil.class, JSONFactory.class);
 
 }
