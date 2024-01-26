@@ -48,7 +48,6 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 </#if>
 
 import com.liferay.petra.function.UnsafeTriConsumer;
-import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONDeserializer;
@@ -2553,7 +2552,7 @@ public abstract class Base${schemaName}ResourceTestCase {
 
 	protected java.lang.reflect.Field[] getDeclaredFields(Class clazz) throws Exception {
 		return TransformUtil.transform(
-			ReflectionUtil.getDeclaredFields(clazz),
+			clazz.getDeclaredFields(),
 			field -> {
 				if (field.isSynthetic()) {
 					return null;
