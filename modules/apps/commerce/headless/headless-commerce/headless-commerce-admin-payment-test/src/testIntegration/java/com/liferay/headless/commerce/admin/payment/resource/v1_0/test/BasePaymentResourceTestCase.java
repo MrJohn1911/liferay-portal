@@ -21,7 +21,6 @@ import com.liferay.headless.commerce.admin.payment.client.resource.v1_0.PaymentR
 import com.liferay.headless.commerce.admin.payment.client.serdes.v1_0.PaymentSerDes;
 import com.liferay.petra.function.UnsafeTriConsumer;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -1591,7 +1590,7 @@ public abstract class BasePaymentResourceTestCase {
 		throws Exception {
 
 		return TransformUtil.transform(
-			ReflectionUtil.getDeclaredFields(clazz),
+			clazz.getDeclaredFields(),
 			field -> {
 				if (field.isSynthetic()) {
 					return null;

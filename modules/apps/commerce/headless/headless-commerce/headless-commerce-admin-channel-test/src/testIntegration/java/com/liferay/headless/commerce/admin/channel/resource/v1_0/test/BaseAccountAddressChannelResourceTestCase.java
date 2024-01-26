@@ -21,7 +21,6 @@ import com.liferay.headless.commerce.admin.channel.client.resource.v1_0.AccountA
 import com.liferay.headless.commerce.admin.channel.client.serdes.v1_0.AccountAddressChannelSerDes;
 import com.liferay.petra.function.UnsafeTriConsumer;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -1279,7 +1278,7 @@ public abstract class BaseAccountAddressChannelResourceTestCase {
 		throws Exception {
 
 		return TransformUtil.transform(
-			ReflectionUtil.getDeclaredFields(clazz),
+			clazz.getDeclaredFields(),
 			field -> {
 				if (field.isSynthetic()) {
 					return null;

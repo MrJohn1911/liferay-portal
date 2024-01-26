@@ -20,7 +20,6 @@ import com.liferay.headless.commerce.delivery.cart.client.pagination.Pagination;
 import com.liferay.headless.commerce.delivery.cart.client.resource.v1_0.CartResource;
 import com.liferay.headless.commerce.delivery.cart.client.serdes.v1_0.CartSerDes;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -1459,7 +1458,7 @@ public abstract class BaseCartResourceTestCase {
 		throws Exception {
 
 		return TransformUtil.transform(
-			ReflectionUtil.getDeclaredFields(clazz),
+			clazz.getDeclaredFields(),
 			field -> {
 				if (field.isSynthetic()) {
 					return null;

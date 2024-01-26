@@ -21,7 +21,6 @@ import com.liferay.headless.commerce.admin.account.client.resource.v1_0.AccountR
 import com.liferay.headless.commerce.admin.account.client.serdes.v1_0.AccountSerDes;
 import com.liferay.petra.function.UnsafeTriConsumer;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -1377,7 +1376,7 @@ public abstract class BaseAccountResourceTestCase {
 		throws Exception {
 
 		return TransformUtil.transform(
-			ReflectionUtil.getDeclaredFields(clazz),
+			clazz.getDeclaredFields(),
 			field -> {
 				if (field.isSynthetic()) {
 					return null;

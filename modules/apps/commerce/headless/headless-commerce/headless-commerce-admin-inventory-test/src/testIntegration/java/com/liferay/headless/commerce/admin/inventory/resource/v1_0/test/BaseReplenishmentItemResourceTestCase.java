@@ -20,7 +20,6 @@ import com.liferay.headless.commerce.admin.inventory.client.pagination.Paginatio
 import com.liferay.headless.commerce.admin.inventory.client.resource.v1_0.ReplenishmentItemResource;
 import com.liferay.headless.commerce.admin.inventory.client.serdes.v1_0.ReplenishmentItemSerDes;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -1287,7 +1286,7 @@ public abstract class BaseReplenishmentItemResourceTestCase {
 		throws Exception {
 
 		return TransformUtil.transform(
-			ReflectionUtil.getDeclaredFields(clazz),
+			clazz.getDeclaredFields(),
 			field -> {
 				if (field.isSynthetic()) {
 					return null;

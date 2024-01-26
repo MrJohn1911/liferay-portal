@@ -21,7 +21,6 @@ import com.liferay.headless.commerce.admin.pricing.client.resource.v2_0.Discount
 import com.liferay.headless.commerce.admin.pricing.client.serdes.v2_0.DiscountAccountGroupSerDes;
 import com.liferay.petra.function.UnsafeTriConsumer;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -1245,7 +1244,7 @@ public abstract class BaseDiscountAccountGroupResourceTestCase {
 		throws Exception {
 
 		return TransformUtil.transform(
-			ReflectionUtil.getDeclaredFields(clazz),
+			clazz.getDeclaredFields(),
 			field -> {
 				if (field.isSynthetic()) {
 					return null;

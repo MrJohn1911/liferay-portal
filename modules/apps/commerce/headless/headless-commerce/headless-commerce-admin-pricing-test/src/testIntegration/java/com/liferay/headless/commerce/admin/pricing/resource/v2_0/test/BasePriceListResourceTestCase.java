@@ -21,7 +21,6 @@ import com.liferay.headless.commerce.admin.pricing.client.resource.v2_0.PriceLis
 import com.liferay.headless.commerce.admin.pricing.client.serdes.v2_0.PriceListSerDes;
 import com.liferay.petra.function.UnsafeTriConsumer;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -1610,7 +1609,7 @@ public abstract class BasePriceListResourceTestCase {
 		throws Exception {
 
 		return TransformUtil.transform(
-			ReflectionUtil.getDeclaredFields(clazz),
+			clazz.getDeclaredFields(),
 			field -> {
 				if (field.isSynthetic()) {
 					return null;
