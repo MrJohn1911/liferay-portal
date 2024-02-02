@@ -53,7 +53,7 @@ public class NoticeableThreadPoolExecutorTest {
 	public void testAdjustSize() throws InterruptedException {
 		NoticeableThreadPoolExecutor noticeableThreadPoolExecutor =
 			new NoticeableThreadPoolExecutor(
-				1, 1, 1, TimeUnit.NANOSECONDS, new LinkedBlockingQueue<>(),
+				1, 2, 1, TimeUnit.NANOSECONDS, new LinkedBlockingQueue<>(),
 				new MethodNameThreadFactory(),
 				(runnable, threadPoolExecutor) -> {
 				},
@@ -61,7 +61,7 @@ public class NoticeableThreadPoolExecutorTest {
 
 		Assert.assertEquals(1, noticeableThreadPoolExecutor.getCorePoolSize());
 		Assert.assertEquals(
-			1, noticeableThreadPoolExecutor.getMaximumPoolSize());
+			2, noticeableThreadPoolExecutor.getMaximumPoolSize());
 
 		try {
 			noticeableThreadPoolExecutor.setCorePoolSize(0);
@@ -136,6 +136,23 @@ public class NoticeableThreadPoolExecutorTest {
 		catch (IllegalArgumentException illegalArgumentException) {
 			Assert.assertEquals(
 				"To ensure FIFO, core pool size must be 1 or greater",
+				illegalArgumentException.getMessage());
+		}
+
+		try {
+			new NoticeableThreadPoolExecutor(
+				2, 1, 1, TimeUnit.NANOSECONDS, new LinkedBlockingQueue<>(),
+				new MethodNameThreadFactory(),
+				(runnable, threadPoolExecutor) -> {
+				},
+				new ThreadPoolHandlerAdapter());
+
+			Assert.fail();
+		}
+		catch (IllegalArgumentException illegalArgumentException) {
+			Assert.assertEquals(
+				"The maximum pool size has to be greater than the core pool " +
+					"size",
 				illegalArgumentException.getMessage());
 		}
 

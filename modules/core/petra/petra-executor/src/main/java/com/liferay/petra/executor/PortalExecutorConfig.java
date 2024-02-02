@@ -29,6 +29,12 @@ public class PortalExecutorConfig implements Serializable {
 				"To ensure FIFO, core pool size must be 1 or greater");
 		}
 
+		if (maxPoolSize < corePoolSize) {
+			throw new IllegalArgumentException(
+				"The maximum pool size has to be greater than the core pool " +
+					"size");
+		}
+
 		_name = name;
 		_corePoolSize = corePoolSize;
 		_maxPoolSize = maxPoolSize;

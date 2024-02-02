@@ -53,6 +53,18 @@ public class PortalExecutorConfigTest {
 				illegalArgumentException.getMessage());
 		}
 
+		try {
+			new PortalExecutorConfig(null, 2, 1, 0, null, 0, null, null, null);
+
+			Assert.fail();
+		}
+		catch (IllegalArgumentException illegalArgumentException) {
+			Assert.assertEquals(
+				"The maximum pool size has to be greater than the core pool " +
+					"size",
+				illegalArgumentException.getMessage());
+		}
+
 		String name = "name";
 
 		int corePoolSize = 1;

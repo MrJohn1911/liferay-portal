@@ -33,6 +33,12 @@ public class NoticeableThreadPoolExecutor
 				"To ensure FIFO, core pool size must be 1 or greater");
 		}
 
+		if (maximumPoolSize < corePoolSize) {
+			throw new IllegalArgumentException(
+				"The maximum pool size has to be greater than the core pool " +
+					"size");
+		}
+
 		AtomicInteger terminationCounter = new AtomicInteger(2);
 
 		_terminationDefaultNoticeableFuture =
