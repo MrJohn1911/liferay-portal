@@ -114,6 +114,10 @@ public class ReflectionUtil {
 		return field;
 	}
 
+	protected static Field getModifiersField() {
+		return _modifiersField;
+	}
+
 	@SuppressWarnings("unchecked")
 	private static <T, E extends Throwable> T _throwException(
 			Throwable throwable)
