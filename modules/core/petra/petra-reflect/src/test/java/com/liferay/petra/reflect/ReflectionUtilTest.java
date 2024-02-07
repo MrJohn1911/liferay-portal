@@ -84,15 +84,31 @@ public class ReflectionUtilTest {
 			TestClass.class, "_privateStaticFinalObject");
 
 		Assert.assertTrue(staticField.isAccessible());
-		Assert.assertFalse(Modifier.isFinal(staticField.getModifiers()));
+
+		_assertModifierIsFinal(staticField.getModifiers());
+
 		Assert.assertSame(
 			TestClass._privateStaticFinalObject, staticField.get(null));
 
 		Object object = new Object();
 
-		staticField.set(null, object);
-
-		Assert.assertSame(object, TestClass._privateStaticFinalObject);
+		if (_jdkSupportsUnfinal()) {
+			try {
+				staticField.set(null, object);
+				Assert.fail();
+			}
+			catch (IllegalAccessException illegalAccessException) {
+				Assert.assertEquals(
+					"Can not set static final java.lang.Object field com." +
+						"liferay.petra.reflect.ReflectionUtilTest$TestClass." +
+							"_privateStaticFinalObject to java.lang.Object",
+					illegalAccessException.getMessage());
+			}
+		}
+		else {
+			staticField.set(null, object);
+			Assert.assertSame(object, TestClass._privateStaticFinalObject);
+		}
 
 		TestClass testClass = new TestClass();
 
@@ -137,7 +153,7 @@ public class ReflectionUtilTest {
 				TestClass.class, "_privateStaticFinalObject");
 
 			Assert.assertTrue(staticField.isAccessible());
-			Assert.assertTrue(Modifier.isFinal(staticField.getModifiers()));
+			_assertModifierIsFinal(staticField.getModifiers());
 			Assert.assertSame(
 				TestClass._privateStaticFinalObject, staticField.get(null));
 		}
@@ -152,7 +168,7 @@ public class ReflectionUtilTest {
 
 			int modifier = field.getModifiers();
 
-			if (Modifier.isStatic(modifier)) {
+			if (Modifier.isStatic(modifier) && !_jdkSupportsUnfinal()) {
 				Assert.assertFalse(Modifier.isFinal(modifier));
 			}
 
@@ -227,15 +243,35 @@ public class ReflectionUtilTest {
 
 		ReflectionUtil.unfinalField(field);
 
-		Assert.assertFalse(Modifier.isFinal(field.getModifiers()));
+		_assertModifierIsFinal(field.getModifiers());
 		Assert.assertTrue(Modifier.isPrivate(field.getModifiers()));
 		Assert.assertTrue(Modifier.isStatic(field.getModifiers()));
 
 		ReflectionUtil.unfinalField(field);
 
-		Assert.assertFalse(Modifier.isFinal(field.getModifiers()));
+		_assertModifierIsFinal(field.getModifiers());
 		Assert.assertTrue(Modifier.isPrivate(field.getModifiers()));
 		Assert.assertTrue(Modifier.isStatic(field.getModifiers()));
+	}
+
+	private void _assertModifierIsFinal(int modifier) throws Exception {
+		if (_jdkSupportsUnfinal()) {
+			Assert.assertTrue(Modifier.isFinal(modifier));
+		}
+		else {
+			Assert.assertFalse(Modifier.isFinal(modifier));
+		}
+	}
+
+	private boolean _jdkSupportsUnfinal() throws Exception {
+		Field field = ReflectionUtil.getDeclaredField(
+			ReflectionUtil.class, "_modifiersField");
+
+		if (field.get(null) == null) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private static class TestClass implements TestInterface {
