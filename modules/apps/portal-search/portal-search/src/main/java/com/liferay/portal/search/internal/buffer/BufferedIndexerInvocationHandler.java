@@ -162,11 +162,10 @@ public class BufferedIndexerInvocationHandler implements InvocationHandler {
 	}
 
 	public void setIndexerRequestBufferOverflowHandler(
-		IndexerRequestBufferOverflowHandler
-			indexerRequestBufferOverflowHandler) {
+		float minimumBufferAvailabilityPercentage) {
 
-		_indexerRequestBufferOverflowHandler =
-			indexerRequestBufferOverflowHandler;
+		_minimumBufferAvailabilityPercentage =
+			minimumBufferAvailabilityPercentage;
 	}
 
 	protected void bufferRequest(
@@ -212,8 +211,8 @@ public class BufferedIndexerInvocationHandler implements InvocationHandler {
 
 		IndexerRequestBufferHandler indexerRequestBufferHandler =
 			new IndexerRequestBufferHandler(
-				_indexerRequestBufferOverflowHandler,
-				_indexerRegistryConfiguration);
+				_indexerRegistryConfiguration,
+				_minimumBufferAvailabilityPercentage);
 
 		indexerRequestBufferHandler.bufferRequest(
 			indexerRequest, indexerRequestBuffer);
@@ -224,8 +223,7 @@ public class BufferedIndexerInvocationHandler implements InvocationHandler {
 
 	private final Indexer<?> _indexer;
 	private volatile IndexerRegistryConfiguration _indexerRegistryConfiguration;
-	private volatile IndexerRequestBufferOverflowHandler
-		_indexerRequestBufferOverflowHandler;
 	private final IndexStatusManager _indexStatusManager;
+	private volatile float _minimumBufferAvailabilityPercentage;
 
 }

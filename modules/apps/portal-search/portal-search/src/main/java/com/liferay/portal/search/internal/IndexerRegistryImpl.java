@@ -7,6 +7,7 @@ package com.liferay.portal.search.internal;
 
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -21,7 +22,6 @@ import com.liferay.portal.search.configuration.IndexerRegistryConfiguration;
 import com.liferay.portal.search.index.IndexStatusManager;
 import com.liferay.portal.search.internal.buffer.BufferedIndexerInvocationHandler;
 import com.liferay.portal.search.internal.buffer.IndexerRequestBuffer;
-import com.liferay.portal.search.internal.buffer.IndexerRequestBufferOverflowHandler;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -207,6 +207,29 @@ public class IndexerRegistryImpl implements IndexerRegistry {
 			bufferedIndexerInvocationHandler.setIndexerRegistryConfiguration(
 				_indexerRegistryConfiguration);
 		}
+
+		IndexerRegistryConfiguration indexerRegistryConfiguration =
+			ConfigurableUtil.createConfigurable(
+				IndexerRegistryConfiguration.class, properties);
+
+		float minimumBufferAvailabilityPercentage =
+			indexerRegistryConfiguration.minimumBufferAvailabilityPercentage();
+
+		if ((minimumBufferAvailabilityPercentage > 1) ||
+			(minimumBufferAvailabilityPercentage < 0.1)) {
+
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					StringBundler.concat(
+						"Invalid minimum buffer availability percentage: ",
+						minimumBufferAvailabilityPercentage,
+						", using default value",
+						_DEFAULT_MINIMUM_BUFFER_AVAILABILITY_PERCENTAGE));
+			}
+		}
+
+		_minimumBufferAvailabilityPercentage =
+			minimumBufferAvailabilityPercentage;
 	}
 
 	private <T> Indexer<T> _proxyIndexer(Indexer<T> indexer) {
@@ -236,7 +259,7 @@ public class IndexerRegistryImpl implements IndexerRegistry {
 
 			bufferedIndexerInvocationHandler.
 				setIndexerRequestBufferOverflowHandler(
-					_indexerRequestBufferOverflowHandler);
+					_minimumBufferAvailabilityPercentage);
 
 			_bufferedInvocationHandlers.put(
 				indexer.getClassName(), bufferedIndexerInvocationHandler);
@@ -252,6 +275,9 @@ public class IndexerRegistryImpl implements IndexerRegistry {
 		return (Indexer<T>)proxiedIndexer;
 	}
 
+	private static final float _DEFAULT_MINIMUM_BUFFER_AVAILABILITY_PERCENTAGE =
+		0.90F;
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		IndexerRegistryImpl.class);
 
@@ -262,16 +288,12 @@ public class IndexerRegistryImpl implements IndexerRegistry {
 	private ServiceTrackerMap<String, List<IndexerPostProcessor>>
 		_indexerPostProcessorsServiceTrackerMap;
 	private volatile IndexerRegistryConfiguration _indexerRegistryConfiguration;
-
-	@Reference
-	private IndexerRequestBufferOverflowHandler
-		_indexerRequestBufferOverflowHandler;
-
 	private ServiceTrackerMap<String, Indexer> _indexerServiceTrackerMap;
 
 	@Reference
 	private IndexStatusManager _indexStatusManager;
 
+	private volatile float _minimumBufferAvailabilityPercentage;
 	private final Map<String, Indexer<? extends Object>> _proxiedIndexers =
 		new ConcurrentHashMap<>();
 

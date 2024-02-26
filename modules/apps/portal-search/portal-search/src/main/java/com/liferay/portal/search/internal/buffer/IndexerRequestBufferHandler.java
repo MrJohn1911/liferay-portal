@@ -14,12 +14,12 @@ import com.liferay.portal.search.configuration.IndexerRegistryConfiguration;
 public class IndexerRequestBufferHandler {
 
 	public IndexerRequestBufferHandler(
-		IndexerRequestBufferOverflowHandler indexerRequestBufferOverflowHandler,
-		IndexerRegistryConfiguration indexerRegistryConfiguration) {
+		IndexerRegistryConfiguration indexerRegistryConfiguration,
+		float minimumBufferAvailabilityPercentage) {
 
-		_indexerRequestBufferOverflowHandler =
-			indexerRequestBufferOverflowHandler;
 		_indexerRegistryConfiguration = indexerRegistryConfiguration;
+		_minimumBufferAvailabilityPercentage =
+			minimumBufferAvailabilityPercentage;
 	}
 
 	public void bufferRequest(
@@ -31,7 +31,7 @@ public class IndexerRequestBufferHandler {
 			int maxBufferSize = _indexerRegistryConfiguration.maxBufferSize();
 
 			indexerRequestBuffer.add(
-				indexerRequest, _indexerRequestBufferOverflowHandler,
+				indexerRequest, _minimumBufferAvailabilityPercentage,
 				maxBufferSize);
 		}
 		else {
@@ -40,7 +40,6 @@ public class IndexerRequestBufferHandler {
 	}
 
 	private final IndexerRegistryConfiguration _indexerRegistryConfiguration;
-	private final IndexerRequestBufferOverflowHandler
-		_indexerRequestBufferOverflowHandler;
+	private volatile float _minimumBufferAvailabilityPercentage;
 
 }
