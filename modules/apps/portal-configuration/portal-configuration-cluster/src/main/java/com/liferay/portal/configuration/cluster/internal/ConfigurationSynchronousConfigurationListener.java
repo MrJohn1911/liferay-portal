@@ -9,7 +9,6 @@ import com.liferay.portal.configuration.cluster.internal.constants.Configuration
 import com.liferay.portal.configuration.persistence.InMemoryOnlyConfigurationThreadLocal;
 import com.liferay.portal.kernel.cluster.ClusterLink;
 import com.liferay.portal.kernel.cluster.Priority;
-import com.liferay.portal.kernel.messaging.Destination;
 import com.liferay.portal.kernel.messaging.Message;
 
 import org.osgi.framework.Constants;
@@ -47,10 +46,5 @@ public class ConfigurationSynchronousConfigurationListener
 
 	@Reference
 	private ClusterLink _clusterLink;
-
-	@Reference(
-		target = "(destination.name=" + ConfigurationClusterDestinationNames.CONFIGURATION + ")"
-	)
-	private Destination _destination;
 
 }
