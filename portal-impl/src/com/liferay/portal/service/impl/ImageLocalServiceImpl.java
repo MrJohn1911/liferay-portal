@@ -382,6 +382,6 @@ public class ImageLocalServiceImpl extends ImageLocalServiceBaseImpl {
 		ImageLocalServiceImpl.class);
 
 	private static final Snapshot<Store> _storeSnapshot = new Snapshot<>(
-		ImageLocalServiceImpl.class, Store.class, "(default=true)");
+		ImageLocalServiceImpl.class, Store.class, "(default=true)", true);
 
 }
