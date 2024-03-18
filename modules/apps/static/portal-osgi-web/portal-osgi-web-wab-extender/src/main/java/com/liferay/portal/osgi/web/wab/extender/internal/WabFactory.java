@@ -59,6 +59,8 @@ public class WabFactory
 			return null;
 		}
 
+		_servletContextHelperFactory.ensureReady();
+
 		FutureTask<WABExtension> futureTask = new FutureTask<>(
 			() -> {
 				WABExtension wabExtension = new WABExtension(bundle);

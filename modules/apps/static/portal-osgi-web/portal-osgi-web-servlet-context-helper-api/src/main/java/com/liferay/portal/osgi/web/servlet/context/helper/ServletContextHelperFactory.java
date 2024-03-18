@@ -9,4 +9,7 @@ package com.liferay.portal.osgi.web.servlet.context.helper;
  * @author Matthew Tambara
  */
 public interface ServletContextHelperFactory {
+
+	public void ensureReady();
+
 }

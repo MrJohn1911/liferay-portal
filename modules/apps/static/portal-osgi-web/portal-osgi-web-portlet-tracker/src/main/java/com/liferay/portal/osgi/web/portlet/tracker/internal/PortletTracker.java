@@ -1308,6 +1308,8 @@ public class PortletTracker
 
 		BundleContext bundleContext = bundle.getBundleContext();
 
+		_servletContextHelperFactory.ensureReady();
+
 		_servletContextHelperRegistrationServiceReference =
 			bundleContext.getServiceReference(
 				ServletContextHelperRegistration.class);

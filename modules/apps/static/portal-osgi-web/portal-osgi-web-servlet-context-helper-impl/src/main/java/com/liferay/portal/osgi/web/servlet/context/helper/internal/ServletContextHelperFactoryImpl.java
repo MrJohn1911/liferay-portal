@@ -5,21 +5,23 @@
 
 package com.liferay.portal.osgi.web.servlet.context.helper.internal;
 
+import com.liferay.petra.concurrent.DCLSingleton;
 import com.liferay.petra.executor.PortalExecutorManager;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.portal.osgi.web.servlet.JSPServletFactory;
 import com.liferay.portal.osgi.web.servlet.context.helper.ServletContextHelperFactory;
 import com.liferay.portal.osgi.web.servlet.context.helper.ServletContextHelperRegistration;
 
-import java.util.Map;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -35,10 +37,13 @@ import org.xml.sax.SAXNotSupportedException;
 public class ServletContextHelperFactoryImpl
 	implements ServletContextHelperFactory {
 
-	@Activate
-	protected void activate(
-			BundleContext bundleContext, Map<String, Object> properties)
-		throws Exception {
+	@Override
+	public void ensureReady() {
+		if (_ready) {
+			return;
+		}
+
+		_ready = true;
 
 		_saxParserFactory.setNamespaceAware(false);
 		_saxParserFactory.setValidating(false);
@@ -61,17 +66,24 @@ public class ServletContextHelperFactoryImpl
 		_executorService = _portalExecutorManager.getPortalExecutor(
 			ServletContextHelperFactoryImpl.class.getName());
 
-		_serviceRegistration = bundleContext.registerService(
-			ServletContextHelperRegistration.class.getName(),
-			new ServletContextHelperRegistrationServiceFactory(
-				_jspServletFactory, _saxParserFactory, properties,
-				_executorService),
-			null);
+		Bundle bundle = FrameworkUtil.getBundle(
+			ServletContextHelperRegistrationImpl.class);
+
+		BundleContext bundleContext = bundle.getBundleContext();
+
+		_serviceRegistrationDCLSingleton.getSingleton(
+			() -> bundleContext.registerService(
+				ServletContextHelperRegistration.class.getName(),
+				new ServletContextHelperRegistrationServiceFactory(
+					_jspServletFactory, _saxParserFactory,
+					Collections.emptyMap(), _executorService),
+				null));
 	}
 
 	@Deactivate
-	protected void deactivate(BundleContext bundleContext) throws Exception {
-		_serviceRegistration.unregister();
+	protected void deactivate() throws Exception {
+		_serviceRegistrationDCLSingleton.destroy(
+			ServiceRegistration::unregister);
 
 		_executorService.shutdownNow();
 	}
@@ -99,9 +111,12 @@ public class ServletContextHelperFactoryImpl
 	@Reference
 	private PortalExecutorManager _portalExecutorManager;
 
+	private boolean _ready;
+
 	@Reference
 	private SAXParserFactory _saxParserFactory;
 
-	private ServiceRegistration<?> _serviceRegistration;
+	private final DCLSingleton<ServiceRegistration<?>>
+		_serviceRegistrationDCLSingleton = new DCLSingleton<>();
 
 }
