@@ -5,13 +5,14 @@
 
 package com.liferay.portal.osgi.web.servlet.context.helper.internal;
 
+import com.liferay.petra.concurrent.DCLSingleton;
 import com.liferay.petra.executor.PortalExecutorManager;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.portal.osgi.web.servlet.JSPServletFactory;
 import com.liferay.portal.osgi.web.servlet.context.helper.ServletContextHelperFactory;
 import com.liferay.portal.osgi.web.servlet.context.helper.ServletContextHelperRegistration;
 
-import java.util.Map;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,10 +36,20 @@ import org.xml.sax.SAXNotSupportedException;
 public class ServletContextHelperFactoryImpl
 	implements ServletContextHelperFactory {
 
+	@Override
+	public void registerServletContextHelperRegistration() {
+		_serviceRegistrationDCLSingleton.getSingleton(
+			() -> _bundleContext.registerService(
+				ServletContextHelperRegistration.class.getName(),
+				new ServletContextHelperRegistrationServiceFactory(
+					_jspServletFactory, _saxParserFactory,
+					Collections.emptyMap(), _executorService),
+				null));
+	}
+
 	@Activate
-	protected void activate(
-			BundleContext bundleContext, Map<String, Object> properties)
-		throws Exception {
+	protected void activate(BundleContext bundleContext) {
+		_bundleContext = bundleContext;
 
 		_saxParserFactory.setNamespaceAware(false);
 		_saxParserFactory.setValidating(false);
@@ -60,18 +71,12 @@ public class ServletContextHelperFactoryImpl
 
 		_executorService = _portalExecutorManager.getPortalExecutor(
 			ServletContextHelperFactoryImpl.class.getName());
-
-		_serviceRegistration = bundleContext.registerService(
-			ServletContextHelperRegistration.class.getName(),
-			new ServletContextHelperRegistrationServiceFactory(
-				_jspServletFactory, _saxParserFactory, properties,
-				_executorService),
-			null);
 	}
 
 	@Deactivate
-	protected void deactivate(BundleContext bundleContext) throws Exception {
-		_serviceRegistration.unregister();
+	protected void deactivate() throws Exception {
+		_serviceRegistrationDCLSingleton.destroy(
+			ServiceRegistration::unregister);
 
 		_executorService.shutdownNow();
 	}
@@ -88,6 +93,7 @@ public class ServletContextHelperFactoryImpl
 	private static final String _FEATURES_LOAD_EXTERNAL_DTD =
 		"http://apache.org/xml/features/nonvalidating/load-external-dtd";
 
+	private BundleContext _bundleContext;
 	private ExecutorService _executorService;
 
 	@Reference
@@ -102,6 +108,7 @@ public class ServletContextHelperFactoryImpl
 	@Reference
 	private SAXParserFactory _saxParserFactory;
 
-	private ServiceRegistration<?> _serviceRegistration;
+	private final DCLSingleton<ServiceRegistration<?>>
+		_serviceRegistrationDCLSingleton = new DCLSingleton<>();
 
 }
