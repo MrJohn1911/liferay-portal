@@ -328,6 +328,8 @@ public class PortletTracker
 		_serviceTracker = new ServiceTracker<>(
 			_bundleContext, Portlet.class, this);
 
+		_servletContextHelperFactory.registerServletContextHelperRegistration();
+
 		DependencyManagerSyncUtil.registerSyncFutureTask(
 			new FutureTask<>(
 				() -> {

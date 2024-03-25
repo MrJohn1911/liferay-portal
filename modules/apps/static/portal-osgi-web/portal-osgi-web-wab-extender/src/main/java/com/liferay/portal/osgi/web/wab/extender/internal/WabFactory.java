@@ -151,6 +151,8 @@ public class WabFactory
 	protected void activate(ComponentContext componentContext) {
 		_parallel = StartupHelperUtil.isDBWarmed();
 
+		_servletContextHelperFactory.registerServletContextHelperRegistration();
+
 		BundleContext bundleContext = componentContext.getBundleContext();
 
 		Dictionary<String, Object> properties =
