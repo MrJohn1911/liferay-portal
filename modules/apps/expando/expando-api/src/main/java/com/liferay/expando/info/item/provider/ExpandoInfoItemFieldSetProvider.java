@@ -9,6 +9,7 @@ import com.liferay.info.field.InfoFieldSet;
 import com.liferay.info.field.InfoFieldValue;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -23,5 +24,8 @@ public interface ExpandoInfoItemFieldSetProvider {
 
 	public List<InfoFieldValue<Object>> getInfoFieldValues(
 		String itemClassName, Object itemObject);
+
+	public List<InfoFieldValue<Object>> getInfoFieldValuesWithLocale(
+		String itemClassName, Object itemObject, Locale locale);
 
 }

@@ -13,10 +13,12 @@ import com.liferay.info.field.InfoFieldSet;
 import com.liferay.info.field.InfoFieldValue;
 import com.liferay.info.localized.InfoLocalizedValue;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
+import com.liferay.portal.kernel.util.LocaleUtil;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -51,6 +53,14 @@ public class ExpandoInfoItemFieldSetProviderImpl
 	public List<InfoFieldValue<Object>> getInfoFieldValues(
 		String itemClassName, Object itemObject) {
 
+		return getInfoFieldValuesWithLocale(
+			itemClassName, itemObject, LocaleUtil.getDefault());
+	}
+
+	@Override
+	public List<InfoFieldValue<Object>> getInfoFieldValuesWithLocale(
+		String itemClassName, Object itemObject, Locale locale) {
+
 		List<InfoFieldValue<Object>> infoFieldValues = new ArrayList<>();
 
 		for (ExpandoInfoItemFieldReader expandoInfoItemFieldReader :
@@ -58,7 +68,7 @@ public class ExpandoInfoItemFieldSetProviderImpl
 
 			InfoFieldValue<Object> infoFieldValue = new InfoFieldValue<>(
 				expandoInfoItemFieldReader.getInfoField(),
-				expandoInfoItemFieldReader.getValue(itemObject));
+				expandoInfoItemFieldReader.getValue(itemObject, locale));
 
 			infoFieldValues.add(infoFieldValue);
 		}

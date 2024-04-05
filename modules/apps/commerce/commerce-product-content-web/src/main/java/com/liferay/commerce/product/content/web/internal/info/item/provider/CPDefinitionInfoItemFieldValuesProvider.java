@@ -73,8 +73,9 @@ public class CPDefinitionInfoItemFieldValuesProvider
 					CPDefinition.class.getName(),
 					cpDefinition.getCPDefinitionId())
 			).infoFieldValues(
-				_expandoInfoItemFieldSetProvider.getInfoFieldValues(
-					CPDefinition.class.getName(), cpDefinition)
+				_expandoInfoItemFieldSetProvider.getInfoFieldValuesWithLocale(
+					CPDefinition.class.getName(), cpDefinition,
+					LocaleUtil.getMostRelevantLocale())
 			).infoFieldValues(
 				_displayPageInfoItemFieldSetProvider.getInfoFieldValues(
 					new InfoItemReference(
