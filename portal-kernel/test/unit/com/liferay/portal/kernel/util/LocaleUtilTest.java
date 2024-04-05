@@ -179,13 +179,13 @@ public class LocaleUtilTest {
 		);
 
 		Assert.assertEquals(
-			"English (United States)",
+			"English (United States, US)",
 			LocaleUtil.getLocaleDisplayName(Locale.US, Locale.US));
 
 		Locale catalanLocale = new Locale("ca", "ES");
 
 		Assert.assertEquals(
-			"Catalan (Spain)",
+			"Catalan (Spain, ES)",
 			LocaleUtil.getLocaleDisplayName(catalanLocale, Locale.US));
 
 		Locale catalanValenciaLocale = new Locale("ca", "ES", "VALENCIA");
@@ -218,7 +218,7 @@ public class LocaleUtilTest {
 		Locale catalanLocale = new Locale("ca", "ES");
 
 		Assert.assertEquals(
-			"catal\u00e0 (Espanya)",
+			"catal\u00e0 (Espanya, ES)",
 			LocaleUtil.getLongDisplayName(catalanLocale, duplicateLanguages));
 
 		Locale catalanValenciaLocale = new Locale("ca", "ES", "VALENCIA");
