@@ -104,6 +104,7 @@ definition {
 		property portal.smoke = "false";
 		property portal.upstream = "quarantine";
 
+
 		User.firstLoginUI(
 			newPassword = "test2",
 			password = ${password},
