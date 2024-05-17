@@ -24,10 +24,6 @@ public class ThreadTitleComparator<T> extends OrderByComparator<T> {
 		"priority", "title", "modifiedDate"
 	};
 
-	public ThreadTitleComparator() {
-		this(false);
-	}
-
 	public ThreadTitleComparator(boolean ascending) {
 		_ascending = ascending;
 	}
