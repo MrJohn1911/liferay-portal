@@ -23,8 +23,14 @@ public class FragmentEntryLinkLastPropagationDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"lastPropagationDate"};
 
-	public FragmentEntryLinkLastPropagationDateComparator(boolean ascending) {
-		_ascending = ascending;
+	public static FragmentEntryLinkLastPropagationDateComparator getInstance(
+		boolean ascending) {
+
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -61,6 +67,18 @@ public class FragmentEntryLinkLastPropagationDateComparator
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private FragmentEntryLinkLastPropagationDateComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final FragmentEntryLinkLastPropagationDateComparator
+		_INSTANCE_ASCENDING =
+			new FragmentEntryLinkLastPropagationDateComparator(true);
+
+	private static final FragmentEntryLinkLastPropagationDateComparator
+		_INSTANCE_DESCENDING =
+			new FragmentEntryLinkLastPropagationDateComparator(false);
 
 	private final boolean _ascending;
 
