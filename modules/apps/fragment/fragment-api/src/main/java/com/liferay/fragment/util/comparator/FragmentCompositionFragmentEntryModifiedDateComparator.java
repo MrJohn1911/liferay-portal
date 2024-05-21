@@ -24,10 +24,14 @@ public class FragmentCompositionFragmentEntryModifiedDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"modifiedDate"};
 
-	public FragmentCompositionFragmentEntryModifiedDateComparator(
-		boolean ascending) {
+	public static FragmentCompositionFragmentEntryModifiedDateComparator
+		getInstance(boolean ascending) {
 
-		_ascending = ascending;
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -73,6 +77,20 @@ public class FragmentCompositionFragmentEntryModifiedDateComparator
 
 		return fragmentEntry.getModifiedDate();
 	}
+
+	private FragmentCompositionFragmentEntryModifiedDateComparator(
+		boolean ascending) {
+
+		_ascending = ascending;
+	}
+
+	private static final FragmentCompositionFragmentEntryModifiedDateComparator
+		_INSTANCE_ASCENDING =
+			new FragmentCompositionFragmentEntryModifiedDateComparator(true);
+
+	private static final FragmentCompositionFragmentEntryModifiedDateComparator
+		_INSTANCE_DESCENDING =
+			new FragmentCompositionFragmentEntryModifiedDateComparator(false);
 
 	private final boolean _ascending;
 
