@@ -23,8 +23,14 @@ public class DataProviderInstanceModifiedDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"modifiedDate"};
 
-	public DataProviderInstanceModifiedDateComparator(boolean ascending) {
-		_ascending = ascending;
+	public static DataProviderInstanceModifiedDateComparator getInstance(
+		boolean ascending) {
+
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -61,6 +67,18 @@ public class DataProviderInstanceModifiedDateComparator
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private DataProviderInstanceModifiedDateComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final DataProviderInstanceModifiedDateComparator
+		_INSTANCE_ASCENDING = new DataProviderInstanceModifiedDateComparator(
+			true);
+
+	private static final DataProviderInstanceModifiedDateComparator
+		_INSTANCE_DESCENDING = new DataProviderInstanceModifiedDateComparator(
+			false);
 
 	private final boolean _ascending;
 
