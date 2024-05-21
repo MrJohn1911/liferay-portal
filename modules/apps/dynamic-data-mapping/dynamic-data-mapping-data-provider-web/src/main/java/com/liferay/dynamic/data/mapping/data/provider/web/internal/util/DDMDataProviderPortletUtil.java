@@ -35,7 +35,7 @@ public class DDMDataProviderPortletUtil {
 		OrderByComparator<DDMDataProviderInstance> orderByComparator = null;
 
 		if (orderByCol.equals("modified-date")) {
-			orderByComparator = new DataProviderInstanceModifiedDateComparator(
+			orderByComparator = DataProviderInstanceModifiedDateComparator.get(
 				orderByAsc);
 		}
 		else if (orderByCol.equals("name")) {
