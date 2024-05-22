@@ -15,8 +15,14 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 public class BackgroundTaskCreateDateComparator
 	extends OrderByComparator<BackgroundTask> {
 
-	public BackgroundTaskCreateDateComparator(boolean ascending) {
-		_ascending = ascending;
+	public static BackgroundTaskCreateDateComparator getInstance(
+		boolean ascending) {
+
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -51,6 +57,16 @@ public class BackgroundTaskCreateDateComparator
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private BackgroundTaskCreateDateComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final BackgroundTaskCreateDateComparator
+		_INSTANCE_ASCENDING = new BackgroundTaskCreateDateComparator(true);
+
+	private static final BackgroundTaskCreateDateComparator
+		_INSTANCE_DESCENDING = new BackgroundTaskCreateDateComparator(false);
 
 	private static final String _ORDER_BY_ASC = "BackgroundTask.createDate ASC";
 
