@@ -584,8 +584,8 @@ public class DisplayPageDisplayContext {
 				getInstance(orderByAsc);
 		}
 		else if (Objects.equals(getOrderByCol(), "name")) {
-			return new LayoutPageTemplateCollectionLayoutPageTemplateEntryNameComparator(
-				orderByAsc);
+			return LayoutPageTemplateCollectionLayoutPageTemplateEntryNameComparator.
+				getInstance(orderByAsc);
 		}
 
 		return null;

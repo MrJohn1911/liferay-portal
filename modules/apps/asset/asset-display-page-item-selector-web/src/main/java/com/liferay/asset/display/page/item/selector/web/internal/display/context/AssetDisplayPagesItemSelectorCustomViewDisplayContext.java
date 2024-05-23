@@ -238,8 +238,8 @@ public class AssetDisplayPagesItemSelectorCustomViewDisplayContext {
 		}
 		else if (orderByCol.equals("name")) {
 			orderByComparator =
-				new LayoutPageTemplateCollectionLayoutPageTemplateEntryNameComparator(
-					orderByAsc);
+				LayoutPageTemplateCollectionLayoutPageTemplateEntryNameComparator.
+					getInstance(orderByAsc);
 		}
 
 		return orderByComparator;
