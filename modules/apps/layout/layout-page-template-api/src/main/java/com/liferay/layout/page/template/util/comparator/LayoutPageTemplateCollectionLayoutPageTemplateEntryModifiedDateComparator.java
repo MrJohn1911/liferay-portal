@@ -51,7 +51,7 @@ public class
 
 			LayoutPageTemplateEntryModifiedDateComparator
 				layoutPageTemplateEntryModifiedDateComparator =
-					new LayoutPageTemplateEntryModifiedDateComparator();
+					new LayoutPageTemplateEntryModifiedDateComparator(true);
 
 			return layoutPageTemplateEntryModifiedDateComparator.compare(
 				(LayoutPageTemplateEntry)object1,
