@@ -20,8 +20,12 @@ public class LayoutRelevanceComparator extends OrderByComparator<Layout> {
 
 	public static final String[] ORDER_BY_FIELDS = {"score"};
 
-	public LayoutRelevanceComparator(boolean ascending) {
-		_ascending = ascending;
+	public static LayoutRelevanceComparator getInstance(boolean ascending) {
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -54,6 +58,16 @@ public class LayoutRelevanceComparator extends OrderByComparator<Layout> {
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private LayoutRelevanceComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final LayoutRelevanceComparator _INSTANCE_ASCENDING =
+		new LayoutRelevanceComparator(true);
+
+	private static final LayoutRelevanceComparator _INSTANCE_DESCENDING =
+		new LayoutRelevanceComparator(false);
 
 	private final boolean _ascending;
 
