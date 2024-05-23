@@ -21,8 +21,12 @@ public class DDMFormInstanceNameComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"name"};
 
-	public DDMFormInstanceNameComparator(boolean ascending) {
-		_ascending = ascending;
+	public static DDMFormInstanceNameComparator getInstance(boolean ascending) {
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -59,6 +63,16 @@ public class DDMFormInstanceNameComparator
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private DDMFormInstanceNameComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final DDMFormInstanceNameComparator _INSTANCE_ASCENDING =
+		new DDMFormInstanceNameComparator(true);
+
+	private static final DDMFormInstanceNameComparator _INSTANCE_DESCENDING =
+		new DDMFormInstanceNameComparator(false);
 
 	private final boolean _ascending;
 
