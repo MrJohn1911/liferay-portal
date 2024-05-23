@@ -17,12 +17,6 @@ import java.util.Date;
 public class WorkflowDefinitionModifiedDateComparator
 	extends OrderByComparator<WorkflowDefinition> {
 
-	public static final String ORDER_BY_ASC = "modifiedDate ASC";
-
-	public static final String ORDER_BY_DESC = "modifiedDate DESC";
-
-	public static final String[] ORDER_BY_FIELDS = {"modifiedDate"};
-
 	public WorkflowDefinitionModifiedDateComparator(boolean ascending) {
 		_ascending = ascending;
 	}
@@ -52,21 +46,27 @@ public class WorkflowDefinitionModifiedDateComparator
 	@Override
 	public String getOrderBy() {
 		if (_ascending) {
-			return ORDER_BY_ASC;
+			return _ORDER_BY_ASC;
 		}
 
-		return ORDER_BY_DESC;
+		return _ORDER_BY_DESC;
 	}
 
 	@Override
 	public String[] getOrderByFields() {
-		return ORDER_BY_FIELDS;
+		return _ORDER_BY_FIELDS;
 	}
 
 	@Override
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private static final String _ORDER_BY_ASC = "modifiedDate ASC";
+
+	private static final String _ORDER_BY_DESC = "modifiedDate DESC";
+
+	private static final String[] _ORDER_BY_FIELDS = {"modifiedDate"};
 
 	private final boolean _ascending;
 
