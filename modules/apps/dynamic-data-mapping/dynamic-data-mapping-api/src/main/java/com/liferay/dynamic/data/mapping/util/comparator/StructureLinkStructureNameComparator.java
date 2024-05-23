@@ -30,17 +30,14 @@ public class StructureLinkStructureNameComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"name"};
 
-	public StructureLinkStructureNameComparator(boolean ascending) {
-		this(ascending, LocaleUtil.getDefault());
-	}
+	public static StructureLinkStructureNameComparator getInstance(
+		boolean ascending) {
 
-	public StructureLinkStructureNameComparator(
-		boolean ascending, Locale locale) {
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
 
-		_ascending = ascending;
-		_locale = locale;
-
-		_collator = CollatorUtil.getInstance(locale);
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -92,6 +89,25 @@ public class StructureLinkStructureNameComparator
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private StructureLinkStructureNameComparator(boolean ascending) {
+		this(ascending, LocaleUtil.getDefault());
+	}
+
+	private StructureLinkStructureNameComparator(
+		boolean ascending, Locale locale) {
+
+		_ascending = ascending;
+		_locale = locale;
+
+		_collator = CollatorUtil.getInstance(locale);
+	}
+
+	private static final StructureLinkStructureNameComparator
+		_INSTANCE_ASCENDING = new StructureLinkStructureNameComparator(true);
+
+	private static final StructureLinkStructureNameComparator
+		_INSTANCE_DESCENDING = new StructureLinkStructureNameComparator(false);
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		StructureLinkStructureNameComparator.class);
