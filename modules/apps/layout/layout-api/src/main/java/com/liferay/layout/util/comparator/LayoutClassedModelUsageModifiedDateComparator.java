@@ -23,8 +23,14 @@ public class LayoutClassedModelUsageModifiedDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"modifiedDate"};
 
-	public LayoutClassedModelUsageModifiedDateComparator(boolean ascending) {
-		_ascending = ascending;
+	public static LayoutClassedModelUsageModifiedDateComparator getInstance(
+		boolean ascending) {
+
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -61,6 +67,18 @@ public class LayoutClassedModelUsageModifiedDateComparator
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private LayoutClassedModelUsageModifiedDateComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final LayoutClassedModelUsageModifiedDateComparator
+		_INSTANCE_ASCENDING = new LayoutClassedModelUsageModifiedDateComparator(
+			true);
+
+	private static final LayoutClassedModelUsageModifiedDateComparator
+		_INSTANCE_DESCENDING =
+			new LayoutClassedModelUsageModifiedDateComparator(false);
 
 	private final boolean _ascending;
 
