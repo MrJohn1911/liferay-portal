@@ -15,8 +15,12 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 public class EntryCreateDateComparator
 	extends OrderByComparator<MicroblogsEntry> {
 
-	public EntryCreateDateComparator(boolean ascending) {
-		_ascending = ascending;
+	public static EntryCreateDateComparator getInstance(boolean ascending) {
+		if (ascending) {
+			return _ASCENDING;
+		}
+
+		return _DESCENDING;
 	}
 
 	@Override
@@ -51,6 +55,16 @@ public class EntryCreateDateComparator
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private EntryCreateDateComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final EntryCreateDateComparator _ASCENDING =
+		new EntryCreateDateComparator(true);
+
+	private static final EntryCreateDateComparator _DESCENDING =
+		new EntryCreateDateComparator(false);
 
 	private static final String _ORDER_BY_ASC = "createDate ASC";
 
