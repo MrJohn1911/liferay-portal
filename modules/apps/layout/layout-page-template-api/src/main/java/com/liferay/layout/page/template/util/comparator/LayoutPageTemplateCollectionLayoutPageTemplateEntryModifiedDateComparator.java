@@ -22,10 +22,15 @@ public class
 
 	public static final String[] ORDER_BY_FIELDS = {"modifiedDate"};
 
-	public LayoutPageTemplateCollectionLayoutPageTemplateEntryModifiedDateComparator(
-		boolean ascending) {
+	public static
+		LayoutPageTemplateCollectionLayoutPageTemplateEntryModifiedDateComparator
+			getInstance(boolean ascending) {
 
-		_ascending = ascending;
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -89,6 +94,24 @@ public class
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private LayoutPageTemplateCollectionLayoutPageTemplateEntryModifiedDateComparator(
+		boolean ascending) {
+
+		_ascending = ascending;
+	}
+
+	private static final
+		LayoutPageTemplateCollectionLayoutPageTemplateEntryModifiedDateComparator
+			_INSTANCE_ASCENDING =
+				new LayoutPageTemplateCollectionLayoutPageTemplateEntryModifiedDateComparator(
+					true);
+
+	private static final
+		LayoutPageTemplateCollectionLayoutPageTemplateEntryModifiedDateComparator
+			_INSTANCE_DESCENDING =
+				new LayoutPageTemplateCollectionLayoutPageTemplateEntryModifiedDateComparator(
+					false);
 
 	private final boolean _ascending;
 

@@ -580,8 +580,8 @@ public class DisplayPageDisplayContext {
 				getInstance(orderByAsc);
 		}
 		else if (Objects.equals(getOrderByCol(), "modified-date")) {
-			return new LayoutPageTemplateCollectionLayoutPageTemplateEntryModifiedDateComparator(
-				orderByAsc);
+			return LayoutPageTemplateCollectionLayoutPageTemplateEntryModifiedDateComparator.
+				getInstance(orderByAsc);
 		}
 		else if (Objects.equals(getOrderByCol(), "name")) {
 			return new LayoutPageTemplateCollectionLayoutPageTemplateEntryNameComparator(
