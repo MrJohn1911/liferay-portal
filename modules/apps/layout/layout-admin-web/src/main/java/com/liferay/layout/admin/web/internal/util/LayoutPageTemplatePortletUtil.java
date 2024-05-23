@@ -33,7 +33,7 @@ public class LayoutPageTemplatePortletUtil {
 
 		if (orderByCol.equals("create-date")) {
 			orderByComparator =
-				new LayoutPageTemplateCollectionCreateDateComparator(
+				LayoutPageTemplateCollectionCreateDateComparator.getInstance(
 					orderByAsc);
 		}
 		else if (orderByCol.equals("name")) {
