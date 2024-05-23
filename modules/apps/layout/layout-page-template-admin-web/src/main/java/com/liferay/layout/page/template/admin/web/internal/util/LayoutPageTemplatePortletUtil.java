@@ -37,8 +37,9 @@ public class LayoutPageTemplatePortletUtil {
 					orderByAsc);
 		}
 		else if (orderByCol.equals("name")) {
-			orderByComparator = new LayoutPageTemplateCollectionNameComparator(
-				orderByAsc);
+			orderByComparator =
+				LayoutPageTemplateCollectionNameComparator.getInstance(
+					orderByAsc);
 		}
 
 		return orderByComparator;

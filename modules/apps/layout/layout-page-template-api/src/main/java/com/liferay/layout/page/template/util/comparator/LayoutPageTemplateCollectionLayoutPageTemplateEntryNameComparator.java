@@ -39,7 +39,8 @@ public class LayoutPageTemplateCollectionLayoutPageTemplateEntryNameComparator
 
 			LayoutPageTemplateCollectionNameComparator
 				layoutPageTemplateCollectionNameComparator =
-					new LayoutPageTemplateCollectionNameComparator(false);
+					LayoutPageTemplateCollectionNameComparator.getInstance(
+						false);
 
 			return layoutPageTemplateCollectionNameComparator.compare(
 				(LayoutPageTemplateCollection)object1,
