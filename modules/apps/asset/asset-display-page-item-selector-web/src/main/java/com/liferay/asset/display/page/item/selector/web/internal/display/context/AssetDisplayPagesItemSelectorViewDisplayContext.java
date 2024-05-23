@@ -173,8 +173,8 @@ public class AssetDisplayPagesItemSelectorViewDisplayContext {
 					orderByAsc);
 		}
 		else if (orderByCol.equals("name")) {
-			orderByComparator = new LayoutPageTemplateEntryNameComparator(
-				orderByAsc);
+			orderByComparator =
+				LayoutPageTemplateEntryNameComparator.getInstance(orderByAsc);
 		}
 
 		return orderByComparator;

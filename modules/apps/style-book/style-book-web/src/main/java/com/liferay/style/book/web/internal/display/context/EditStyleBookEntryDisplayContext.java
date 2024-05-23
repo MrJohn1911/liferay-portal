@@ -354,8 +354,8 @@ public class EditStyleBookEntryDisplayContext {
 							_getPreviewItemsGroupId(), layoutTypes,
 							WorkflowConstants.STATUS_APPROVED, 0,
 							Math.min(total, 4),
-							new LayoutPageTemplateEntryModifiedDateComparator(
-								false)),
+							LayoutPageTemplateEntryModifiedDateComparator.
+								getInstance(false)),
 					layoutPageTemplateEntry -> JSONUtil.put(
 						"name", layoutPageTemplateEntry.getName()
 					).put(

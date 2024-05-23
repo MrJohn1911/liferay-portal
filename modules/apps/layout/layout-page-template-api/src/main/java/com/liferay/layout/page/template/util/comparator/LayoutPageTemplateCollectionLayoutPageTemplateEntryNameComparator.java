@@ -52,7 +52,7 @@ public class LayoutPageTemplateCollectionLayoutPageTemplateEntryNameComparator
 
 			LayoutPageTemplateEntryNameComparator
 				layoutPageTemplateEntryNameComparator =
-					new LayoutPageTemplateEntryNameComparator(false);
+					LayoutPageTemplateEntryNameComparator.getInstance(false);
 
 			return layoutPageTemplateEntryNameComparator.compare(
 				(LayoutPageTemplateEntry)object1,
