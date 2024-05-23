@@ -17,8 +17,14 @@ import java.util.Date;
 public class WorkflowDefinitionModifiedDateComparator
 	extends OrderByComparator<WorkflowDefinition> {
 
-	public WorkflowDefinitionModifiedDateComparator(boolean ascending) {
-		_ascending = ascending;
+	public static WorkflowDefinitionModifiedDateComparator getInstance(
+		boolean ascending) {
+
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -61,6 +67,18 @@ public class WorkflowDefinitionModifiedDateComparator
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private WorkflowDefinitionModifiedDateComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final WorkflowDefinitionModifiedDateComparator
+		_INSTANCE_ASCENDING = new WorkflowDefinitionModifiedDateComparator(
+			true);
+
+	private static final WorkflowDefinitionModifiedDateComparator
+		_INSTANCE_DESCENDING = new WorkflowDefinitionModifiedDateComparator(
+			false);
 
 	private static final String _ORDER_BY_ASC = "modifiedDate ASC";
 
