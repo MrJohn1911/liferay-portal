@@ -23,10 +23,6 @@ public class LayoutPageTemplateEntryModifiedDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"modifiedDate"};
 
-	public LayoutPageTemplateEntryModifiedDateComparator() {
-		this(true);
-	}
-
 	public LayoutPageTemplateEntryModifiedDateComparator(boolean ascending) {
 		_ascending = ascending;
 	}

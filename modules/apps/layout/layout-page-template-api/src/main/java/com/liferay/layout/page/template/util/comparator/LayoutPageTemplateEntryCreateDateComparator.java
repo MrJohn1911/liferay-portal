@@ -23,10 +23,6 @@ public class LayoutPageTemplateEntryCreateDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"createDate"};
 
-	public LayoutPageTemplateEntryCreateDateComparator() {
-		this(true);
-	}
-
 	public LayoutPageTemplateEntryCreateDateComparator(boolean ascending) {
 		_ascending = ascending;
 	}

@@ -25,10 +25,6 @@ public class LayoutPageTemplateCollectionNameComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"name"};
 
-	public LayoutPageTemplateCollectionNameComparator() {
-		this(false);
-	}
-
 	public LayoutPageTemplateCollectionNameComparator(boolean ascending) {
 		_ascending = ascending;
 	}

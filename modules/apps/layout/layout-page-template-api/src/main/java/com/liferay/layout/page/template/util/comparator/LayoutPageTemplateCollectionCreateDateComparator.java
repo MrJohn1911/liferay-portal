@@ -25,10 +25,6 @@ public class LayoutPageTemplateCollectionCreateDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"createDate"};
 
-	public LayoutPageTemplateCollectionCreateDateComparator() {
-		this(true);
-	}
-
 	public LayoutPageTemplateCollectionCreateDateComparator(boolean ascending) {
 		_ascending = ascending;
 	}

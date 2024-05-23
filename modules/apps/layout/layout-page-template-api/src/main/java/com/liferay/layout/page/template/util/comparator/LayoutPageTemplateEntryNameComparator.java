@@ -23,10 +23,6 @@ public class LayoutPageTemplateEntryNameComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"name"};
 
-	public LayoutPageTemplateEntryNameComparator() {
-		this(false);
-	}
-
 	public LayoutPageTemplateEntryNameComparator(boolean ascending) {
 		_ascending = ascending;
 	}
