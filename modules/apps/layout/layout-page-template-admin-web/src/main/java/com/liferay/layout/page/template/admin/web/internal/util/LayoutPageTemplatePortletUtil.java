@@ -58,8 +58,9 @@ public class LayoutPageTemplatePortletUtil {
 		OrderByComparator<LayoutPageTemplateEntry> orderByComparator = null;
 
 		if (orderByCol.equals("create-date")) {
-			orderByComparator = new LayoutPageTemplateEntryCreateDateComparator(
-				orderByAsc);
+			orderByComparator =
+				LayoutPageTemplateEntryCreateDateComparator.getInstance(
+					orderByAsc);
 		}
 		else if (orderByCol.equals("name")) {
 			orderByComparator = new LayoutPageTemplateEntryNameComparator(
