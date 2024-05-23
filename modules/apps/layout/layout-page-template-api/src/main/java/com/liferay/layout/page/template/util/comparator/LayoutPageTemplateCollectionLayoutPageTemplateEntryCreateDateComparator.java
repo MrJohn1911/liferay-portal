@@ -39,7 +39,7 @@ public class
 
 			LayoutPageTemplateCollectionCreateDateComparator
 				layoutPageTemplateCollectionCreateDateComparator =
-					new LayoutPageTemplateCollectionCreateDateComparator();
+					new LayoutPageTemplateCollectionCreateDateComparator(true);
 
 			return layoutPageTemplateCollectionCreateDateComparator.compare(
 				(LayoutPageTemplateCollection)object1,
