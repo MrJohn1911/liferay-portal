@@ -40,8 +40,8 @@ public class
 
 			LayoutPageTemplateCollectionModifiedDateComparator
 				layoutPageTemplateCollectionModifiedDateComparator =
-					new LayoutPageTemplateCollectionModifiedDateComparator(
-						true);
+					LayoutPageTemplateCollectionModifiedDateComparator.
+						getInstance(true);
 
 			return layoutPageTemplateCollectionModifiedDateComparator.compare(
 				(LayoutPageTemplateCollection)object1,
