@@ -21,8 +21,12 @@ public class StructureCreateDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"createDate"};
 
-	public StructureCreateDateComparator(boolean ascending) {
-		_ascending = ascending;
+	public static StructureCreateDateComparator getInstance(boolean ascending) {
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -55,6 +59,16 @@ public class StructureCreateDateComparator
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private StructureCreateDateComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final StructureCreateDateComparator _INSTANCE_ASCENDING =
+		new StructureCreateDateComparator(true);
+
+	private static final StructureCreateDateComparator _INSTANCE_DESCENDING =
+		new StructureCreateDateComparator(false);
 
 	private final boolean _ascending;
 
