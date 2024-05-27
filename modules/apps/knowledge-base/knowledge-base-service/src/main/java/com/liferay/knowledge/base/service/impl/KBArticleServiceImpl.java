@@ -366,7 +366,7 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 
 		List<KBArticle> kbArticles = getGroupKBArticles(
 			group.getGroupId(), status, 0, max,
-			new KBArticleModifiedDateComparator());
+			new KBArticleModifiedDateComparator(false));
 
 		return _exportToRSS(
 			name, description, feedURL, kbArticles, type, version, displayStyle,
@@ -412,7 +412,7 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 
 		List<KBArticle> kbArticles = getAllDescendantKBArticles(
 			GroupConstants.DEFAULT_PARENT_GROUP_ID, resourcePrimKey, status,
-			new KBArticleModifiedDateComparator());
+			new KBArticleModifiedDateComparator(false));
 
 		return _exportToRSS(
 			name, description, feedURL, ListUtil.subList(kbArticles, 0, max),
