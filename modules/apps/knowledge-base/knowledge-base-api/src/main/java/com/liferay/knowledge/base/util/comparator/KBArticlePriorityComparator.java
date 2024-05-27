@@ -20,10 +20,6 @@ public class KBArticlePriorityComparator extends OrderByComparator<KBArticle> {
 
 	public static final String[] ORDER_BY_FIELDS = {"priority", "title"};
 
-	public KBArticlePriorityComparator() {
-		this(false);
-	}
-
 	public KBArticlePriorityComparator(boolean ascending) {
 		_ascending = ascending;
 	}

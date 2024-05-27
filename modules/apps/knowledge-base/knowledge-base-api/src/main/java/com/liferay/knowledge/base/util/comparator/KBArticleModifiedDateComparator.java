@@ -22,10 +22,6 @@ public class KBArticleModifiedDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"modifiedDate"};
 
-	public KBArticleModifiedDateComparator() {
-		this(false);
-	}
-
 	public KBArticleModifiedDateComparator(boolean ascending) {
 		_ascending = ascending;
 	}

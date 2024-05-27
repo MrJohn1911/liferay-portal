@@ -20,10 +20,6 @@ public class KBArticleVersionComparator extends OrderByComparator<KBArticle> {
 
 	public static final String[] ORDER_BY_FIELDS = {"version", "title"};
 
-	public KBArticleVersionComparator() {
-		this(false);
-	}
-
 	public KBArticleVersionComparator(boolean ascending) {
 		_ascending = ascending;
 	}
