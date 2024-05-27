@@ -2432,7 +2432,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		List<KBArticle> kbArticles = getKBArticles(
 			groupId, parentResourcePrimKey, WorkflowConstants.STATUS_ANY, 0, 1,
-			new KBArticlePriorityComparator());
+			new KBArticlePriorityComparator(false));
 
 		if (kbArticles.isEmpty()) {
 			return KBArticleConstants.DEFAULT_PRIORITY;
