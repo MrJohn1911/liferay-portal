@@ -100,7 +100,7 @@ public class KBUtil {
 		}
 
 		if (orderByCol.equals("create-date")) {
-			return new KBArticleCreateDateComparator(ascending);
+			return KBArticleCreateDateComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("modified-date")) {
 			return new KBArticleModifiedDateComparator(ascending);
