@@ -693,11 +693,12 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	public KBArticle fetchLatestKBArticle(long resourcePrimKey, int status) {
 		if (status == WorkflowConstants.STATUS_ANY) {
 			return kbArticlePersistence.fetchByResourcePrimKey_First(
-				resourcePrimKey, new KBArticleVersionComparator(false));
+				resourcePrimKey, KBArticleVersionComparator.getInstance(false));
 		}
 
 		return kbArticlePersistence.fetchByR_S_First(
-			resourcePrimKey, status, new KBArticleVersionComparator(false));
+			resourcePrimKey, status,
+			KBArticleVersionComparator.getInstance(false));
 	}
 
 	@Override
@@ -712,7 +713,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		return kbArticlePersistence.fetchByG_ERC_Last(
 			groupId, externalReferenceCode,
-			new KBArticleVersionComparator(false));
+			KBArticleVersionComparator.getInstance(false));
 	}
 
 	@Override
@@ -725,7 +726,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		List<KBArticle> kbArticles = null;
 
 		OrderByComparator<KBArticle> orderByComparator =
-			new KBArticleVersionComparator(false);
+			KBArticleVersionComparator.getInstance(false);
 
 		if (status == WorkflowConstants.STATUS_ANY) {
 			kbArticles = kbArticlePersistence.findByG_KBFI_UT_NotS(
@@ -1018,11 +1019,12 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		if (status == WorkflowConstants.STATUS_ANY) {
 			return kbArticlePersistence.findByResourcePrimKey_First(
-				resourcePrimKey, new KBArticleVersionComparator(false));
+				resourcePrimKey, KBArticleVersionComparator.getInstance(false));
 		}
 
 		return kbArticlePersistence.findByR_S_First(
-			resourcePrimKey, status, new KBArticleVersionComparator(false));
+			resourcePrimKey, status,
+			KBArticleVersionComparator.getInstance(false));
 	}
 
 	@Override
@@ -1032,7 +1034,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		return kbArticlePersistence.findByG_ERC_First(
 			groupId, externalReferenceCode,
-			new KBArticleVersionComparator(false));
+			KBArticleVersionComparator.getInstance(false));
 	}
 
 	@Override
@@ -1265,7 +1267,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			List<KBArticle> kbArticles = getKBArticleVersions(
 				resourcePrimKey, WorkflowConstants.STATUS_ANY,
 				QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-				new KBArticleVersionComparator(false));
+				KBArticleVersionComparator.getInstance(false));
 
 			for (KBArticle curKBArticle : kbArticles) {
 				curKBArticle.setParentResourceClassNameId(
@@ -1289,7 +1291,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 						curKBArticle.getResourcePrimKey(),
 						WorkflowConstants.STATUS_ANY, QueryUtil.ALL_POS,
 						QueryUtil.ALL_POS,
-						new KBArticleVersionComparator(false));
+						KBArticleVersionComparator.getInstance(false));
 
 					for (KBArticle kbArticleVersion : kbArticleVersions) {
 						kbArticleVersion.setKbFolderId(kbFolderId);

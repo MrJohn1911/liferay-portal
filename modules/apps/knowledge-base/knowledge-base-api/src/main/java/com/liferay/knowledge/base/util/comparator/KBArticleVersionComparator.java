@@ -20,8 +20,12 @@ public class KBArticleVersionComparator extends OrderByComparator<KBArticle> {
 
 	public static final String[] ORDER_BY_FIELDS = {"version", "title"};
 
-	public KBArticleVersionComparator(boolean ascending) {
-		_ascending = ascending;
+	public static KBArticleVersionComparator getInstance(boolean ascending) {
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -66,6 +70,16 @@ public class KBArticleVersionComparator extends OrderByComparator<KBArticle> {
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private KBArticleVersionComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final KBArticleVersionComparator _INSTANCE_ASCENDING =
+		new KBArticleVersionComparator(true);
+
+	private static final KBArticleVersionComparator _INSTANCE_DESCENDING =
+		new KBArticleVersionComparator(false);
 
 	private final boolean _ascending;
 

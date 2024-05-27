@@ -118,7 +118,7 @@ public class KBUtil {
 			return KBArticleUserNameComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("version")) {
-			return new KBArticleVersionComparator(ascending);
+			return KBArticleVersionComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("view-count")) {
 			return new KBArticleViewCountComparator(ascending);
