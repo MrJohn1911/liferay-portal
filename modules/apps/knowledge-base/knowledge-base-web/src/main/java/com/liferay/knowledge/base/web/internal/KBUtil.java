@@ -112,7 +112,7 @@ public class KBUtil {
 			return KBArticleStatusComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("title")) {
-			return new KBArticleTitleComparator(ascending);
+			return KBArticleTitleComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("user-name")) {
 			return new KBArticleUserNameComparator(ascending);
