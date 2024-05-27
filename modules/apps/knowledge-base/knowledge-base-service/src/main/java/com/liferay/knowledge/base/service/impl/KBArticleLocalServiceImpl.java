@@ -642,7 +642,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		return kbArticlePersistence.fetchByG_P_L_NotS_First(
 			groupId, parentResourcePrimKey, true,
 			WorkflowConstants.STATUS_IN_TRASH,
-			new KBArticlePriorityComparator(true));
+			KBArticlePriorityComparator.getInstance(true));
 	}
 
 	@Override
@@ -2435,7 +2435,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		List<KBArticle> kbArticles = getKBArticles(
 			groupId, parentResourcePrimKey, WorkflowConstants.STATUS_ANY, 0, 1,
-			new KBArticlePriorityComparator(false));
+			KBArticlePriorityComparator.getInstance(false));
 
 		if (kbArticles.isEmpty()) {
 			return KBArticleConstants.DEFAULT_PRIORITY;

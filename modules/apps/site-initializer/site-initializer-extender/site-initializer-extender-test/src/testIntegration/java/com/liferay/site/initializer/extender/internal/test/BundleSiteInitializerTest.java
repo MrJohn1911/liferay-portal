@@ -1670,7 +1670,8 @@ public class BundleSiteInitializerTest {
 			_kbArticleLocalService.getKBArticles(
 				_group.getGroupId(), kbFolder.getKbFolderId(),
 				WorkflowConstants.STATUS_ANY, QueryUtil.ALL_POS,
-				QueryUtil.ALL_POS, new KBArticlePriorityComparator(true));
+				QueryUtil.ALL_POS,
+				KBArticlePriorityComparator.getInstance(true));
 
 		Assert.assertEquals(
 			kbFolderKBArticles.toString(), 1, kbFolderKBArticles.size());
@@ -1687,7 +1688,8 @@ public class BundleSiteInitializerTest {
 			_kbArticleLocalService.getKBArticles(
 				_group.getGroupId(), kbArticle1.getResourcePrimKey(),
 				WorkflowConstants.STATUS_ANY, QueryUtil.ALL_POS,
-				QueryUtil.ALL_POS, new KBArticlePriorityComparator(true));
+				QueryUtil.ALL_POS,
+				KBArticlePriorityComparator.getInstance(true));
 
 		Assert.assertEquals(
 			kbArticleKBArticles.toString(), 2, kbArticleKBArticles.size());

@@ -20,8 +20,12 @@ public class KBArticlePriorityComparator extends OrderByComparator<KBArticle> {
 
 	public static final String[] ORDER_BY_FIELDS = {"priority", "title"};
 
-	public KBArticlePriorityComparator(boolean ascending) {
-		_ascending = ascending;
+	public static KBArticlePriorityComparator getInstance(boolean ascending) {
+		if (ascending) {
+			return _INSTANCE_ASCENDING;
+		}
+
+		return _INSTANCE_DESCENDING;
 	}
 
 	@Override
@@ -66,6 +70,16 @@ public class KBArticlePriorityComparator extends OrderByComparator<KBArticle> {
 	public boolean isAscending() {
 		return _ascending;
 	}
+
+	private KBArticlePriorityComparator(boolean ascending) {
+		_ascending = ascending;
+	}
+
+	private static final KBArticlePriorityComparator _INSTANCE_ASCENDING =
+		new KBArticlePriorityComparator(true);
+
+	private static final KBArticlePriorityComparator _INSTANCE_DESCENDING =
+		new KBArticlePriorityComparator(false);
 
 	private final boolean _ascending;
 

@@ -106,7 +106,7 @@ public class KBUtil {
 			return KBArticleModifiedDateComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("priority")) {
-			return new KBArticlePriorityComparator(ascending);
+			return KBArticlePriorityComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("status")) {
 			return new KBArticleStatusComparator(ascending);

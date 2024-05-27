@@ -982,7 +982,7 @@ public class KBArticleLocalServiceTest {
 			_kbArticleLocalService.getAllDescendantKBArticles(
 				parentKBArticle.getResourcePrimKey(),
 				WorkflowConstants.STATUS_APPROVED,
-				new KBArticlePriorityComparator(true));
+				KBArticlePriorityComparator.getInstance(true));
 
 		Assert.assertEquals(
 			kbArticleAndAllDescendantKBArticles.toString(), 5,
@@ -1066,7 +1066,7 @@ public class KBArticleLocalServiceTest {
 			_kbArticleLocalService.getKBArticleAndAllDescendantKBArticles(
 				parentKBArticle.getResourcePrimKey(),
 				WorkflowConstants.STATUS_APPROVED,
-				new KBArticlePriorityComparator(true));
+				KBArticlePriorityComparator.getInstance(true));
 
 		Assert.assertEquals(
 			kbArticleAndAllDescendantKBArticles.toString(), 6,
