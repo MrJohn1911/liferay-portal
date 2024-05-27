@@ -23,10 +23,6 @@ public class CalendarResourceCodeComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"code", "name"};
 
-	public CalendarResourceCodeComparator() {
-		this(false);
-	}
-
 	public CalendarResourceCodeComparator(boolean ascending) {
 		_ascending = ascending;
 	}

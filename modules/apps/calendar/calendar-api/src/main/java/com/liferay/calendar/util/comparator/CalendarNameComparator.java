@@ -20,10 +20,6 @@ public class CalendarNameComparator extends OrderByComparator<Calendar> {
 
 	public static final String[] ORDER_BY_FIELDS = {"name"};
 
-	public CalendarNameComparator() {
-		this(false);
-	}
-
 	public CalendarNameComparator(boolean ascending) {
 		_ascending = ascending;
 	}
