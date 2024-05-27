@@ -103,7 +103,7 @@ public class KBUtil {
 			return KBArticleCreateDateComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("modified-date")) {
-			return new KBArticleModifiedDateComparator(ascending);
+			return KBArticleModifiedDateComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("priority")) {
 			return new KBArticlePriorityComparator(ascending);
