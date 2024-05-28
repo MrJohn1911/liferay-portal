@@ -192,7 +192,7 @@ public class KBFolderKBArticleSelector implements KBArticleSelector {
 		if ((kbFolder == null) && (kbArticlesCount == 0)) {
 			kbFolder = _kbFolderService.fetchFirstChildKBFolder(
 				groupId, ancestorKBFolder.getKbFolderId(),
-				new KBFolderNameComparator(false));
+				KBFolderNameComparator.getInstance(false));
 		}
 
 		if (kbFolder == null) {
@@ -233,7 +233,7 @@ public class KBFolderKBArticleSelector implements KBArticleSelector {
 		if ((kbFolder == null) && (kbArticlesCount == 0)) {
 			kbFolder = _kbFolderService.fetchFirstChildKBFolder(
 				groupId, ancestorKBFolder.getKbFolderId(),
-				new KBFolderNameComparator(false));
+				KBFolderNameComparator.getInstance(false));
 		}
 
 		if (kbFolder == null) {

@@ -83,7 +83,8 @@ public class KBUtil {
 			}
 		}
 
-		return ListUtil.sort(kbFolders, new KBFolderNameComparator(false));
+		return ListUtil.sort(
+			kbFolders, KBFolderNameComparator.getInstance(false));
 	}
 
 	public static OrderByComparator<KBArticle> getKBArticleOrderByComparator(
