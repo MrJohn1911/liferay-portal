@@ -21,10 +21,6 @@ public class KBCommentCreateDateComparator
 
 	public static final String[] ORDER_BY_FIELDS = {"createDate"};
 
-	public KBCommentCreateDateComparator() {
-		this(false);
-	}
-
 	public KBCommentCreateDateComparator(boolean ascending) {
 		_ascending = ascending;
 	}

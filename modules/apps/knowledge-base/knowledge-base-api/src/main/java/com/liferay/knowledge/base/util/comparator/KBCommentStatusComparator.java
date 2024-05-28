@@ -19,10 +19,6 @@ public class KBCommentStatusComparator extends OrderByComparator<KBComment> {
 
 	public static final String[] ORDER_BY_FIELDS = {"status"};
 
-	public KBCommentStatusComparator() {
-		this(false);
-	}
-
 	public KBCommentStatusComparator(boolean ascending) {
 		_ascending = ascending;
 	}
