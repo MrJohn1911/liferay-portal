@@ -208,7 +208,7 @@ public class KBUtil {
 			return KBCommentStatusComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("user-name")) {
-			return new KBCommentUserNameComparator(ascending);
+			return KBCommentUserNameComparator.getInstance(ascending);
 		}
 
 		return null;
