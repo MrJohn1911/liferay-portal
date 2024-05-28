@@ -189,7 +189,7 @@ public class KBUtil {
 		String orderByCol, String orderByType) {
 
 		if (Validator.isNull(orderByCol) || Validator.isNull(orderByType)) {
-			return new KBCommentStatusComparator();
+			return new KBCommentStatusComparator(false);
 		}
 
 		boolean ascending = false;
