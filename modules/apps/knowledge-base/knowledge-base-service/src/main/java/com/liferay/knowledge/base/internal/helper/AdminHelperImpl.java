@@ -45,7 +45,7 @@ public class AdminHelperImpl implements AdminHelper {
 		List<KBArticle> kbArticles = _kbArticleService.getKBArticleVersions(
 			groupId, kbArticleResourcePrimKey,
 			WorkflowConstants.STATUS_APPROVED, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS, new KBArticleVersionComparator());
+			QueryUtil.ALL_POS, new KBArticleVersionComparator(false));
 
 		for (KBArticle curKBArticle : kbArticles) {
 			if ((curKBArticle.getVersion() < sourceVersion) &&
