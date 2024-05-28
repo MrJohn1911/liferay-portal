@@ -189,7 +189,7 @@ public class KBUtil {
 		String orderByCol, String orderByType) {
 
 		if (Validator.isNull(orderByCol) || Validator.isNull(orderByType)) {
-			return new KBCommentStatusComparator(false);
+			return KBCommentStatusComparator.getInstance(false);
 		}
 
 		boolean ascending = false;
@@ -205,7 +205,7 @@ public class KBUtil {
 			return KBCommentModifiedDateComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("status")) {
-			return new KBCommentStatusComparator(ascending);
+			return KBCommentStatusComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("user-name")) {
 			return new KBCommentUserNameComparator(ascending);
