@@ -199,7 +199,7 @@ public class KBUtil {
 		}
 
 		if (orderByCol.equals("create-date")) {
-			return new KBCommentCreateDateComparator(ascending);
+			return KBCommentCreateDateComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("modified-date")) {
 			return new KBCommentModifiedDateComparator(ascending);
