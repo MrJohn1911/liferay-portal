@@ -202,7 +202,7 @@ public class KBUtil {
 			return KBCommentCreateDateComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("modified-date")) {
-			return new KBCommentModifiedDateComparator(ascending);
+			return KBCommentModifiedDateComparator.getInstance(ascending);
 		}
 		else if (orderByCol.equals("status")) {
 			return new KBCommentStatusComparator(ascending);
