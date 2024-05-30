@@ -68,4 +68,6 @@ public class DataProviderInstanceModifiedDateComparator
 
 	private final boolean _ascending;
 
+	private static final String _test = "test";
+
 }
