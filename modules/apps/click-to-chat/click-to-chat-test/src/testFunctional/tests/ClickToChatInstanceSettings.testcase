@@ -59,7 +59,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-137169. Verify if Hubspot can access required scopes"
+	@description = "this is a test for LPS-137169. Verify if Hubspot can access required scopes"
 	@priority = 4
 	test CanHubspotAccessRequiredScopes {
 		Select(
