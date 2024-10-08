@@ -9,12 +9,16 @@ import {clickAndExpectToBeVisible} from '../../utils/clickAndExpectToBeVisible';
 import {SiteSettingsPage} from './SiteSettingsPage';
 
 export class LocalizationSiteSettingsPage {
+	readonly availableLanguages: Locator;
 	readonly languageSelector: Locator;
 	readonly page: Page;
 	readonly saveButton: Locator;
 	readonly siteSettingsPage: SiteSettingsPage;
 
 	constructor(page: Page) {
+		this.availableLanguages = page.locator(
+			'[id="_com_liferay_site_admin_web_portlet_SiteSettingsPortlet_siteLanguageConfiguration"]'
+		);
 		this.languageSelector = page.getByRole('combobox');
 		this.page = page;
 		this.saveButton = page.getByRole('button', {name: 'Save'});
