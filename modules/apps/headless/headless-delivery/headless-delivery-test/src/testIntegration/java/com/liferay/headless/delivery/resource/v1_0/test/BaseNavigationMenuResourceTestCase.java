@@ -296,6 +296,22 @@ public abstract class BaseNavigationMenuResourceTestCase {
 	}
 
 	@Test
+	public void testPostSiteNavigationMenuWithNavigationType()
+		throws Exception {
+
+		NavigationMenu navigationMenu = randomNavigationMenu();
+
+		navigationMenu.setNavigationType(NavigationMenu.NavigationType.PRIMARY);
+
+		navigationMenu = navigationMenuResource.postSiteNavigationMenu(
+			testGroup.getGroupId(), navigationMenu);
+
+		Assert.assertEquals(
+			NavigationMenu.NavigationType.PRIMARY,
+			navigationMenu.getNavigationType());
+	}
+
+	@Test
 	public void testGetNavigationMenu() throws Exception {
 		NavigationMenu postNavigationMenu =
 			testGetNavigationMenu_addNavigationMenu();
