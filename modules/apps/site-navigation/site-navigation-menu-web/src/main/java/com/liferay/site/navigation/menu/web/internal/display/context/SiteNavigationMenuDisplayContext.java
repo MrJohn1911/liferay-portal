@@ -209,7 +209,9 @@ public class SiteNavigationMenuDisplayContext {
 					_getSiteNavigationMenuGroupId());
 
 		if (siteNavigationMenuItem == null) {
-			return StringPool.BLANK;
+			_rootMenuItemId = rootMenuItemExternalReferenceCode;
+
+			return _rootMenuItemId;
 		}
 
 		_rootMenuItemId = String.valueOf(

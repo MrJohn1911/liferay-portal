@@ -138,6 +138,11 @@ SiteNavigationMenuConfigurationDisplayContext siteNavigationMenuConfigurationDis
 
 										rootMenuItemName = siteNavigationMenuItemType.getTitle(siteNavigationMenuItem, locale);
 									}
+									else if (siteNavigationMenuDisplayContext.getRootMenuItemId() != null) {
+										Layout rootLayout = LayoutLocalServiceUtil.fetchLayoutByExternalReferenceCode(siteNavigationMenuDisplayContext.getRootMenuItemId(), themeDisplay.getScopeGroupId());
+
+										rootMenuItemName = rootLayout.getName(LocaleUtil.getMostRelevantLocale());
+									}
 									%>
 
 									<div class="card card-horizontal card-type-directory">

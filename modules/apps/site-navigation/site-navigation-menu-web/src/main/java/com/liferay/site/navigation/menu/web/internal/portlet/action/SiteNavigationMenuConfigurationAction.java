@@ -122,12 +122,28 @@ public class SiteNavigationMenuConfigurationAction
 
 		long rootMenuItemId = GetterUtil.getLong(
 			portletPreferences.getValue("rootMenuItemId", null));
+
+		String rootMenuItemExternalReferenceCode = null;
+
+		if (rootMenuItemId == 0) {
+			rootMenuItemExternalReferenceCode = GetterUtil.getString(
+				portletPreferences.getValue("rootMenuItemId", null));
+		}
+
+		if ((rootMenuItemId == 0) &&
+			(rootMenuItemExternalReferenceCode != null)) {
+
+			portletPreferences.setValue(
+				"rootMenuItemExternalReferenceCode",
+				rootMenuItemExternalReferenceCode);
+
+			return;
+		}
+
 		String rootMenuItemType = portletPreferences.getValue(
 			"rootMenuItemType", StringPool.BLANK);
 
-		if ((rootMenuItemId == 0) ||
-			!Objects.equals(rootMenuItemType, "select")) {
-
+		if (!Objects.equals(rootMenuItemType, "select")) {
 			portletPreferences.reset("rootMenuItemExternalReferenceCode");
 			portletPreferences.reset("rootMenuItemId");
 		}
