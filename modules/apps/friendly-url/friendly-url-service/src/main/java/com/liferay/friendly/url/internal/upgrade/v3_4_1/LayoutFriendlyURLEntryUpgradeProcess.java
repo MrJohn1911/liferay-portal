@@ -14,6 +14,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
@@ -49,104 +50,24 @@ public class LayoutFriendlyURLEntryUpgradeProcess extends UpgradeProcess {
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
 			Map<Long, String> defaultLanguageIds = new ConcurrentHashMap<>();
 
-			String sql = StringBundler.concat(
-				"select distinct LayoutFriendlyURL.ctCollectionId, ",
-				"LayoutFriendlyURL.groupId, LayoutFriendlyURL.companyId, ",
-				"LayoutFriendlyURL.plid, LayoutFriendlyURL.privateLayout, ",
-				"CASE WHEN LayoutFriendlyURL.privateLayout = [$TRUE$] THEN ",
-				_classNameLocalService.getClassNameId(
-					_resourceActions.getCompositeModelName(
-						Layout.class.getName(), Boolean.TRUE.toString())),
-				" ELSE ",
-				_classNameLocalService.getClassNameId(
-					_resourceActions.getCompositeModelName(
-						Layout.class.getName(), Boolean.FALSE.toString())),
-				" END as classNameId from LayoutFriendlyURL left join ",
-				"FriendlyURLEntryLocalization on ",
-				"(FriendlyURLEntryLocalization.ctCollectionId = ",
-				"LayoutFriendlyURL.ctCollectionId and ",
-				"FriendlyURLEntryLocalization.languageId = ",
-				"LayoutFriendlyURL.languageId and ",
-				"FriendlyURLEntryLocalization.urlTitle = ",
-				"LayoutFriendlyURL.friendlyURL and ",
-				"FriendlyURLEntryLocalization.groupId = ",
-				"LayoutFriendlyURL.groupId and ",
-				"FriendlyURLEntryLocalization.classNameId = classNameId and ",
-				"FriendlyURLEntryLocalization.classPK = ",
-				"LayoutFriendlyURL.plid) where ",
-				"FriendlyURLEntryLocalization.friendlyURLEntryLocalizationId ",
-				"is null");
+			try (PreparedStatement preparedStatement =
+					connection.prepareStatement(
+						"SELECT companyId FROM Company");
+				ResultSet resultSet = preparedStatement.executeQuery()) {
 
-			processConcurrently(
-				SQLTransformer.transform(sql),
-				StringBundler.concat(
-					"insert into FriendlyURLEntryLocalization (mvccVersion, ",
-					"ctCollectionId, friendlyURLEntryLocalizationId, ",
-					"companyId, friendlyURLEntryId, languageId, urlTitle, ",
-					"groupId, classNameId, classPK) values (?, ?, ?, ?, ?, ?, ",
-					"?, ?, ?, ?)"),
-				resultSet -> new Object[] {
-					resultSet.getLong("ctCollectionId"),
-					resultSet.getLong("groupId"),
-					resultSet.getLong("companyId"), resultSet.getLong("plid"),
-					resultSet.getBoolean("privateLayout"),
-					resultSet.getLong("classNameId")
-				},
-				(values, preparedStatement) -> {
-					long ctCollectionId = (Long)values[0];
-					long groupId = (Long)values[1];
-					long companyId = (Long)values[2];
-					long plid = (Long)values[3];
-					boolean privateLayout = (Boolean)values[4];
-					long classNameId = (Long)values[5];
+				_originalCompanyId = CompanyThreadLocal.getCompanyId();
 
-					try {
-						long friendlyURLEntryId =
-							_addFriendlyURLEntryIfAbsentAndGetId(
-								classNameId, plid, companyId, ctCollectionId,
-								defaultLanguageIds, groupId);
+				while (resultSet.next()) {
+					long companyId = resultSet.getLong("companyId");
 
-						if (friendlyURLEntryId == 0) {
-							return;
-						}
+					CompanyThreadLocal.setCompanyId(companyId);
 
-						Map<String, String> friendlyURLMap = _getFriendlyURLMap(
-							companyId, classNameId, ctCollectionId, groupId,
-							plid, privateLayout);
-
-						for (Map.Entry<String, String> entry :
-								friendlyURLMap.entrySet()) {
-
-							preparedStatement.setLong(1, 0);
-							preparedStatement.setLong(2, ctCollectionId);
-							preparedStatement.setLong(
-								3,
-								increment(
-									FriendlyURLEntryLocalization.class.
-										getName()));
-							preparedStatement.setLong(4, companyId);
-							preparedStatement.setLong(5, friendlyURLEntryId);
-							preparedStatement.setString(6, entry.getKey());
-							preparedStatement.setString(7, entry.getValue());
-							preparedStatement.setLong(8, groupId);
-							preparedStatement.setLong(9, classNameId);
-							preparedStatement.setLong(10, plid);
-
-							preparedStatement.addBatch();
-						}
-					}
-					catch (Exception exception) {
-						if (_log.isWarnEnabled()) {
-							_log.warn(
-								StringBundler.concat(
-									"Unable to add friendly URL entry for ",
-									"PLID ", plid, " in group ", groupId),
-								exception);
-						}
-					}
-				},
-				"Unable to create friendly URL entries for layout friendly " +
-					"URLs");
+					_processCompanyRecords(companyId, defaultLanguageIds);
+				}
+			}
+			finally {
+				CompanyThreadLocal.setCompanyId(_originalCompanyId);
+			}
 		}
 	}
 
@@ -352,8 +273,96 @@ public class LayoutFriendlyURLEntryUpgradeProcess extends UpgradeProcess {
 		}
 	}
 
+	private void _processCompanyRecords(
+			long companyId, Map<Long, String> defaultLanguageIds)
+		throws Exception {
+
+		String sql = StringBundler.concat(
+			"SELECT distinct LayoutFriendlyURL.ctCollectionId, ",
+			"LayoutFriendlyURL.groupId, LayoutFriendlyURL.companyId, ",
+			"LayoutFriendlyURL.plid, LayoutFriendlyURL.privateLayout, CASE ",
+			"WHEN LayoutFriendlyURL.privateLayout = [$TRUE$] THEN ",
+			_classNameLocalService.getClassNameId(
+				_resourceActions.getCompositeModelName(
+					Layout.class.getName(), Boolean.TRUE.toString())),
+			" ELSE ",
+			_classNameLocalService.getClassNameId(
+				_resourceActions.getCompositeModelName(
+					Layout.class.getName(), Boolean.FALSE.toString())),
+			" END as classNameId FROM LayoutFriendlyURL WHERE companyId = ?");
+
+		processConcurrently(
+			SQLTransformer.transform(sql),
+			StringBundler.concat(
+				"INSERT INTO FriendlyURLEntryLocalization (mvccVersion, ",
+				"ctCollectionId, friendlyURLEntryLocalizationId, companyId, ",
+				"friendlyURLEntryId, languageId, urlTitle, groupId, ",
+				"classNameId, classPK) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"),
+			resultSet -> new Object[] {
+				resultSet.getLong("ctCollectionId"),
+				resultSet.getLong("groupId"), resultSet.getLong("companyId"),
+				resultSet.getLong("plid"),
+				resultSet.getBoolean("privateLayout"),
+				resultSet.getLong("classNameId")
+			},
+			(values, preparedStatement) -> {
+				long ctCollectionId = (Long)values[0];
+				long groupId = (Long)values[1];
+				long plid = (Long)values[3];
+				boolean privateLayout = (Boolean)values[4];
+				long classNameId = (Long)values[5];
+
+				try {
+					long friendlyURLEntryId =
+						_addFriendlyURLEntryIfAbsentAndGetId(
+							classNameId, plid, companyId, ctCollectionId,
+							defaultLanguageIds, groupId);
+
+					if (friendlyURLEntryId == 0) {
+						return;
+					}
+
+					Map<String, String> friendlyURLMap = _getFriendlyURLMap(
+						companyId, classNameId, ctCollectionId, groupId, plid,
+						privateLayout);
+
+					for (Map.Entry<String, String> entry :
+							friendlyURLMap.entrySet()) {
+
+						preparedStatement.setLong(1, 0);
+						preparedStatement.setLong(2, ctCollectionId);
+						preparedStatement.setLong(
+							3,
+							increment(
+								FriendlyURLEntryLocalization.class.getName()));
+						preparedStatement.setLong(4, companyId);
+						preparedStatement.setLong(5, friendlyURLEntryId);
+						preparedStatement.setString(6, entry.getKey());
+						preparedStatement.setString(7, entry.getValue());
+						preparedStatement.setLong(8, groupId);
+						preparedStatement.setLong(9, classNameId);
+						preparedStatement.setLong(10, plid);
+
+						preparedStatement.addBatch();
+					}
+				}
+				catch (Exception exception) {
+					if (_log.isWarnEnabled()) {
+						_log.warn(
+							StringBundler.concat(
+								"Unable to add friendly URL entry for PLID ",
+								plid, " in group ", groupId),
+							exception);
+					}
+				}
+			},
+			"Unable to create friendly URL entries for layout friendly URLs");
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		LayoutFriendlyURLEntryUpgradeProcess.class);
+
+	private static long _originalCompanyId;
 
 	private final ClassNameLocalService _classNameLocalService;
 	private final Portal _portal;
