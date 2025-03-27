@@ -87,3 +87,9 @@ if (selLayout != null) {
 	module="{EditLayout} from site-navigation-menu-item-layout"
 	servletContext="<%= application %>"
 />
+
+<div>
+	<react:component
+		module="{NavigationMenuIconSelector} from site-navigation-taglib"
+	/>
+</div>
