@@ -387,6 +387,7 @@ module.exports = {
 		'site-navigation-item-selector-web': [],
 		'site-navigation-menu-item-layout': [],
 		'site-navigation-menu-web': [],
+		'site-navigation-taglib': [],
 		'site-teams-web': [],
 		'social-bookmarks-taglib': [],
 		'speedwell-theme': [],
