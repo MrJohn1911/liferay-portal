@@ -11,8 +11,10 @@ import com.liferay.object.field.util.ObjectFieldUtil;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.test.util.ObjectDefinitionTestUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
+import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.HTTPTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
@@ -50,6 +52,8 @@ public abstract class BaseTaskResourceTestCase {
 					OBJECT_FIELD_NAME_TEXT)),
 			ObjectDefinitionConstants.SCOPE_COMPANY,
 			TestPropsValues.getUserId());
+
+		group = GroupTestUtil.addGroup();
 	}
 
 	protected JSONObject waitForFinish(
@@ -88,6 +92,9 @@ public abstract class BaseTaskResourceTestCase {
 
 	protected static final String OBJECT_FIELD_NAME_TEXT =
 		"x" + RandomTestUtil.randomString();
+
+	@DeleteAfterTestRun
+	protected Group group;
 
 	@DeleteAfterTestRun
 	protected ObjectDefinition objectDefinition;

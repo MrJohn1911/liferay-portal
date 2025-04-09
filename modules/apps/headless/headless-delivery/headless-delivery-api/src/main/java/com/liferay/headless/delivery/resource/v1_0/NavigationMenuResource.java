@@ -7,6 +7,7 @@ package com.liferay.headless.delivery.resource.v1_0;
 
 import com.liferay.headless.delivery.dto.v1_0.NavigationMenu;
 import com.liferay.portal.kernel.change.tracking.CTAware;
+import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
@@ -75,7 +76,8 @@ public interface NavigationMenuResource {
 		throws Exception;
 
 	public Page<NavigationMenu> getSiteNavigationMenusPage(
-			Long siteId, Pagination pagination)
+		com.liferay.portal.kernel.search.filter.Filter filter, 
+		String search, Long siteId, Sort[] sorts, Pagination pagination)
 		throws Exception;
 
 	public Response postSiteNavigationMenusPageExportBatch(

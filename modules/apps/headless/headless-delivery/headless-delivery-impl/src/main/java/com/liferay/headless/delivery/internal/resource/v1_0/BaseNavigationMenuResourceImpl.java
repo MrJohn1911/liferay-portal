@@ -17,6 +17,7 @@ import com.liferay.portal.kernel.model.Resource;
 import com.liferay.portal.kernel.model.ResourceAction;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.ResourcePermission;
+import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -498,11 +499,18 @@ public abstract class BaseNavigationMenuResourceImpl
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
 	public Page<NavigationMenu> getSiteNavigationMenusPage(
-			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
-			@javax.validation.constraints.NotNull
-			@javax.ws.rs.PathParam("siteId")
-			Long siteId,
-			@javax.ws.rs.core.Context Pagination pagination)
+		@javax.ws.rs.core.Context
+		com.liferay.portal.kernel.search.filter.Filter filter,
+		@io.swagger.v3.oas.annotations.Parameter(hidden = true)
+		@javax.ws.rs.QueryParam("search")
+		String search,
+		@io.swagger.v3.oas.annotations.Parameter(hidden = true)
+		@javax.validation.constraints.NotNull
+		@javax.ws.rs.PathParam("siteId")
+		Long siteId,
+		@javax.ws.rs.core.Context
+		com.liferay.portal.kernel.search.Sort[] sorts,
+		@javax.ws.rs.core.Context Pagination pagination)
 		throws Exception {
 
 		return Page.of(Collections.emptyList());
@@ -1100,8 +1108,8 @@ public abstract class BaseNavigationMenuResourceImpl
 		throws Exception {
 
 		if (parameters.containsKey("siteId")) {
-			return getSiteNavigationMenusPage(
-				(Long)parameters.get("siteId"), pagination);
+			return getSiteNavigationMenusPage(filter, search,
+				(Long)parameters.get("siteId"), sorts, pagination);
 		}
 		else {
 			throw new NotSupportedException(

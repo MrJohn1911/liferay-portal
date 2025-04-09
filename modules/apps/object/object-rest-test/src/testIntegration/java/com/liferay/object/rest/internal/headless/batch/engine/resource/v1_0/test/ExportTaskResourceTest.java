@@ -24,6 +24,8 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalServiceUtil;
 import com.liferay.portal.kernel.test.util.HTTPTestUtil;
+import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -34,6 +36,7 @@ import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.vulcan.jackson.databind.ObjectMapperProviderUtil;
 import com.liferay.portal.vulcan.permission.PermissionUtil;
+import com.liferay.site.navigation.service.SiteNavigationMenuLocalService;
 
 import java.util.Collections;
 import java.util.zip.ZipInputStream;
@@ -158,19 +161,30 @@ public class ExportTaskResourceTest extends BaseTaskResourceTestCase {
 		ObjectEntryTestUtil.addObjectEntry(
 			objectDefinition, OBJECT_FIELD_NAME_TEXT, "Object3");
 
+		_siteNavigationMenuLocalService.addSiteNavigationMenu(
+			null, TestPropsValues.getUserId(), group.getGroupId(), "Test",
+			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
+
 		ObjectEntry objectEntry1 = ObjectEntryTestUtil.addObjectEntry(
 			objectDefinition, OBJECT_FIELD_NAME_TEXT, "TestObject1");
 		ObjectEntry objectEntry2 = ObjectEntryTestUtil.addObjectEntry(
 			objectDefinition, OBJECT_FIELD_NAME_TEXT, "TestObject2");
 
-		String filterString =
+		String filterString1 =
 			"contains(" + OBJECT_FIELD_NAME_TEXT + ", 'Test')";
 
-		JSONObject jsonObject = _testPostExportTask(
-			"COMPLETED", "filter=" + URLCodec.encodeURL(filterString),
+		String filterString2 = "dateCreated gt 2026-01-01T00:00:00Z";
+
+		JSONObject jsonObject1 = _testPostExportTask(
+			"COMPLETED", "filter=" + URLCodec.encodeURL(filterString1),
 			objectDefinition);
 
-		Assert.assertEquals(2, jsonObject.getInt("processedItemsCount"));
+		JSONObject jsonObject2 = _testPostExportTask2(
+			"COMPLETED", "filter=" + URLCodec.encodeURL(filterString2));
+
+		Assert.assertEquals(2, jsonObject1.getInt("processedItemsCount"));
+
+		Assert.assertEquals(1, jsonObject2.getInt("processedItemsCount"));
 
 		JSONAssert.assertEquals(
 			JSONUtil.putAll(
@@ -182,7 +196,7 @@ public class ExportTaskResourceTest extends BaseTaskResourceTestCase {
 					objectEntry2.getExternalReferenceCode())
 			).toString(),
 			_getExportTaskContentJSONArray(
-				jsonObject.getString("externalReferenceCode")
+				jsonObject1.getString("externalReferenceCode")
 			).toString(),
 			JSONCompareMode.LENIENT);
 	}
@@ -232,7 +246,34 @@ public class ExportTaskResourceTest extends BaseTaskResourceTestCase {
 			Http.Method.GET);
 	}
 
+	private JSONObject _testPostExportTask2(
+			String expectedExecuteStatus, String queryParameters)
+		throws Exception {
+
+		String endpoint = StringBundler.concat(
+			"headless-batch-engine/v1.0/export-task",
+			"/com.liferay.headless.delivery.dto.v1_0.NavigationMenu/json?",
+			"siteId=", group.getGroupId());
+
+		if (queryParameters != null) {
+			endpoint = endpoint + "&" + queryParameters;
+		}
+
+		JSONObject jsonObject = waitForFinish(
+			expectedExecuteStatus, false,
+			HTTPTestUtil.invokeToJSONObject(null, endpoint, Http.Method.POST));
+
+		return HTTPTestUtil.invokeToJSONObject(
+			null,
+			ENDPOINT_EXPORT_TASK_BY_ERC +
+				jsonObject.getString("externalReferenceCode"),
+			Http.Method.GET);
+	}
+
 	@Inject
 	private CompanyLocalService _companyLocalService;
+
+	@Inject
+	private SiteNavigationMenuLocalService _siteNavigationMenuLocalService;
 
 }

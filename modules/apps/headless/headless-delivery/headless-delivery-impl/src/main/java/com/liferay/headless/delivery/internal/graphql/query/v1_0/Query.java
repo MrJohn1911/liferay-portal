@@ -3186,11 +3186,16 @@ public class Query {
 	 *
 	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {navigationMenus(page: ___, pageSize: ___, siteKey: ___){items {__}, page, pageSize, totalCount}}"}' -u 'test@liferay.com:test'
 	 */
+
+
 	@GraphQLField
 	public NavigationMenuPage navigationMenus(
 			@GraphQLName("siteKey") @NotEmpty String siteKey,
+			@GraphQLName("search") String search,
+			@GraphQLName("filter") String filterString,
 			@GraphQLName("pageSize") int pageSize,
-			@GraphQLName("page") int page)
+			@GraphQLName("page") int page,
+			@GraphQLName("sort") String sortsString)
 		throws Exception {
 
 		return _applyComponentServiceObjects(
@@ -3198,7 +3203,10 @@ public class Query {
 			this::_populateResourceContext,
 			navigationMenuResource -> new NavigationMenuPage(
 				navigationMenuResource.getSiteNavigationMenusPage(
-					Long.valueOf(siteKey), Pagination.of(page, pageSize))));
+					_filterBiFunction.apply(
+						navigationMenuResource, filterString),search,
+					Long.valueOf(siteKey), _sortsBiFunction.apply(
+						navigationMenuResource, sortsString), Pagination.of(page, pageSize))));
 	}
 
 	/**
