@@ -217,12 +217,21 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 			type = navigationType.ordinal() + 1;
 		}
 
+		ModelPermissions modelPermissions =
+			ModelPermissionsUtil.toModelPermissions(
+				contextCompany.getCompanyId(), navigationMenu.getPermissions(),
+				GetterUtil.getLong(navigationMenu.getId()),
+				SiteNavigationMenu.class.getName(), _resourceActionLocalService,
+				_resourcePermissionLocalService, _roleLocalService);
+
 		SiteNavigationMenu siteNavigationMenu =
 			_siteNavigationMenuService.addSiteNavigationMenu(
 				externalReferenceCode, siteId, navigationMenu.getName(), type,
 				true,
 				ServiceContextBuilder.create(
 					siteId, contextHttpServletRequest, null
+				).permissions(
+					modelPermissions
 				).build());
 
 		_createNavigationMenuItems(

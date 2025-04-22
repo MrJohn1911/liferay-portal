@@ -13,9 +13,11 @@ import com.liferay.portal.kernel.model.ModelHintsUtil;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.PermissionService;
 import com.liferay.portal.kernel.service.ResourceLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
@@ -76,10 +78,30 @@ public class SiteNavigationMenuLocalServiceImpl
 
 		// Resources
 
-		_resourceLocalService.addResources(
-			siteNavigationMenu.getCompanyId(), siteNavigationMenu.getGroupId(),
-			siteNavigationMenu.getUserId(), SiteNavigationMenu.class.getName(),
-			siteNavigationMenu.getSiteNavigationMenuId(), false, true, true);
+		ModelPermissions modelPermissions =
+			serviceContext.getModelPermissions();
+
+		if (modelPermissions != null) {
+			_permissionService.checkPermission(
+				siteNavigationMenu.getGroupId(),
+				siteNavigationMenu.getModelClassName(),
+				siteNavigationMenu.getModelClassName());
+
+			_resourceLocalService.addModelResources(
+				siteNavigationMenu.getCompanyId(),
+				siteNavigationMenu.getGroupId(), siteNavigationMenu.getUserId(),
+				siteNavigationMenu.getModelClassName(),
+				String.valueOf(siteNavigationMenu.getSiteNavigationMenuId()),
+				modelPermissions);
+		}
+		else {
+			_resourceLocalService.addResources(
+				siteNavigationMenu.getCompanyId(),
+				siteNavigationMenu.getGroupId(), siteNavigationMenu.getUserId(),
+				SiteNavigationMenu.class.getName(),
+				siteNavigationMenu.getSiteNavigationMenuId(), false, true,
+				true);
+		}
 
 		_updateOldSiteNavigationMenuType(siteNavigationMenu, type);
 
@@ -362,6 +384,9 @@ public class SiteNavigationMenuLocalServiceImpl
 
 	@Reference
 	private CustomSQL _customSQL;
+
+	@Reference
+	private PermissionService _permissionService;
 
 	@Reference
 	private ResourceLocalService _resourceLocalService;
