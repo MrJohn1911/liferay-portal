@@ -22,8 +22,12 @@ import com.liferay.portal.kernel.service.LayoutFriendlyURLLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.PermissionService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
+import com.liferay.portal.kernel.service.ResourceLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -38,6 +42,7 @@ import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.fields.NestedFieldsSupplier;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
+import com.liferay.portal.vulcan.permission.ModelPermissionsUtil;
 import com.liferay.portal.vulcan.permission.Permission;
 import com.liferay.portal.vulcan.permission.PermissionUtil;
 import com.liferay.portal.vulcan.util.JaxRsLinkUtil;
@@ -797,6 +802,28 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 			siteNavigationMenu.getGroupId(),
 			siteNavigationMenu.getSiteNavigationMenuId());
 
+		ModelPermissions modelPermissions =
+			ModelPermissionsUtil.toModelPermissions(
+				siteNavigationMenu.getCompanyId(),
+				navigationMenu.getPermissions(),
+				GetterUtil.getLong(navigationMenu.getId()),
+				SiteNavigationMenu.class.getName(), _resourceActionLocalService,
+				_resourcePermissionLocalService, _roleLocalService);
+
+		if (modelPermissions != null) {
+			_permissionService.checkPermission(
+				siteNavigationMenu.getGroupId(),
+				siteNavigationMenu.getModelClassName(),
+				siteNavigationMenu.getSiteNavigationMenuId());
+
+			_resourceLocalService.updateResources(
+				siteNavigationMenu.getCompanyId(),
+				siteNavigationMenu.getGroupId(),
+				siteNavigationMenu.getModelClassName(),
+				String.valueOf(siteNavigationMenu.getSiteNavigationMenuId()),
+				modelPermissions);
+		}
+
 		ServiceContext serviceContext = ServiceContextBuilder.create(
 			siteNavigationMenu.getGroupId(), contextHttpServletRequest, null
 		).build();
@@ -909,6 +936,15 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 
 	@Reference
 	private ResourceActionLocalService _resourceActionLocalService;
+
+	@Reference
+	private ResourceLocalService _resourceLocalService;
+
+	@Reference
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Reference
+	private RoleLocalService _roleLocalService;
 
 	@Reference
 	private SiteNavigationMenuItemService _siteNavigationMenuItemService;
