@@ -3481,6 +3481,12 @@ components:
                         type: string
                     readOnly: true
                     type: array
+                contentId:
+                    # @review
+                    description:
+                        The navigation menu item's content ID.
+                    format: int64
+                    type: integer
                 contentURL:
                     # @review
                     description:
@@ -3573,7 +3579,6 @@ components:
                     # @review
                     description:
                         The navigation menu item's type.
-                    readOnly: true
                     type: string
                 url:
                     # @review
