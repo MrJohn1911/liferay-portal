@@ -77,6 +77,16 @@ public class NavigationMenuItemSerDes {
 			sb.append("]");
 		}
 
+		if (navigationMenuItem.getContentId() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"contentId\": ");
+
+			sb.append(navigationMenuItem.getContentId());
+		}
+
 		if (navigationMenuItem.getContentURL() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -348,6 +358,14 @@ public class NavigationMenuItemSerDes {
 				String.valueOf(navigationMenuItem.getAvailableLanguages()));
 		}
 
+		if (navigationMenuItem.getContentId() == null) {
+			map.put("contentId", null);
+		}
+		else {
+			map.put(
+				"contentId", String.valueOf(navigationMenuItem.getContentId()));
+		}
+
 		if (navigationMenuItem.getContentURL() == null) {
 			map.put("contentURL", null);
 		}
@@ -510,6 +528,9 @@ public class NavigationMenuItemSerDes {
 			if (Objects.equals(jsonParserFieldName, "availableLanguages")) {
 				return false;
 			}
+			else if (Objects.equals(jsonParserFieldName, "contentId")) {
+				return false;
+			}
 			else if (Objects.equals(jsonParserFieldName, "contentURL")) {
 				return false;
 			}
@@ -580,6 +601,12 @@ public class NavigationMenuItemSerDes {
 				if (jsonParserFieldValue != null) {
 					navigationMenuItem.setAvailableLanguages(
 						toStrings((Object[])jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "contentId")) {
+				if (jsonParserFieldValue != null) {
+					navigationMenuItem.setContentId(
+						Long.valueOf((String)jsonParserFieldValue));
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "contentURL")) {

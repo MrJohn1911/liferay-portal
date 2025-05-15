@@ -101,6 +101,49 @@ public class NavigationMenuItem implements Serializable {
 	private Supplier<String[]> _availableLanguagesSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "The navigation menu item's content ID."
+	)
+	public Long getContentId() {
+		if (_contentIdSupplier != null) {
+			contentId = _contentIdSupplier.get();
+
+			_contentIdSupplier = null;
+		}
+
+		return contentId;
+	}
+
+	public void setContentId(Long contentId) {
+		this.contentId = contentId;
+
+		_contentIdSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setContentId(
+		UnsafeSupplier<Long, Exception> contentIdUnsafeSupplier) {
+
+		_contentIdSupplier = () -> {
+			try {
+				return contentIdUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(description = "The navigation menu item's content ID.")
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Long contentId;
+
+	@JsonIgnore
+	private Supplier<Long> _contentIdSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "The navigation menu item's content API REST URL."
 	)
 	public String getContentURL() {
@@ -760,7 +803,7 @@ public class NavigationMenuItem implements Serializable {
 	}
 
 	@GraphQLField(description = "The navigation menu item's type.")
-	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String type;
 
 	@JsonIgnore
@@ -902,6 +945,18 @@ public class NavigationMenuItem implements Serializable {
 			}
 
 			sb.append("]");
+		}
+
+		Long contentId = getContentId();
+
+		if (contentId != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"contentId\": ");
+
+			sb.append(contentId);
 		}
 
 		String contentURL = getContentURL();
