@@ -5,13 +5,24 @@
 
 package com.liferay.headless.delivery.internal.resource.v1_0;
 
+import com.liferay.asset.kernel.model.AssetCategory;
+import com.liferay.asset.kernel.model.AssetVocabulary;
+import com.liferay.asset.kernel.service.AssetCategoryLocalService;
+import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
+import com.liferay.blogs.model.BlogsEntry;
+import com.liferay.blogs.service.BlogsEntryLocalService;
 import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.headless.common.spi.service.context.ServiceContextBuilder;
 import com.liferay.headless.delivery.dto.v1_0.NavigationMenu;
 import com.liferay.headless.delivery.dto.v1_0.NavigationMenuItem;
 import com.liferay.headless.delivery.dto.v1_0.util.CreatorUtil;
 import com.liferay.headless.delivery.internal.odata.entity.v1_0.NavigationMenuEntityModel;
 import com.liferay.headless.delivery.resource.v1_0.NavigationMenuResource;
+import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.service.JournalArticleLocalService;
+import com.liferay.knowledge.base.model.KBArticle;
+import com.liferay.knowledge.base.service.KBArticleLocalService;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -22,6 +33,7 @@ import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.LayoutFriendlyURLLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.PermissionService;
@@ -275,7 +287,7 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 		SiteNavigationMenuItem siteNavigationMenuItem =
 			_siteNavigationMenuItemService.addSiteNavigationMenuItem(
 				null, siteId, siteNavigationMenuId, parentNavigationMenuId,
-				_getType(navigationMenuItem), unicodeProperties,
+				_getType(navigationMenuItem.getType()), unicodeProperties,
 				ServiceContextBuilder.create(
 					siteId, contextHttpServletRequest, null
 				).expandoBridgeAttributes(
@@ -450,15 +462,33 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 		return siteNavigationMenuItemsMap;
 	}
 
-	private String _getType(NavigationMenuItem navigationMenuItem) {
-		if (navigationMenuItem.getLink() != null) {
+	private String _getType(String navigationMenuItemType) {
+		if (navigationMenuItemType.equals("asset_vocabulary")) {
+			return AssetVocabulary.class.getName();
+		}
+		else if (navigationMenuItemType.equals("blogPosting")) {
+			return BlogsEntry.class.getName();
+		}
+		else if (navigationMenuItemType.equals("category")) {
+			return AssetCategory.class.getName();
+		}
+		else if (navigationMenuItemType.equals("document")) {
+			return DLFileEntry.class.getName();
+		}
+		else if (navigationMenuItemType.equals("knowledgeBaseArticle")) {
+			return KBArticle.class.getName();
+		}
+		else if (navigationMenuItemType.equals("navigationMenu")) {
+			return "node";
+		}
+		else if (navigationMenuItemType.equals("page")) {
 			return "layout";
 		}
-		else if (navigationMenuItem.getUrl() != null) {
-			return "url";
+		else if (navigationMenuItemType.equals("structuredContent")) {
+			return JournalArticle.class.getName();
 		}
 
-		return "node";
+		return navigationMenuItemType;
 	}
 
 	private String _getUnicodeProperties(
@@ -468,34 +498,71 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 
 		UnicodeProperties unicodeProperties = new UnicodeProperties(true);
 
-		if (navigationMenuItem.getLink() != null) {
-			unicodeProperties.setProperty(
-				"defaultLanguageId",
-				LocaleUtil.toLanguageId(LocaleUtil.getDefault()));
+		String navigationMenuItemType = navigationMenuItem.getType();
 
-			Layout layout = _getLayout(navigationMenuItem.getLink(), siteId);
+		if (navigationMenuItemType.equals("asset_vocabulary")) {
+			AssetVocabulary assetVocabulary =
+				_assetVocabularyLocalService.fetchAssetVocabulary(
+					navigationMenuItem.getContentId());
 
-			unicodeProperties.setProperty(
-				"groupId", String.valueOf(layout.getGroupId()));
-			unicodeProperties.setProperty("layoutUuid", layout.getUuid());
+			_populateModelProperties(
+				unicodeProperties, navigationMenuItemType,
+				assetVocabulary.getVocabularyId(), assetVocabulary.getTitle(),
+				navigationMenuItem, siteNavigationMenuItem);
 
-			Map<Locale, String> nameMap = LocalizedMapUtil.getLocalizedMap(
-				contextAcceptLanguage.getPreferredLocale(),
-				navigationMenuItem.getName(), navigationMenuItem.getName_i18n(),
-				_getLocalizedNamesFromProperties(
-					_getUnicodeProperties(siteNavigationMenuItem)));
+			unicodeProperties.setProperty("uuid", assetVocabulary.getUuid());
+		}
+		else if (navigationMenuItemType.equals("blogPosting")) {
+			BlogsEntry blogsEntry = _blogsEntryLocalService.fetchBlogsEntry(
+				navigationMenuItem.getContentId());
 
-			for (Map.Entry<Locale, String> entry : nameMap.entrySet()) {
-				unicodeProperties.setProperty(
-					"name_" + LocaleUtil.toLanguageId(entry.getKey()),
-					nameMap.get(entry.getKey()));
-			}
+			_populateModelProperties(
+				unicodeProperties, navigationMenuItemType,
+				blogsEntry.getEntryId(), blogsEntry.getTitle(),
+				navigationMenuItem, siteNavigationMenuItem);
+		}
+		else if (navigationMenuItemType.equals("category")) {
+			AssetCategory assetCategory =
+				_assetCategoryLocalService.fetchAssetCategory(
+					navigationMenuItem.getContentId());
 
-			unicodeProperties.setProperty(
-				"privateLayout", String.valueOf(layout.isPrivateLayout()));
-			unicodeProperties.setProperty(
-				"useCustomName",
-				String.valueOf(navigationMenuItem.getUseCustomName()));
+			_populateModelProperties(
+				unicodeProperties, navigationMenuItemType,
+				assetCategory.getCategoryId(), assetCategory.getTitle(),
+				navigationMenuItem, siteNavigationMenuItem);
+		}
+		else if (navigationMenuItemType.equals("document")) {
+			DLFileEntry dlFileEntry = _dlFileEntryLocalService.fetchDLFileEntry(
+				navigationMenuItem.getContentId());
+
+			_populateModelProperties(
+				unicodeProperties, navigationMenuItemType,
+				dlFileEntry.getClassPK(), dlFileEntry.getTitle(),
+				navigationMenuItem, siteNavigationMenuItem);
+		}
+		else if (navigationMenuItemType.equals("knowledgeBaseArticle")) {
+			KBArticle kbArticle = _kbArticleLocalService.fetchLatestKBArticle(
+				navigationMenuItem.getContentId(), siteId);
+
+			_populateModelProperties(
+				unicodeProperties, navigationMenuItemType,
+				kbArticle.getClassPK(), kbArticle.getTitle(),
+				navigationMenuItem, siteNavigationMenuItem);
+		}
+		else if (navigationMenuItemType.equals("page")) {
+			_populateLayoutProperties(
+				unicodeProperties, navigationMenuItem, siteId,
+				siteNavigationMenuItem);
+		}
+		else if (navigationMenuItemType.equals("structuredContent")) {
+			JournalArticle journalArticle =
+				_journalArticleLocalService.fetchLatestArticle(
+					navigationMenuItem.getContentId());
+
+			_populateModelProperties(
+				unicodeProperties, navigationMenuItemType,
+				journalArticle.getClassPK(), journalArticle.getTitle(),
+				navigationMenuItem, siteNavigationMenuItem);
 		}
 		else {
 			Map<Locale, String> nameMap = LocalizedMapUtil.getLocalizedMap(
@@ -543,6 +610,70 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 		String propertyKey = property.getKey();
 
 		return propertyKey.startsWith("name_");
+	}
+
+	private void _populateLayoutProperties(
+			UnicodeProperties unicodeProperties,
+			NavigationMenuItem navigationMenuItem, long siteId,
+			SiteNavigationMenuItem siteNavigationMenuItem)
+		throws Exception {
+
+		unicodeProperties.setProperty(
+			"defaultLanguageId",
+			LocaleUtil.toLanguageId(LocaleUtil.getDefault()));
+
+		Layout layout = _getLayout(navigationMenuItem.getLink(), siteId);
+
+		unicodeProperties.setProperty(
+			"groupId", String.valueOf(layout.getGroupId()));
+		unicodeProperties.setProperty("layoutUuid", layout.getUuid());
+
+		Map<Locale, String> nameMap = LocalizedMapUtil.getLocalizedMap(
+			contextAcceptLanguage.getPreferredLocale(),
+			navigationMenuItem.getName(), navigationMenuItem.getName_i18n(),
+			_getLocalizedNamesFromProperties(
+				_getUnicodeProperties(siteNavigationMenuItem)));
+
+		for (Map.Entry<Locale, String> entry : nameMap.entrySet()) {
+			unicodeProperties.setProperty(
+				"name_" + LocaleUtil.toLanguageId(entry.getKey()),
+				nameMap.get(entry.getKey()));
+		}
+
+		unicodeProperties.setProperty(
+			"privateLayout", String.valueOf(layout.isPrivateLayout()));
+		unicodeProperties.setProperty(
+			"useCustomName",
+			String.valueOf(navigationMenuItem.getUseCustomName()));
+	}
+
+	private void _populateModelProperties(
+		UnicodeProperties unicodeProperties, String className, Long classPK,
+		String title, NavigationMenuItem navigationMenuItem,
+		SiteNavigationMenuItem siteNavigationMenuItem) {
+
+		unicodeProperties.setProperty("className", className);
+		unicodeProperties.setProperty(
+			"classNameId",
+			String.valueOf(_classNameLocalService.getClassNameId(className)));
+		unicodeProperties.setProperty("classPK", String.valueOf(classPK));
+		unicodeProperties.setProperty("title", title);
+
+		Map<Locale, String> nameMap = LocalizedMapUtil.getLocalizedMap(
+			contextAcceptLanguage.getPreferredLocale(),
+			navigationMenuItem.getName(), navigationMenuItem.getName_i18n(),
+			_getLocalizedNamesFromProperties(
+				_getUnicodeProperties(siteNavigationMenuItem)));
+
+		for (Map.Entry<Locale, String> entry : nameMap.entrySet()) {
+			unicodeProperties.setProperty(
+				"name_" + LocaleUtil.toLanguageId(entry.getKey()),
+				nameMap.get(entry.getKey()));
+		}
+
+		unicodeProperties.setProperty(
+			"useCustomName",
+			String.valueOf(navigationMenuItem.getUseCustomName()));
 	}
 
 	private NavigationMenu _toNavigationMenu(
@@ -634,6 +765,9 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 						return LocaleUtil.toW3cLanguageIds(
 							locales.toArray(new Locale[localizedMap.size()]));
 					});
+				setContentId(
+					() -> GetterUtil.getLong(
+						unicodeProperties.getProperty("classPK")));
 				setContentURL(
 					() -> {
 						DTOConverter<?, ?> dtoConverter =
@@ -656,6 +790,7 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 						_portal,
 						_userLocalService.fetchUser(
 							siteNavigationMenuItem.getUserId())));
+
 				setCustomFields(
 					() -> CustomFieldsUtil.toCustomFields(
 						contextAcceptLanguage.isAcceptAllLanguages(),
@@ -922,10 +1057,31 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 		new NavigationMenuEntityModel();
 
 	@Reference
+	private AssetCategoryLocalService _assetCategoryLocalService;
+
+	@Reference
+	private AssetVocabularyLocalService _assetVocabularyLocalService;
+
+	@Reference
+	private BlogsEntryLocalService _blogsEntryLocalService;
+
+	@Reference
+	private ClassNameLocalService _classNameLocalService;
+
+	@Reference
+	private DLFileEntryLocalService _dlFileEntryLocalService;
+
+	@Reference
 	private DTOConverterRegistry _dtoConverterRegistry;
 
 	@Reference
+	private JournalArticleLocalService _journalArticleLocalService;
+
+	@Reference
 	private JSONFactory _jsonFactory;
+
+	@Reference
+	private KBArticleLocalService _kbArticleLocalService;
 
 	@Reference
 	private LayoutFriendlyURLLocalService _layoutFriendlyURLLocalService;
