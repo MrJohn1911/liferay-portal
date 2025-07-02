@@ -440,12 +440,9 @@ public class DisplayPageTypeSiteNavigationMenuItemType
 			).build();
 
 		return AssetDisplayPageUtil.hasAssetDisplayPage(
-			siteNavigationMenuItem.getGroupId(),
-			GetterUtil.getLong(
-				typeSettingsUnicodeProperties.get("classNameId")),
-			GetterUtil.getLong(typeSettingsUnicodeProperties.get("classPK")),
-			GetterUtil.getLong(
-				typeSettingsUnicodeProperties.get("classTypeId")));
+			GetterUtil.getString(
+				typeSettingsUnicodeProperties.get("externalReferenceCode")),
+			siteNavigationMenuItem.getGroupId());
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

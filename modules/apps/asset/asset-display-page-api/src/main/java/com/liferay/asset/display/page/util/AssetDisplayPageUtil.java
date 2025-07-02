@@ -17,7 +17,13 @@ import com.liferay.layout.display.page.LayoutDisplayPageProviderRegistry;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalServiceUtil;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryServiceUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.servlet.taglib.DynamicIncludeUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+
+import java.io.IOException;
 
 /**
  * @author Jürgen Kappler
@@ -59,6 +65,23 @@ public class AssetDisplayPageUtil {
 			return true;
 		}
 
+		return false;
+	}
+
+	public static boolean hasAssetDisplayPage(String externalReferenceCode, long groupId) {
+		try {
+			LayoutPageTemplateEntry layoutPageTemplateEntry =
+				LayoutPageTemplateEntryServiceUtil.getLayoutPageTemplateEntryByExternalReferenceCode(externalReferenceCode, groupId);
+
+			if (layoutPageTemplateEntry != null) {
+				return true;
+			}
+		}
+		catch (PortalException portalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException);
+			}
+		}
 		return false;
 	}
 
@@ -126,5 +149,8 @@ public class AssetDisplayPageUtil {
 
 		return defaultLayoutPageTemplateEntry;
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		AssetDisplayPageUtil.class);
 
 }
