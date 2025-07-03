@@ -5,6 +5,7 @@
 
 package com.liferay.headless.delivery.internal.resource.v1_0;
 
+import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.headless.common.spi.service.context.ServiceContextBuilder;
 import com.liferay.headless.delivery.dto.v1_0.NavigationMenu;
@@ -12,10 +13,13 @@ import com.liferay.headless.delivery.dto.v1_0.NavigationMenuItem;
 import com.liferay.headless.delivery.dto.v1_0.util.CreatorUtil;
 import com.liferay.headless.delivery.internal.odata.entity.v1_0.NavigationMenuEntityModel;
 import com.liferay.headless.delivery.resource.v1_0.NavigationMenuResource;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.PersistedModel;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
@@ -23,6 +27,7 @@ import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.PermissionService;
+import com.liferay.portal.kernel.service.PersistedModelLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
@@ -36,6 +41,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.odata.entity.EntityModel;
+import com.liferay.portal.service.PersistedModelLocalServiceRegistryUtil;
 import com.liferay.portal.vulcan.custom.field.CustomFieldsUtil;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.fields.NestedFieldsSupplier;
@@ -266,6 +272,45 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 		UnicodeProperties unicodeProperties = UnicodePropertiesBuilder.putAll(
 			navigationMenuItem.getTypeSettings()
 		).build();
+
+		if (!LazyReferencingThreadLocal.isEnabled()) {
+			PersistedModel model;
+
+			if (Objects.equals(navigationMenuItem.getType(), "layout")) {
+				model = _layoutLocalService.fetchLayoutByUuidAndGroupId(
+					unicodeProperties.getProperty("Uuid"),
+					GetterUtil.getLong(
+						unicodeProperties.getProperty("groupId")),
+					GetterUtil.getBoolean(
+						unicodeProperties.getProperty("privateLayout")));
+			}
+			else if (Objects.equals(
+						navigationMenuItem.getType(), "asset-vocabulary")) {
+
+				model =
+					_assetVocabularyLocalService.
+						fetchAssetVocabularyByUuidAndGroupId(
+							unicodeProperties.getProperty("Uuid"),
+							GetterUtil.getLong(
+								unicodeProperties.getProperty("groupId")));
+			}
+			else {
+				PersistedModelLocalService persistedModelLocalService =
+					PersistedModelLocalServiceRegistryUtil.
+						getPersistedModelLocalService(
+							unicodeProperties.getProperty("className"));
+
+				model = persistedModelLocalService.getPersistedModel(
+					GetterUtil.getLong(
+						unicodeProperties.getProperty("classPK")));
+			}
+
+			if (model == null) {
+				throw new PortalException(
+					"Persisted model of type " + navigationMenuItem.getType() +
+						" could not be found");
+			}
+		}
 
 		SiteNavigationMenuItem siteNavigationMenuItem =
 			_siteNavigationMenuItemService.addSiteNavigationMenuItem(
@@ -742,6 +787,9 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 
 	private static final EntityModel _entityModel =
 		new NavigationMenuEntityModel();
+
+	@Reference
+	private AssetVocabularyLocalService _assetVocabularyLocalService;
 
 	@Reference
 	private JSONFactory _jsonFactory;
