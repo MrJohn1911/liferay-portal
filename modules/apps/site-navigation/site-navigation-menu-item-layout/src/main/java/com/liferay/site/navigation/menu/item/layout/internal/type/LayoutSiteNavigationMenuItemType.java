@@ -246,8 +246,8 @@ public class LayoutSiteNavigationMenuItemType
 
 		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
-		if (layout == null) {
-			return StringPool.BLANK;
+		if (layout.getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
+			return "missing-layout";
 		}
 
 		Group group = layout.getGroup();
@@ -280,7 +280,10 @@ public class LayoutSiteNavigationMenuItemType
 
 		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
-		if ((layout != null) && !_isUseCustomName(siteNavigationMenuItem)) {
+		if (layout.getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
+			return "missing-layout";
+		}
+		else if (!_isUseCustomName(siteNavigationMenuItem)) {
 			return layout.getName(locale);
 		}
 
@@ -536,21 +539,19 @@ public class LayoutSiteNavigationMenuItemType
 				siteNavigationMenuItem.getTypeSettings()
 			).build();
 
-		String layoutUuid = typeSettingsUnicodeProperties.get("layoutUuid");
+		String externalReferenceCode = typeSettingsUnicodeProperties.get(
+			"externalReferenceCode");
 
-		boolean privateLayout = GetterUtil.getBoolean(
-			typeSettingsUnicodeProperties.get("privateLayout"));
-
-		Layout layout = _layoutLocalService.fetchLayoutByUuidAndGroupId(
-			layoutUuid, siteNavigationMenuItem.getGroupId(), privateLayout);
+		Layout layout = _layoutLocalService.fetchLayoutByExternalReferenceCode(
+			typeSettingsUnicodeProperties.get("externalReferenceCode"),
+			siteNavigationMenuItem.getGroupId());
 
 		if ((layout == null) && _log.isWarnEnabled()) {
 			_log.warn(
 				StringBundler.concat(
 					"No layout found for site navigation menu item ID ",
 					siteNavigationMenuItem.getSiteNavigationMenuItemId(),
-					" with layout UUID ", layoutUuid, " and private layout ",
-					privateLayout));
+					" with externalReferenceCode ", externalReferenceCode));
 		}
 
 		return layout;
