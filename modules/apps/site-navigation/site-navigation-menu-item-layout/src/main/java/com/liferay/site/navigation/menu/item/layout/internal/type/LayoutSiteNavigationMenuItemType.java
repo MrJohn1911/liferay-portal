@@ -247,7 +247,7 @@ public class LayoutSiteNavigationMenuItemType
 		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		if (layout == null) {
-			return StringPool.BLANK;
+			return "missing-layout";
 		}
 
 		Group group = layout.getGroup();
@@ -280,7 +280,10 @@ public class LayoutSiteNavigationMenuItemType
 
 		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
-		if ((layout != null) && !_isUseCustomName(siteNavigationMenuItem)) {
+		if (layout == null) {
+			return "missing-layout";
+		}
+		else if (!_isUseCustomName(siteNavigationMenuItem)) {
 			return layout.getName(locale);
 		}
 
@@ -541,8 +544,9 @@ public class LayoutSiteNavigationMenuItemType
 		boolean privateLayout = GetterUtil.getBoolean(
 			typeSettingsUnicodeProperties.get("privateLayout"));
 
-		Layout layout = _layoutLocalService.fetchLayoutByUuidAndGroupId(
-			layoutUuid, siteNavigationMenuItem.getGroupId(), privateLayout);
+		Layout layout = _layoutLocalService.fetchLayoutByExternalReferenceCode(
+			typeSettingsUnicodeProperties.get("externalReferenceCode"),
+			siteNavigationMenuItem.getGroupId());
 
 		if ((layout == null) && _log.isWarnEnabled()) {
 			_log.warn(
