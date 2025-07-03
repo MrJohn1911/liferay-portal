@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.site.navigation.menu.item.layout.constants.SiteNavigationMenuItemTypeConstants;
 import com.liferay.site.navigation.model.SiteNavigationMenuItem;
 
@@ -110,20 +111,21 @@ public class SiteNavigationMenuItemUtil {
 				siteNavigationMenuItem.getTypeSettings()
 			).build();
 
-		Set<Locale> availableLocales = LanguageUtil.getAvailableLocales(
-			siteNavigationMenuItem.getGroupId());
-
 		if (Objects.equals(
 				siteNavigationMenuItem.getType(),
 				SiteNavigationMenuItemTypeConstants.LAYOUT)) {
 
-			String layoutUuid = typeSettingsUnicodeProperties.get("layoutUuid");
+			Layout layout =
+				LayoutLocalServiceUtil.fetchLayoutByExternalReferenceCode(
+					typeSettingsUnicodeProperties.get("externalReferenceCode"),
+					siteNavigationMenuItem.getGroupId());
 
-			boolean privateLayout = GetterUtil.getBoolean(
-				typeSettingsUnicodeProperties.get("privateLayout"));
-
-			Layout layout = LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
-				layoutUuid, siteNavigationMenuItem.getGroupId(), privateLayout);
+			if (layout.getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
+				return LocalizationUtil.getXml(
+					new HashMap<>(),
+					LocaleUtil.toLanguageId(LocaleUtil.getMostRelevantLocale()),
+					name);
+			}
 
 			Map<Locale, String> nameMap = layout.getNameMap();
 
@@ -139,6 +141,9 @@ public class SiteNavigationMenuItemUtil {
 				}
 			}
 		}
+
+		Set<Locale> availableLocales = LanguageUtil.getAvailableLocales(
+			siteNavigationMenuItem.getGroupId());
 
 		Map<String, String> map = new HashMap<>();
 
