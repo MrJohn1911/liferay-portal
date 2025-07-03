@@ -56,6 +56,7 @@ dependencies {
 	compileOnly project(":apps:portal-vulcan:portal-vulcan-api")
 	compileOnly project(":apps:segments:segments-api")
 	compileOnly project(":apps:site-navigation:site-navigation-api")
+	compileOnly project(":apps:site-navigation:site-navigation-menu-item-api")
 	compileOnly project(":apps:style-book:style-book-api")
 	compileOnly project(":apps:subscription:subscription-api")
 	compileOnly project(":apps:upload:upload-api")

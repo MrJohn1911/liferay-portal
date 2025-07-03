@@ -5,6 +5,7 @@
 
 package com.liferay.headless.delivery.internal.resource.v1_0;
 
+import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.headless.common.spi.service.context.ServiceContextBuilder;
 import com.liferay.headless.delivery.dto.v1_0.NavigationMenu;
@@ -12,10 +13,19 @@ import com.liferay.headless.delivery.dto.v1_0.NavigationMenuItem;
 import com.liferay.headless.delivery.dto.v1_0.util.CreatorUtil;
 import com.liferay.headless.delivery.internal.odata.entity.v1_0.NavigationMenuEntityModel;
 import com.liferay.headless.delivery.resource.v1_0.NavigationMenuResource;
+import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.service.JournalArticleLocalService;
+import com.liferay.knowledge.base.model.KBArticle;
+import com.liferay.knowledge.base.service.KBArticleLocalService;
+import com.liferay.object.model.ObjectDefinition;
+import com.liferay.object.model.ObjectEntry;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.PersistedModel;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
@@ -23,6 +33,7 @@ import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.PermissionService;
+import com.liferay.portal.kernel.service.PersistedModelLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
@@ -36,6 +47,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.odata.entity.EntityModel;
+import com.liferay.portal.service.PersistedModelLocalServiceRegistryUtil;
 import com.liferay.portal.vulcan.custom.field.CustomFieldsUtil;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.fields.NestedFieldsSupplier;
@@ -48,6 +60,8 @@ import com.liferay.portal.vulcan.util.LocalizedMapUtil;
 import com.liferay.portal.vulcan.util.SearchUtil;
 import com.liferay.site.navigation.constants.SiteNavigationActionKeys;
 import com.liferay.site.navigation.constants.SiteNavigationConstants;
+import com.liferay.site.navigation.menu.item.layout.constants.SiteNavigationMenuItemTypeConstants;
+import com.liferay.site.navigation.menu.item.util.SiteNavigationMenuItemUtil;
 import com.liferay.site.navigation.model.SiteNavigationMenu;
 import com.liferay.site.navigation.model.SiteNavigationMenuItem;
 import com.liferay.site.navigation.service.SiteNavigationMenuItemService;
@@ -266,6 +280,77 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 		UnicodeProperties unicodeProperties = UnicodePropertiesBuilder.putAll(
 			navigationMenuItem.getTypeSettings()
 		).build();
+
+		String navigationMenuItemType = navigationMenuItem.getType();
+
+		if (!LazyReferencingThreadLocal.isEnabled() &&
+			SiteNavigationMenuItemUtil.isExternalReferenceCodeType(
+				navigationMenuItemType)) {
+
+			PersistedModel model;
+
+			if (Objects.equals(
+					navigationMenuItemType,
+					SiteNavigationMenuItemTypeConstants.LAYOUT)) {
+
+				model = _layoutLocalService.fetchLayoutByUuidAndGroupId(
+					unicodeProperties.getProperty("layoutUuid"),
+					GetterUtil.getLong(
+						unicodeProperties.getProperty("groupId")),
+					GetterUtil.getBoolean(
+						unicodeProperties.getProperty("privateLayout")));
+			}
+			else if (Objects.equals(
+						navigationMenuItemType,
+						SiteNavigationMenuItemTypeConstants.ASSET_VOCABULARY)) {
+
+				model =
+					_assetVocabularyLocalService.
+						fetchAssetVocabularyByUuidAndGroupId(
+							unicodeProperties.getProperty("uuid"),
+							GetterUtil.getLong(
+								unicodeProperties.getProperty("groupId")));
+			}
+			else if (Objects.equals(
+						navigationMenuItemType,
+						JournalArticle.class.getName())) {
+
+				model = _journalArticleLocalService.getLatestArticle(
+					GetterUtil.getLong(
+						unicodeProperties.getProperty("classPK")));
+			}
+			else if (Objects.equals(
+						navigationMenuItemType, KBArticle.class.getName())) {
+
+				model = _kbArticleLocalService.getLatestKBArticle(
+					GetterUtil.getLong(
+						unicodeProperties.getProperty("classPK")));
+			}
+			else {
+				String className = unicodeProperties.getProperty("className");
+
+				if (className.equals(FileEntry.class.getName())) {
+					className = DLFileEntry.class.getName();
+				}
+				else if (className.contains(ObjectDefinition.class.getName())) {
+					className = ObjectEntry.class.getName();
+				}
+
+				PersistedModelLocalService persistedModelLocalService =
+					PersistedModelLocalServiceRegistryUtil.
+						getPersistedModelLocalService(className);
+
+				model = persistedModelLocalService.getPersistedModel(
+					GetterUtil.getLong(
+						unicodeProperties.getProperty("classPK")));
+			}
+
+			if (model == null) {
+				throw new PortalException(
+					"Persisted model of type " + navigationMenuItemType +
+						" could not be found");
+			}
+		}
 
 		SiteNavigationMenuItem siteNavigationMenuItem =
 			_siteNavigationMenuItemService.addSiteNavigationMenuItem(
@@ -744,7 +829,16 @@ public class NavigationMenuResourceImpl extends BaseNavigationMenuResourceImpl {
 		new NavigationMenuEntityModel();
 
 	@Reference
+	private AssetVocabularyLocalService _assetVocabularyLocalService;
+
+	@Reference
+	private JournalArticleLocalService _journalArticleLocalService;
+
+	@Reference
 	private JSONFactory _jsonFactory;
+
+	@Reference
+	private KBArticleLocalService _kbArticleLocalService;
 
 	@Reference
 	private LayoutLocalService _layoutLocalService;
