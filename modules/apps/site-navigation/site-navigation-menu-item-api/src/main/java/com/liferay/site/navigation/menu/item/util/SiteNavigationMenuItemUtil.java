@@ -5,6 +5,7 @@
 
 package com.liferay.site.navigation.menu.item.util;
 
+import com.liferay.object.model.ObjectDefinition;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -175,6 +176,21 @@ public class SiteNavigationMenuItemUtil {
 		return LocalizationUtil.getXml(
 			map, LocaleUtil.toLanguageId(LocaleUtil.getMostRelevantLocale()),
 			name);
+	}
+
+	public static boolean isExternalReferenceCodeType(
+		String siteNavigationMenuItemType) {
+
+		if (siteNavigationMenuItemType.contains(
+				ObjectDefinition.class.getName())) {
+
+			return true;
+		}
+
+		return ArrayUtil.contains(
+			SiteNavigationMenuItemTypeConstants.
+				SUPPORTED_ERC_SITE_NAVIGATION_MENU_ITEM_TYPES,
+			siteNavigationMenuItemType);
 	}
 
 }
