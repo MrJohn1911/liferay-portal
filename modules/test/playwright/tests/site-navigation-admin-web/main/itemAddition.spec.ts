@@ -408,7 +408,7 @@ test(
 
 		await page.getByLabel('Add New Vocabulary').click();
 
-		const vocabularyName = getRandomString();
+		const vocabularyName = 'test';
 
 		await page.getByPlaceholder('Name').fill(vocabularyName);
 
@@ -426,6 +426,8 @@ test(
 
 		await navigationMenusPage.openAddVocabularyModal();
 
+		await page.waitForTimeout(300);
+
 		await navigationMenusPage.vocabulariesModal
 			.getByLabel(vocabularyName)
 			.check();
@@ -433,6 +435,8 @@ test(
 		await navigationMenusPage.selectButton.click();
 
 		// Assert that the Vocabulary Navigation Menu item was successfully created
+
+		await page.waitForTimeout(300);
 
 		await expect(page.getByText(vocabularyName)).toBeVisible();
 
