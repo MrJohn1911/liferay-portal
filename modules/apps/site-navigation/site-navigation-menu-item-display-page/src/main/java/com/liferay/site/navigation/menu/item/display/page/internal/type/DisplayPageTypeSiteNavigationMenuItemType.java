@@ -7,14 +7,21 @@ package com.liferay.site.navigation.menu.item.display.page.internal.type;
 
 import com.liferay.asset.display.page.portlet.AssetDisplayPageFriendlyURLProvider;
 import com.liferay.asset.display.page.util.AssetDisplayPageUtil;
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
 import com.liferay.info.item.provider.InfoItemPermissionProvider;
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.item.selector.criteria.InfoItemItemSelectorReturnType;
 import com.liferay.item.selector.criteria.info.item.criterion.InfoItemItemSelectorCriterion;
+import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.service.JournalArticleLocalServiceUtil;
+import com.liferay.knowledge.base.model.KBArticle;
+import com.liferay.knowledge.base.service.KBArticleLocalServiceUtil;
 import com.liferay.layout.display.page.LayoutDisplayPageMultiSelectionProvider;
 import com.liferay.layout.display.page.LayoutDisplayPageObjectProvider;
+import com.liferay.object.model.ObjectDefinition;
+import com.liferay.object.model.ObjectEntry;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONException;
@@ -24,11 +31,14 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.ClassedModel;
+import com.liferay.portal.kernel.model.PersistedModel;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.service.PersistedModelLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
@@ -40,6 +50,7 @@ import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portal.service.PersistedModelLocalServiceRegistryUtil;
 import com.liferay.site.navigation.menu.item.display.page.internal.display.context.DisplayPageTypeSiteNavigationMenuTypeDisplayContext;
 import com.liferay.site.navigation.model.SiteNavigationMenuItem;
 import com.liferay.site.navigation.type.SiteNavigationMenuItemType;
@@ -57,6 +68,7 @@ import java.io.IOException;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Lourdes Fernández Besada
@@ -198,6 +210,41 @@ public class DisplayPageTypeSiteNavigationMenuItemType
 	@Override
 	public String getLabel(Locale locale) {
 		return _displayPageTypeContext.getLabel(locale);
+	}
+
+	@Override
+	public PersistedModel getModel(
+			UnicodeProperties typeSettingsUnicodeProperties)
+		throws PortalException {
+
+		if (Objects.equals(getType(), JournalArticle.class.getName())) {
+			return JournalArticleLocalServiceUtil.getLatestArticle(
+				GetterUtil.getLong(
+					typeSettingsUnicodeProperties.getProperty("classPK")));
+		}
+		else if (Objects.equals(getType(), KBArticle.class.getName())) {
+			return KBArticleLocalServiceUtil.getLatestKBArticle(
+				GetterUtil.getLong(
+					typeSettingsUnicodeProperties.getProperty("classPK")));
+		}
+
+		String className = typeSettingsUnicodeProperties.getProperty(
+			"className");
+
+		if (className.equals(FileEntry.class.getName())) {
+			className = DLFileEntry.class.getName();
+		}
+		else if (className.contains(ObjectDefinition.class.getName())) {
+			className = ObjectEntry.class.getName();
+		}
+
+		PersistedModelLocalService persistedModelLocalService =
+			PersistedModelLocalServiceRegistryUtil.
+				getPersistedModelLocalService(className);
+
+		return persistedModelLocalService.getPersistedModel(
+			GetterUtil.getLong(
+				typeSettingsUnicodeProperties.getProperty("classPK")));
 	}
 
 	@Override
