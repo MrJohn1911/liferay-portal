@@ -96,7 +96,9 @@ import com.liferay.headless.delivery.resource.v1_0.StructuredContentFolderResour
 import com.liferay.journal.constants.JournalArticleConstants;
 import com.liferay.journal.constants.JournalFolderConstants;
 import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.service.JournalArticleLocalService;
+import com.liferay.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.knowledge.base.model.KBArticle;
 import com.liferay.layout.importer.LayoutsImportStrategy;
 import com.liferay.layout.importer.LayoutsImporter;
@@ -4074,9 +4076,11 @@ public class BundleSiteInitializer implements SiteInitializer {
 		String json = SiteInitializerUtil.read(
 			parentResourcePath + ".metadata.json", _servletContext);
 
+		String folderName = FileUtil.getShortFileName(parentResourcePath);
+
 		if (json == null) {
 			json = JSONUtil.put(
-				"name", FileUtil.getShortFileName(parentResourcePath)
+				"name", folderName
 			).toString();
 		}
 
@@ -4085,6 +4089,16 @@ public class BundleSiteInitializer implements SiteInitializer {
 
 		structuredContentFolder.setParentStructuredContentFolderId(
 			() -> documentFolderId);
+
+		JournalFolder journalFolder = JournalFolderLocalServiceUtil.fetchFolder(
+			serviceContext.getScopeGroupId(), folderName);
+
+		if ((journalFolder != null) &&
+			(structuredContentFolder.getExternalReferenceCode() == null)) {
+
+			structuredContentFolder.setExternalReferenceCode(
+				journalFolder::getExternalReferenceCode);
+		}
 
 		structuredContentFolder =
 			structuredContentFolderResource.
