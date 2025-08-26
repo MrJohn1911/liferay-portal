@@ -1839,11 +1839,21 @@ public class BundleSiteInitializerTest {
 		Assert.assertEquals(
 			"Test Journal Article 2", journalArticle2.getTitle());
 
+		JournalArticle journalArticle3 =
+			_journalArticleLocalService.fetchArticle(
+				_group.getGroupId(), "TEST-JOURNAL-ARTICLE-3");
+
+		Assert.assertNotNull(journalArticle3);
+		Assert.assertEquals(
+			"TEST DDM TEMPLATE KEY 1", journalArticle3.getDDMTemplateKey());
+		Assert.assertEquals(
+			"Test Journal Article 3", journalArticle3.getTitle());
+
 		List<JournalFolder> journalFolders = _journalFolderService.getFolders(
 			_group.getGroupId());
 
 		Assert.assertEquals(
-			journalFolders.toString(), 2, journalFolders.size());
+			journalFolders.toString(), 3, journalFolders.size());
 
 		JournalFolder journalFolder1 = journalFolders.get(0);
 
@@ -1856,6 +1866,10 @@ public class BundleSiteInitializerTest {
 		Assert.assertEquals(
 			"TESTJOURNALFOLDER2", journalFolder2.getExternalReferenceCode());
 		Assert.assertEquals("Test Journal Folder 2", journalFolder2.getName());
+
+		JournalFolder journalFolder3 = journalFolders.get(2);
+
+		Assert.assertEquals("test-journal-folder-3", journalFolder3.getName());
 	}
 
 	private void _assertJournalArticles2() throws Exception {
@@ -1887,17 +1901,27 @@ public class BundleSiteInitializerTest {
 		Assert.assertTrue(
 			Validator.isNull(journalArticle3.getDDMTemplateKey()));
 		Assert.assertEquals(
-			"Test Journal Article 3", journalArticle3.getTitle());
+			"Test Journal Article 3 Update", journalArticle3.getTitle());
+
+		JournalArticle journalArticle4 =
+			_journalArticleLocalService.fetchArticle(
+				_group.getGroupId(), "TEST-JOURNAL-ARTICLE-4");
+
+		Assert.assertNotNull(journalArticle4);
+		Assert.assertTrue(
+			Validator.isNull(journalArticle4.getDDMTemplateKey()));
+		Assert.assertEquals(
+			"Test Journal Article 4", journalArticle4.getTitle());
 		Assert.assertEquals(
 			LocaleUtil.toLanguageId(
 				_portal.getSiteDefaultLocale(_group.getGroupId())),
-			journalArticle3.getDefaultLanguageId());
+			journalArticle4.getDefaultLanguageId());
 
 		List<JournalFolder> journalFolders = _journalFolderService.getFolders(
 			_group.getGroupId());
 
 		Assert.assertEquals(
-			journalFolders.toString(), 3, journalFolders.size());
+			journalFolders.toString(), 4, journalFolders.size());
 
 		JournalFolder journalFolder1 = journalFolders.get(0);
 
@@ -1912,11 +1936,15 @@ public class BundleSiteInitializerTest {
 		Assert.assertEquals(
 			"Test Journal Folder 2 Update", journalFolder2.getName());
 
-		JournalFolder journalFolder3 = journalFolders.get(2);
+		JournalFolder journalFolder4 = journalFolders.get(2);
 
 		Assert.assertEquals(
-			"TESTJOURNALFOLDER3", journalFolder3.getExternalReferenceCode());
-		Assert.assertEquals("Test Journal Folder 3", journalFolder3.getName());
+			"TESTJOURNALFOLDER4", journalFolder4.getExternalReferenceCode());
+		Assert.assertEquals("Test Journal Folder 4", journalFolder4.getName());
+
+		JournalFolder journalFolder3 = journalFolders.get(3);
+
+		Assert.assertEquals("test-journal-folder-3", journalFolder3.getName());
 	}
 
 	private void _assertKBArticles() throws Exception {
