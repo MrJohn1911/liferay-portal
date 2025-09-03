@@ -213,8 +213,81 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 	}
 
 	@Override
+	@Test
+	public void testPutSite() throws Exception {
+		Site postSite = testPutSite_addSite();
+
+		Site randomSite = randomSite();
+
+		randomSite.setExternalReferenceCode(
+			postSite.getExternalReferenceCode());
+
+		Site putSite = siteResource.putSite(randomSite);
+
+		assertEquals(randomSite, putSite);
+		assertValid(putSite);
+
+		Site getSite = siteResource.getSite(putSite.getId());
+
+		assertEquals(randomSite, getSite);
+		assertValid(getSite);
+	}
+
+	@Override
+	@Test
+	public void testPutSiteByExternalReferenceCode() throws Exception {
+		Site postSite = testPutSiteByExternalReferenceCode_addSite();
+
+		Site randomSite = randomSite();
+
+		randomSite.setExternalReferenceCode(
+			postSite.getExternalReferenceCode());
+
+		Map<String, File> multipartFiles = getMultipartFiles();
+
+		Site putSite = siteResource.putSiteByExternalReferenceCode(
+			postSite.getExternalReferenceCode(), randomSite, multipartFiles);
+
+		assertEquals(randomSite, putSite);
+		assertValid(putSite);
+
+		Site getSite = siteResource.getSiteByExternalReferenceCode(
+			putSite.getExternalReferenceCode());
+
+		assertEquals(randomSite, getSite);
+		assertValid(getSite);
+
+		assertValid(getSite, multipartFiles);
+
+		Site newSite = testPutSiteByExternalReferenceCode_createSite();
+
+		putSite = siteResource.putSiteByExternalReferenceCode(
+			newSite.getExternalReferenceCode(), newSite, getMultipartFiles());
+
+		assertEquals(newSite, putSite);
+		assertValid(putSite);
+
+		getSite = siteResource.getSiteByExternalReferenceCode(
+			putSite.getExternalReferenceCode());
+
+		assertEquals(newSite, getSite);
+
+		Assert.assertEquals(
+			newSite.getExternalReferenceCode(),
+			putSite.getExternalReferenceCode());
+	}
+
+	@Override
 	protected void assertValid(Site site, Map<String, File> multipartFiles)
 		throws Exception {
+	}
+
+	@Override
+	protected String[] getAdditionalAssertFieldNames() {
+		return new String[] {
+			"active", "externalReferenceCode", "friendlyUrlPath",
+			"manualMembership", "name"
+		};
 	}
 
 	@Override
@@ -261,6 +334,11 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 	}
 
 	@Override
+	protected Site testGetSite_addSite() throws Exception {
+		return testPostSite_addSite(randomSite());
+	}
+
+	@Override
 	protected Site testGetSiteByExternalReferenceCode_addSite()
 		throws Exception {
 
@@ -296,6 +374,11 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 		_sites.add(postSite);
 
 		return postSite;
+	}
+
+	@Override
+	protected Site testPutSite_addSite() throws Exception {
+		return testPostSite_addSite(randomSite());
 	}
 
 	@Override
