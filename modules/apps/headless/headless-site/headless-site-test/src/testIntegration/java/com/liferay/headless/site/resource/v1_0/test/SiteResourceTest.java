@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -213,8 +214,200 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 	}
 
 	@Override
+	@Test
+	public void testPutSite() throws Exception {
+		Site postSite = testPutSite_addSite();
+
+		Site randomSite = randomSite();
+
+		randomSite.setExternalReferenceCode(
+			postSite.getExternalReferenceCode());
+
+		Site putSite = siteResource.putSite(randomSite);
+
+		assertEquals(randomSite, putSite);
+		assertValid(putSite);
+
+		Site getSite = siteResource.getSite(putSite.getId());
+
+		assertEquals(randomSite, getSite);
+		assertValid(getSite);
+	}
+
+	@Override
+	@Test
+	public void testPutSiteByExternalReferenceCode() throws Exception {
+		Site postSite = testPutSiteByExternalReferenceCode_addSite();
+
+		Site randomSite = randomSite();
+
+		randomSite.setExternalReferenceCode(
+			postSite.getExternalReferenceCode());
+
+		Map<String, File> multipartFiles = getMultipartFiles();
+
+		Site putSite = siteResource.putSiteByExternalReferenceCode(
+			postSite.getExternalReferenceCode(), randomSite, multipartFiles);
+
+		assertEquals(randomSite, putSite);
+		assertValid(putSite);
+
+		Site getSite = siteResource.getSiteByExternalReferenceCode(
+			putSite.getExternalReferenceCode());
+
+		assertEquals(randomSite, getSite);
+		assertValid(getSite);
+
+		assertValid(getSite, multipartFiles);
+
+		Site newSite = testPutSiteByExternalReferenceCode_createSite();
+
+		putSite = siteResource.putSiteByExternalReferenceCode(
+			newSite.getExternalReferenceCode(), newSite, getMultipartFiles());
+
+		assertEquals(newSite, putSite);
+		assertValid(putSite);
+
+		getSite = siteResource.getSiteByExternalReferenceCode(
+			putSite.getExternalReferenceCode());
+
+		assertEquals(newSite, getSite);
+
+		Assert.assertEquals(
+			newSite.getExternalReferenceCode(),
+			putSite.getExternalReferenceCode());
+	}
+
+	@Override
+	protected void assertValid(Site site) throws Exception {
+		boolean valid = true;
+
+		if (site.getId() == null) {
+			valid = false;
+		}
+
+		for (String additionalAssertFieldName :
+				getAdditionalAssertFieldNames()) {
+
+			if (Objects.equals(additionalAssertFieldName, "active")) {
+				if (site.getActive() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					additionalAssertFieldName, "externalReferenceCode")) {
+
+				if (site.getExternalReferenceCode() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(additionalAssertFieldName, "friendlyUrlPath")) {
+				if (site.getFriendlyUrlPath() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(additionalAssertFieldName, "key")) {
+				if (site.getKey() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(additionalAssertFieldName, "manualMembership")) {
+				if (site.getManualMembership() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					additionalAssertFieldName, "membershipRestriction")) {
+
+				if (site.getMembershipRestriction() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(additionalAssertFieldName, "membershipType")) {
+				if (site.getMembershipType() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(additionalAssertFieldName, "name")) {
+				if (site.getName() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(additionalAssertFieldName, "parentSiteKey")) {
+				if (site.getParentSiteKey() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(additionalAssertFieldName, "templateKey")) {
+				if (site.getTemplateKey() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(additionalAssertFieldName, "templateType")) {
+				if (site.getTemplateType() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(additionalAssertFieldName, "typeSettings")) {
+				if (site.getTypeSettings() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			throw new IllegalArgumentException(
+				"Invalid additional assert field name " +
+					additionalAssertFieldName);
+		}
+
+		Assert.assertTrue(valid);
+	}
+
+	@Override
 	protected void assertValid(Site site, Map<String, File> multipartFiles)
 		throws Exception {
+	}
+
+	@Override
+	protected String[] getAdditionalAssertFieldNames() {
+		return new String[] {
+			"active", "externalReferenceCode", "friendlyUrlPath",
+			"manualMembership", "name"
+		};
 	}
 
 	@Override
@@ -261,6 +454,11 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 	}
 
 	@Override
+	protected Site testGetSite_addSite() throws Exception {
+		return testPostSite_addSite(randomSite());
+	}
+
+	@Override
 	protected Site testGetSiteByExternalReferenceCode_addSite()
 		throws Exception {
 
@@ -296,6 +494,11 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 		_sites.add(postSite);
 
 		return postSite;
+	}
+
+	@Override
+	protected Site testPutSite_addSite() throws Exception {
+		return testPostSite_addSite(randomSite());
 	}
 
 	@Override
