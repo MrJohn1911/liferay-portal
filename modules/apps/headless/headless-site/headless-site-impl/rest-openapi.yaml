@@ -34,9 +34,8 @@ components:
                     type: string
                 name:
                     type: string
-                parentSiteKey:
+                parentSiteERC:
                     type: string
-                    writeOnly: true
                 templateKey:
                     type: string
                     writeOnly: true
