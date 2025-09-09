@@ -34,9 +34,8 @@ components:
                     type: string
                 name:
                     type: string
-                parentSiteKey:
+                parentSiteExternalReferenceCode:
                     type: string
-                    writeOnly: true
                 templateKey:
                     type: string
                     writeOnly: true
