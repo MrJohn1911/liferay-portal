@@ -219,26 +219,26 @@ public class Site implements Cloneable, Serializable {
 
 	protected String name;
 
-	public String getParentSiteKey() {
-		return parentSiteKey;
+	public String getParentSiteERC() {
+		return parentSiteERC;
 	}
 
-	public void setParentSiteKey(String parentSiteKey) {
-		this.parentSiteKey = parentSiteKey;
+	public void setParentSiteERC(String parentSiteERC) {
+		this.parentSiteERC = parentSiteERC;
 	}
 
-	public void setParentSiteKey(
-		UnsafeSupplier<String, Exception> parentSiteKeyUnsafeSupplier) {
+	public void setParentSiteERC(
+		UnsafeSupplier<String, Exception> parentSiteERCUnsafeSupplier) {
 
 		try {
-			parentSiteKey = parentSiteKeyUnsafeSupplier.get();
+			parentSiteERC = parentSiteERCUnsafeSupplier.get();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected String parentSiteKey;
+	protected String parentSiteERC;
 
 	public String getTemplateKey() {
 		return templateKey;

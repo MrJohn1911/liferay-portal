@@ -440,29 +440,29 @@ public class Site implements Serializable {
 	private Supplier<String> _nameSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema
-	public String getParentSiteKey() {
-		if (_parentSiteKeySupplier != null) {
-			parentSiteKey = _parentSiteKeySupplier.get();
+	public String getParentSiteERC() {
+		if (_parentSiteERCSupplier != null) {
+			parentSiteERC = _parentSiteERCSupplier.get();
 
-			_parentSiteKeySupplier = null;
+			_parentSiteERCSupplier = null;
 		}
 
-		return parentSiteKey;
+		return parentSiteERC;
 	}
 
-	public void setParentSiteKey(String parentSiteKey) {
-		this.parentSiteKey = parentSiteKey;
+	public void setParentSiteERC(String parentSiteERC) {
+		this.parentSiteERC = parentSiteERC;
 
-		_parentSiteKeySupplier = null;
+		_parentSiteERCSupplier = null;
 	}
 
 	@JsonIgnore
-	public void setParentSiteKey(
-		UnsafeSupplier<String, Exception> parentSiteKeyUnsafeSupplier) {
+	public void setParentSiteERC(
+		UnsafeSupplier<String, Exception> parentSiteERCUnsafeSupplier) {
 
-		_parentSiteKeySupplier = () -> {
+		_parentSiteERCSupplier = () -> {
 			try {
-				return parentSiteKeyUnsafeSupplier.get();
+				return parentSiteERCUnsafeSupplier.get();
 			}
 			catch (RuntimeException runtimeException) {
 				throw runtimeException;
@@ -474,11 +474,11 @@ public class Site implements Serializable {
 	}
 
 	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	protected String parentSiteKey;
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String parentSiteERC;
 
 	@JsonIgnore
-	private Supplier<String> _parentSiteKeySupplier;
+	private Supplier<String> _parentSiteERCSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema
 	public String getTemplateKey() {
@@ -773,18 +773,18 @@ public class Site implements Serializable {
 			sb.append("\"");
 		}
 
-		String parentSiteKey = getParentSiteKey();
+		String parentSiteERC = getParentSiteERC();
 
-		if (parentSiteKey != null) {
+		if (parentSiteERC != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"parentSiteKey\": ");
+			sb.append("\"parentSiteERC\": ");
 
 			sb.append("\"");
 
-			sb.append(_escape(parentSiteKey));
+			sb.append(_escape(parentSiteERC));
 
 			sb.append("\"");
 		}

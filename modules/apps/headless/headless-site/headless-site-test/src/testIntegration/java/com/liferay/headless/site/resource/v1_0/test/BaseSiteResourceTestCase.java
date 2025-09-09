@@ -211,7 +211,7 @@ public abstract class BaseSiteResourceTestCase {
 		site.setFriendlyUrlPath(regex);
 		site.setKey(regex);
 		site.setName(regex);
-		site.setParentSiteKey(regex);
+		site.setParentSiteERC(regex);
 		site.setTemplateKey(regex);
 
 		String json = SiteSerDes.toJSON(site);
@@ -224,7 +224,7 @@ public abstract class BaseSiteResourceTestCase {
 		Assert.assertEquals(regex, site.getFriendlyUrlPath());
 		Assert.assertEquals(regex, site.getKey());
 		Assert.assertEquals(regex, site.getName());
-		Assert.assertEquals(regex, site.getParentSiteKey());
+		Assert.assertEquals(regex, site.getParentSiteERC());
 		Assert.assertEquals(regex, site.getTemplateKey());
 	}
 
@@ -988,8 +988,8 @@ public abstract class BaseSiteResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("parentSiteKey", additionalAssertFieldName)) {
-				if (site.getParentSiteKey() == null) {
+			if (Objects.equals("parentSiteERC", additionalAssertFieldName)) {
+				if (site.getParentSiteERC() == null) {
 					valid = false;
 				}
 
@@ -1232,9 +1232,9 @@ public abstract class BaseSiteResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("parentSiteKey", additionalAssertFieldName)) {
+			if (Objects.equals("parentSiteERC", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						site1.getParentSiteKey(), site2.getParentSiteKey())) {
+						site1.getParentSiteERC(), site2.getParentSiteERC())) {
 
 					return false;
 				}
@@ -1590,8 +1590,8 @@ public abstract class BaseSiteResourceTestCase {
 			return sb.toString();
 		}
 
-		if (entityFieldName.equals("parentSiteKey")) {
-			Object object = site.getParentSiteKey();
+		if (entityFieldName.equals("parentSiteERC")) {
+			Object object = site.getParentSiteERC();
 
 			String value = String.valueOf(object);
 
@@ -1752,7 +1752,7 @@ public abstract class BaseSiteResourceTestCase {
 				manualMembership = RandomTestUtil.randomBoolean();
 				membershipRestriction = RandomTestUtil.randomInt();
 				name = StringUtil.toLowerCase(RandomTestUtil.randomString());
-				parentSiteKey = StringUtil.toLowerCase(
+				parentSiteERC = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
 				templateKey = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
