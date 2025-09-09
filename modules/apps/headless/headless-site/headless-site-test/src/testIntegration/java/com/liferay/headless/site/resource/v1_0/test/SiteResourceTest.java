@@ -16,11 +16,13 @@ import com.liferay.headless.site.client.pagination.Page;
 import com.liferay.headless.site.client.pagination.Pagination;
 import com.liferay.headless.site.client.problem.Problem;
 import com.liferay.headless.site.client.resource.v1_0.SiteResource;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.LayoutSet;
@@ -105,6 +107,12 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 				TestPropsValues.getCompanyId());
 
 			if (group != null) {
+				List<Group> childGroups = group.getChildren(true);
+
+				for (Group childGroup : childGroups) {
+					_groupLocalService.deleteGroup(childGroup);
+				}
+
 				_groupLocalService.deleteGroup(group);
 			}
 		}
@@ -204,6 +212,7 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 		_testPostSiteFailureSiteTemplateNotFound();
 		_testPostSiteFailureTemplateKeyNoTemplateType();
 		_testPostSiteFailureTemplateTypeNoTemplateKey();
+		_testPostSiteSiteParentSiteERC();
 		_testPostSiteSuccessChild();
 		_testPostSiteSuccessMembershipTypePrivate();
 		_testPostSiteSuccessSiteInitializer();
@@ -212,13 +221,14 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 		_testPostSiteWithoutAuthentication();
 	}
 
-	@LazyReferencing
 	@Override
 	@Test
 	public void testPutSite() throws Exception {
 		super.testPutSite();
 
 		_testPutSiteBatch();
+		_testPutSiteSiteParentSiteERC();
+		_testPutSiteBatchSiteParentSiteERC();
 	}
 
 	@Override
@@ -301,6 +311,7 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 				membershipType = MembershipType.create(
 					GroupConstants.getTypeLabel(GroupConstants.TYPE_SITE_OPEN));
 				name = StringUtil.toLowerCase(RandomTestUtil.randomString());
+				parentSiteERC = StringPool.BLANK;
 				typeSettings = LinkedHashMapBuilder.put(
 					RandomTestUtil.randomString(), RandomTestUtil.randomString()
 				).build();
@@ -638,7 +649,7 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 	private void _testPostSiteFailureParentSiteNotFound() throws Exception {
 		Site randomSite = randomSite();
 
-		randomSite.setParentSiteKey(
+		randomSite.setParentSiteERC(
 			StringUtil.toLowerCase(RandomTestUtil.randomString()));
 
 		try {
@@ -824,6 +835,42 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 		}
 	}
 
+	private void _testPostSiteSiteParentSiteERC() throws Exception {
+		Site postParentSite = testPostSite_addSite(randomSite());
+
+		Site randomSite = randomSite();
+
+		randomSite.setParentSiteERC(postParentSite.getExternalReferenceCode());
+
+		Site postSite = siteResource.postSite(randomSite);
+
+		Assert.assertEquals(
+			randomSite.getParentSiteERC(), postSite.getParentSiteERC());
+		assertEquals(randomSite, postSite);
+		assertValid(postSite);
+
+		randomSite = randomSite();
+
+		randomSite.setParentSiteERC(RandomTestUtil.randomString());
+
+		postSite = siteResource.postSite(randomSite);
+
+		Assert.assertEquals(StringPool.BLANK, postSite.getParentSiteERC());
+		assertEquals(randomSite, postSite);
+		assertValid(postSite);
+
+		randomSite = randomSite();
+
+		randomSite.setParentSiteERC(StringPool.BLANK);
+
+		postSite = siteResource.postSite(randomSite);
+
+		Assert.assertEquals(
+			randomSite.getParentSiteERC(), postSite.getParentSiteERC());
+		assertEquals(randomSite, postSite);
+		assertValid(postSite);
+	}
+
 	private Site _testPostSiteSuccess(Site site) throws Exception {
 		Site postSite = _testPostSite_addSite(site);
 
@@ -838,7 +885,7 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 
 		Site randomSite = randomSite();
 
-		randomSite.setParentSiteKey(parentSite.getKey());
+		randomSite.setParentSiteERC(parentSite.getExternalReferenceCode());
 
 		Site postSite = _testPostSiteSuccess(randomSite);
 
@@ -985,6 +1032,81 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 		_sites.add(
 			siteResource.getSiteByExternalReferenceCode(
 				updatedSite.getExternalReferenceCode()));
+	}
+
+	private void _testPutSiteBatchSiteParentSiteERC() throws Exception {
+		try (SafeCloseable safeCloseable =
+				LazyReferencingThreadLocal.setEnabledWithSafeCloseable(true)) {
+
+			Site postParentSite = testPutSite_addSite();
+
+			Site postSite = testPutSite_addSite();
+
+			Site randomSite = randomSite();
+
+			randomSite.setExternalReferenceCode(
+				postSite.getExternalReferenceCode());
+
+			randomSite.setParentSiteERC(
+				postParentSite.getExternalReferenceCode());
+
+			Site putSite = siteResource.putSite(randomSite);
+
+			Assert.assertEquals(StringPool.BLANK, putSite.getParentSiteERC());
+			assertEquals(randomSite, putSite);
+			assertValid(putSite);
+
+			randomSite.setParentSiteERC(RandomTestUtil.randomString());
+
+			putSite = siteResource.putSite(randomSite);
+
+			Assert.assertEquals(StringPool.BLANK, putSite.getParentSiteERC());
+			assertEquals(randomSite, putSite);
+			assertValid(putSite);
+
+			randomSite.setParentSiteERC(StringPool.BLANK);
+
+			putSite = siteResource.putSite(randomSite);
+
+			Assert.assertEquals(StringPool.BLANK, putSite.getParentSiteERC());
+			assertEquals(randomSite, putSite);
+			assertValid(putSite);
+		}
+	}
+
+	private void _testPutSiteSiteParentSiteERC() throws Exception {
+		Site postParentSite = testPutSite_addSite();
+
+		Site postSite = testPutSite_addSite();
+
+		Site randomSite = randomSite();
+
+		randomSite.setExternalReferenceCode(
+			postSite.getExternalReferenceCode());
+		randomSite.setParentSiteERC(postParentSite.getExternalReferenceCode());
+
+		Site putSite = siteResource.putSite(randomSite);
+
+		Assert.assertEquals(
+			randomSite.getParentSiteERC(), putSite.getParentSiteERC());
+		assertEquals(randomSite, putSite);
+		assertValid(putSite);
+
+		randomSite.setParentSiteERC(RandomTestUtil.randomString());
+
+		putSite = siteResource.putSite(randomSite);
+
+		Assert.assertEquals(StringPool.BLANK, putSite.getParentSiteERC());
+		assertEquals(randomSite, putSite);
+		assertValid(putSite);
+
+		randomSite.setParentSiteERC(StringPool.BLANK);
+
+		putSite = siteResource.putSite(randomSite);
+
+		Assert.assertEquals(StringPool.BLANK, putSite.getParentSiteERC());
+		assertEquals(randomSite, putSite);
+		assertValid(putSite);
 	}
 
 	private static final String _CLASS_NAME_EXCEPTION_MAPPER =

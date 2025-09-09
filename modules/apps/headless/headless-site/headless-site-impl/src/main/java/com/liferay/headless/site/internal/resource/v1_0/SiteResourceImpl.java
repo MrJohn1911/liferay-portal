@@ -9,12 +9,14 @@ import com.liferay.headless.site.dto.v1_0.Site;
 import com.liferay.headless.site.resource.v1_0.SiteResource;
 import com.liferay.layout.util.LayoutServiceContextHelper;
 import com.liferay.petra.lang.SafeCloseable;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.events.ServicePreAction;
 import com.liferay.portal.events.ThemeServicePreAction;
 import com.liferay.portal.kernel.change.tracking.CTAware;
 import com.liferay.portal.kernel.exception.NoSuchGroupException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
+import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
@@ -225,7 +227,7 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 			group = _addGroup(externalReferenceCode, site);
 		}
 		else {
-			group = _updateGroup(group.getGroupId(), site);
+			group = _updateGroup(group, site);
 		}
 
 		return _toSite(group);
@@ -256,8 +258,7 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 				ActionKeys.UPDATE);
 
 			group = _updateGroup(
-				group.getGroupId(),
-				multipartBody.getValueAsInstance("site", Site.class));
+				group, multipartBody.getValueAsInstance("site", Site.class));
 
 			return _toSite(group);
 		}
@@ -396,7 +397,7 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 		throws Exception {
 
 		Group group = _groupService.addGroup(
-			_getParentGroupId(site.getParentSiteKey()),
+			_getParentGroupId(null, site.getParentSiteERC()),
 			GroupConstants.DEFAULT_LIVE_GROUP_ID,
 			HashMapBuilder.put(
 				LocaleUtil.getDefault(), site.getName()
@@ -463,15 +464,34 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 		return membershipRestriction;
 	}
 
-	private long _getParentGroupId(String parentSiteKey)
-		throws PortalException {
-
-		if (Validator.isNull(parentSiteKey)) {
+	private long _getParentGroupId(Group group, String parentSiteERC) {
+		if (Validator.isNull(parentSiteERC)) {
 			return GroupConstants.DEFAULT_PARENT_GROUP_ID;
 		}
 
-		Group parentGroup = _groupLocalService.getGroup(
-			contextCompany.getCompanyId(), parentSiteKey);
+		Group parentGroup =
+			_groupLocalService.fetchGroupByExternalReferenceCode(
+				parentSiteERC, contextCompany.getCompanyId());
+
+		if (LazyReferencingThreadLocal.isEnabled()) {
+			if (parentGroup == null) {
+				return GroupConstants.DEFAULT_PARENT_GROUP_ID;
+			}
+
+			if ((group != null) && LazyReferencingThreadLocal.isEnabled()) {
+				Group currentParentGroup = group.getParentGroup();
+
+				if ((currentParentGroup != null) &&
+					Objects.equals(
+						parentGroup.getExternalReferenceCode(),
+						parentSiteERC)) {
+
+					return currentParentGroup.getGroupId();
+				}
+
+				return GroupConstants.DEFAULT_PARENT_GROUP_ID;
+			}
+		}
 
 		return parentGroup.getGroupId();
 	}
@@ -582,6 +602,17 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 					() -> MembershipType.create(
 						GroupConstants.getTypeLabel(group.getType())));
 				setName(() -> group.getName(LocaleUtil.getDefault()));
+				setParentSiteERC(
+					() -> {
+						Group parentGroup = _groupLocalService.fetchGroup(
+							group.getParentGroupId());
+
+						if (parentGroup != null) {
+							return parentGroup.getExternalReferenceCode();
+						}
+
+						return StringPool.BLANK;
+					});
 				setTypeSettings(
 					() -> UnicodePropertiesBuilder.fastLoad(
 						group.getTypeSettings()
@@ -590,13 +621,14 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 		};
 	}
 
-	private Group _updateGroup(long groupId, Site site) throws Exception {
+	private Group _updateGroup(Group group, Site site) throws Exception {
 		try (AutoCloseable autoCloseable =
 				_layoutServiceContextHelper.getServiceContextAutoCloseable(
 					contextCompany, contextUser)) {
 
 			Group updatedGroup = _groupLocalService.updateGroup(
-				groupId, _getParentGroupId(site.getParentSiteKey()),
+				group.getGroupId(),
+				_getParentGroupId(group, site.getParentSiteERC()),
 				HashMapBuilder.put(
 					LocaleUtil.getDefault(), site.getName()
 				).build(),
