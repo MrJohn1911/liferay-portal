@@ -440,29 +440,33 @@ public class Site implements Serializable {
 	private Supplier<String> _nameSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema
-	public String getParentSiteKey() {
-		if (_parentSiteKeySupplier != null) {
-			parentSiteKey = _parentSiteKeySupplier.get();
+	public String getParentSiteExternalReferenceCode() {
+		if (_parentSiteExternalReferenceCodeSupplier != null) {
+			parentSiteExternalReferenceCode =
+				_parentSiteExternalReferenceCodeSupplier.get();
 
-			_parentSiteKeySupplier = null;
+			_parentSiteExternalReferenceCodeSupplier = null;
 		}
 
-		return parentSiteKey;
+		return parentSiteExternalReferenceCode;
 	}
 
-	public void setParentSiteKey(String parentSiteKey) {
-		this.parentSiteKey = parentSiteKey;
+	public void setParentSiteExternalReferenceCode(
+		String parentSiteExternalReferenceCode) {
 
-		_parentSiteKeySupplier = null;
+		this.parentSiteExternalReferenceCode = parentSiteExternalReferenceCode;
+
+		_parentSiteExternalReferenceCodeSupplier = null;
 	}
 
 	@JsonIgnore
-	public void setParentSiteKey(
-		UnsafeSupplier<String, Exception> parentSiteKeyUnsafeSupplier) {
+	public void setParentSiteExternalReferenceCode(
+		UnsafeSupplier<String, Exception>
+			parentSiteExternalReferenceCodeUnsafeSupplier) {
 
-		_parentSiteKeySupplier = () -> {
+		_parentSiteExternalReferenceCodeSupplier = () -> {
 			try {
-				return parentSiteKeyUnsafeSupplier.get();
+				return parentSiteExternalReferenceCodeUnsafeSupplier.get();
 			}
 			catch (RuntimeException runtimeException) {
 				throw runtimeException;
@@ -474,11 +478,11 @@ public class Site implements Serializable {
 	}
 
 	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	protected String parentSiteKey;
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String parentSiteExternalReferenceCode;
 
 	@JsonIgnore
-	private Supplier<String> _parentSiteKeySupplier;
+	private Supplier<String> _parentSiteExternalReferenceCodeSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema
 	public String getTemplateKey() {
@@ -773,18 +777,19 @@ public class Site implements Serializable {
 			sb.append("\"");
 		}
 
-		String parentSiteKey = getParentSiteKey();
+		String parentSiteExternalReferenceCode =
+			getParentSiteExternalReferenceCode();
 
-		if (parentSiteKey != null) {
+		if (parentSiteExternalReferenceCode != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"parentSiteKey\": ");
+			sb.append("\"parentSiteExternalReferenceCode\": ");
 
 			sb.append("\"");
 
-			sb.append(_escape(parentSiteKey));
+			sb.append(_escape(parentSiteExternalReferenceCode));
 
 			sb.append("\"");
 		}
