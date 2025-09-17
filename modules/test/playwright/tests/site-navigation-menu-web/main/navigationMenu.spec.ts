@@ -573,14 +573,16 @@ test(
 
 			const childSite = await apiHelpers.headlessSite.createSite({
 				name: getRandomString(),
-				parentSiteKey: parentSite.name,
+				parentSiteExternalReferenceCode:
+					parentSite.externalReferenceCode,
 			});
 
 			childSiteId = childSite.id;
 
 			const grandchildSite = await apiHelpers.headlessSite.createSite({
 				name: getRandomString(),
-				parentSiteKey: childSite.name,
+				parentSiteExternalReferenceCode:
+					childSite.externalReferenceCode,
 			});
 
 			grandchildSiteId = grandchildSite.id;
@@ -665,7 +667,7 @@ test(
 
 			const childSite = await apiHelpers.headlessSite.createSite({
 				name: childSiteName,
-				parentSiteKey: site.name,
+				parentSiteExternalReferenceCode: site.externalReferenceCode,
 			});
 
 			childSiteId = childSite.id;

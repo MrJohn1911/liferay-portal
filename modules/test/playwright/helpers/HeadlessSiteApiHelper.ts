@@ -12,7 +12,7 @@ type TSite = {
 	externalReferenceCode?: string;
 	id?: number;
 	name: string;
-	parentSiteKey?: string;
+	parentSiteExternalReferenceCode?: string;
 	templateKey?: string;
 	templateType?: string;
 };

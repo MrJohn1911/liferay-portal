@@ -7,7 +7,7 @@ definition {
 		}
 
 		if (isSet(parentSiteName)) {
-			var parentSiteKey = HeadlessSiteSetter.setParentSiteKey(
+			var parentSiteExternalReferenceCode = HeadlessSiteSetter.setParentSiteExternalReferenceCode(
 				grandParentSiteName = ${grandParentSiteName},
 				parentSiteName = ${parentSiteName},
 				portalURL = ${portalURL});
@@ -25,7 +25,7 @@ definition {
 
 		var siteId = HeadlessSiteAPI._addSite(
 			membershipType = ${membershipType},
-			parentSiteKey = ${parentSiteKey},
+			parentSiteExternalReferenceCode = ${parentSiteExternalReferenceCode},
 			portalURL = ${portalURL},
 			siteName = ${siteName},
 			templateKey = ${templateKey},

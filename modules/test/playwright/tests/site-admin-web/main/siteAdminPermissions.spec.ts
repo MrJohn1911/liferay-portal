@@ -283,7 +283,7 @@ test('User can manage child site with Manage Subsites permission', async ({
 
 	childSite = await apiHelpers.headlessSite.createSite({
 		name: getRandomString(),
-		parentSiteKey: site.name,
+		parentSiteExternalReferenceCode: site.externalReferenceCode,
 	});
 
 	const siteMemberRole =

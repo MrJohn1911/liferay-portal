@@ -26,7 +26,7 @@ test('Ensure Sites Directory widget can display child site', async ({
 }) => {
 	const childSite = await apiHelpers.headlessSite.createSite({
 		name: getRandomString(),
-		parentSiteKey: site.name,
+		parentSiteExternalReferenceCode: site.externalReferenceCode,
 	});
 
 	const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
@@ -67,7 +67,7 @@ test('Ensure Sites Directory widget can display parent site', async ({
 }) => {
 	const childSite = await apiHelpers.headlessSite.createSite({
 		name: getRandomString(),
-		parentSiteKey: site.name,
+		parentSiteExternalReferenceCode: site.externalReferenceCode,
 	});
 
 	const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
@@ -106,12 +106,12 @@ test('Ensure Sites Directory widget can display sibling site', async ({
 }) => {
 	const childSite1 = await apiHelpers.headlessSite.createSite({
 		name: getRandomString(),
-		parentSiteKey: site.name,
+		parentSiteExternalReferenceCode: site.externalReferenceCode,
 	});
 
 	const childSite2 = await apiHelpers.headlessSite.createSite({
 		name: getRandomString(),
-		parentSiteKey: site.name,
+		parentSiteExternalReferenceCode: site.externalReferenceCode,
 	});
 
 	const layout = await apiHelpers.jsonWebServicesLayout.addLayout({

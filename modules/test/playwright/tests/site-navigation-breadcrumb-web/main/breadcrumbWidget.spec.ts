@@ -196,7 +196,7 @@ test('Configure Show Parent Sites in Breadcrumb widget', async ({
 }) => {
 	const childSite = await apiHelpers.headlessSite.createSite({
 		name: getRandomString(),
-		parentSiteKey: site.name,
+		parentSiteExternalReferenceCode: site.externalReferenceCode,
 	});
 
 	const layout = await breadcrumbWidgetPage.addBreadcrumbPortlet(childSite);

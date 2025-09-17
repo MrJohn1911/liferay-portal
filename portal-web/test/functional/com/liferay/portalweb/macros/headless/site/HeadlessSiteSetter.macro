@@ -1,14 +1,14 @@
 definition {
 
 	@summary = "Default summary"
-	macro setParentSiteKey(parentSiteName = null, portalURL = null, grandParentSiteName = null) {
-		var parentSiteKey = JSONGroupAPI._getGroupKeyByName(
+	macro setParentSiteExternalReferenceCode(parentSiteName = null, portalURL = null, grandParentSiteName = null) {
+		var parentSiteExternalReferenceCode = JSONGroupAPI._getGroupExternalReferenceCodeByName(
 			groupName = ${parentSiteName},
 			parentGroupName = ${grandParentSiteName},
 			portalURL = ${portalURL},
 			site = "true");
 
-		return ${parentSiteKey};
+		return ${parentSiteExternalReferenceCode};
 	}
 
 	@summary = "Default summary"
