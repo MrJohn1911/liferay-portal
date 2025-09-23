@@ -210,6 +210,7 @@ public abstract class BaseSiteResourceTestCase {
 		site.setExternalReferenceCode(regex);
 		site.setFriendlyUrlPath(regex);
 		site.setKey(regex);
+		site.setParentSiteExternalReferenceCode(regex);
 		site.setParentSiteKey(regex);
 		site.setTemplateKey(regex);
 
@@ -222,6 +223,7 @@ public abstract class BaseSiteResourceTestCase {
 		Assert.assertEquals(regex, site.getExternalReferenceCode());
 		Assert.assertEquals(regex, site.getFriendlyUrlPath());
 		Assert.assertEquals(regex, site.getKey());
+		Assert.assertEquals(regex, site.getParentSiteExternalReferenceCode());
 		Assert.assertEquals(regex, site.getParentSiteKey());
 		Assert.assertEquals(regex, site.getTemplateKey());
 	}
@@ -994,6 +996,17 @@ public abstract class BaseSiteResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals(
+					"parentSiteExternalReferenceCode",
+					additionalAssertFieldName)) {
+
+				if (site.getParentSiteExternalReferenceCode() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("parentSiteKey", additionalAssertFieldName)) {
 				if (site.getParentSiteKey() == null) {
 					valid = false;
@@ -1243,6 +1256,20 @@ public abstract class BaseSiteResourceTestCase {
 
 			if (Objects.equals("name", additionalAssertFieldName)) {
 				if (!equals((Map)site1.getName(), (Map)site2.getName())) {
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"parentSiteExternalReferenceCode",
+					additionalAssertFieldName)) {
+
+				if (!Objects.deepEquals(
+						site1.getParentSiteExternalReferenceCode(),
+						site2.getParentSiteExternalReferenceCode())) {
+
 					return false;
 				}
 
@@ -1571,6 +1598,52 @@ public abstract class BaseSiteResourceTestCase {
 				"Invalid entity field " + entityFieldName);
 		}
 
+		if (entityFieldName.equals("parentSiteExternalReferenceCode")) {
+			Object object = site.getParentSiteExternalReferenceCode();
+
+			String value = String.valueOf(object);
+
+			if (operator.equals("contains")) {
+				sb = new StringBundler();
+
+				sb.append("contains(");
+				sb.append(entityFieldName);
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 2)) {
+					sb.append(value.substring(1, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else if (operator.equals("startswith")) {
+				sb = new StringBundler();
+
+				sb.append("startswith(");
+				sb.append(entityFieldName);
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 1)) {
+					sb.append(value.substring(0, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else {
+				sb.append("'");
+				sb.append(value);
+				sb.append("'");
+			}
+
+			return sb.toString();
+		}
+
 		if (entityFieldName.equals("parentSiteKey")) {
 			Object object = site.getParentSiteKey();
 
@@ -1732,6 +1805,8 @@ public abstract class BaseSiteResourceTestCase {
 				key = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				manualMembership = RandomTestUtil.randomBoolean();
 				membershipRestriction = RandomTestUtil.randomInt();
+				parentSiteExternalReferenceCode = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
 				parentSiteKey = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
 				templateKey = StringUtil.toLowerCase(
