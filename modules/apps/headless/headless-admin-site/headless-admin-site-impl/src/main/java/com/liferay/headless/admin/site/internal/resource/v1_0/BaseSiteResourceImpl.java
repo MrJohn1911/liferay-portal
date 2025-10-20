@@ -72,7 +72,7 @@ public abstract class BaseSiteResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'DELETE' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{externalReferenceCode}'  -u 'test@liferay.com:test'
+	 * curl -X 'DELETE' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{siteExternalReferenceCode}'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
 		description = "Deletes a site and all of its associated content."
@@ -81,7 +81,7 @@ public abstract class BaseSiteResourceImpl
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
+				name = "siteExternalReferenceCode"
 			)
 		}
 	)
@@ -89,28 +89,24 @@ public abstract class BaseSiteResourceImpl
 		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "Site")}
 	)
 	@jakarta.ws.rs.DELETE
-	@jakarta.ws.rs.Path("/sites/{externalReferenceCode}")
+	@jakarta.ws.rs.Path("/sites/{siteExternalReferenceCode}")
 	@jakarta.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
 	public void deleteSite(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@jakarta.validation.constraints.NotNull
-			@jakarta.ws.rs.PathParam("externalReferenceCode")
-			String externalReferenceCode)
+			@jakarta.ws.rs.PathParam("siteExternalReferenceCode")
+			String siteExternalReferenceCode)
 		throws Exception {
 	}
 
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'DELETE' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{externalReferenceCode}/batch'  -u 'test@liferay.com:test'
+	 * curl -X 'DELETE' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{siteExternalReferenceCode}/batch'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
-			@io.swagger.v3.oas.annotations.Parameter(
-				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
-			),
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
 				name = "callbackURL"
@@ -122,14 +118,10 @@ public abstract class BaseSiteResourceImpl
 	)
 	@jakarta.ws.rs.Consumes("application/json")
 	@jakarta.ws.rs.DELETE
-	@jakarta.ws.rs.Path("/sites/{externalReferenceCode}/batch")
+	@jakarta.ws.rs.Path("/sites/{siteExternalReferenceCode}/batch")
 	@jakarta.ws.rs.Produces("application/json")
 	@Override
 	public Response deleteSiteBatch(
-			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
-			@jakarta.validation.constraints.NotNull
-			@jakarta.ws.rs.PathParam("externalReferenceCode")
-			String externalReferenceCode,
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@jakarta.ws.rs.QueryParam("callbackURL")
 			String callbackURL,
@@ -155,13 +147,13 @@ public abstract class BaseSiteResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'GET' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{externalReferenceCode}'  -u 'test@liferay.com:test'
+	 * curl -X 'GET' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{siteExternalReferenceCode}'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
+				name = "siteExternalReferenceCode"
 			)
 		}
 	)
@@ -169,14 +161,14 @@ public abstract class BaseSiteResourceImpl
 		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "Site")}
 	)
 	@jakarta.ws.rs.GET
-	@jakarta.ws.rs.Path("/sites/{externalReferenceCode}")
+	@jakarta.ws.rs.Path("/sites/{siteExternalReferenceCode}")
 	@jakarta.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
 	public Site getSite(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@jakarta.validation.constraints.NotNull
-			@jakarta.ws.rs.PathParam("externalReferenceCode")
-			String externalReferenceCode)
+			@jakarta.ws.rs.PathParam("siteExternalReferenceCode")
+			String siteExternalReferenceCode)
 		throws Exception {
 
 		return new Site();
@@ -185,13 +177,13 @@ public abstract class BaseSiteResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'GET' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{externalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
+	 * curl -X 'GET' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{siteExternalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
+				name = "siteExternalReferenceCode"
 			)
 		}
 	)
@@ -199,14 +191,14 @@ public abstract class BaseSiteResourceImpl
 		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "Site")}
 	)
 	@jakarta.ws.rs.GET
-	@jakarta.ws.rs.Path("/sites/{externalReferenceCode}/site-initializer")
+	@jakarta.ws.rs.Path("/sites/{siteExternalReferenceCode}/site-initializer")
 	@jakarta.ws.rs.Produces("application/zip")
 	@Override
 	public Response getSiteSiteInitializer(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@jakarta.validation.constraints.NotNull
-			@jakarta.ws.rs.PathParam("externalReferenceCode")
-			String externalReferenceCode)
+			@jakarta.ws.rs.PathParam("siteExternalReferenceCode")
+			String siteExternalReferenceCode)
 		throws Exception {
 
 		Response.ResponseBuilder responseBuilder = Response.ok();
@@ -327,7 +319,7 @@ public abstract class BaseSiteResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'POST' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{externalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
+	 * curl -X 'POST' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{siteExternalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
 		description = "Adds a new site based on a multipart/form-data",
@@ -337,7 +329,7 @@ public abstract class BaseSiteResourceImpl
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
+				name = "siteExternalReferenceCode"
 			)
 		}
 	)
@@ -345,15 +337,15 @@ public abstract class BaseSiteResourceImpl
 		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "Site")}
 	)
 	@jakarta.ws.rs.Consumes("multipart/form-data")
-	@jakarta.ws.rs.Path("/sites/{externalReferenceCode}/site-initializer")
+	@jakarta.ws.rs.Path("/sites/{siteExternalReferenceCode}/site-initializer")
 	@jakarta.ws.rs.POST
 	@jakarta.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
 	public Site postSiteSiteInitializer(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@jakarta.validation.constraints.NotNull
-			@jakarta.ws.rs.PathParam("externalReferenceCode")
-			String externalReferenceCode,
+			@jakarta.ws.rs.PathParam("siteExternalReferenceCode")
+			String siteExternalReferenceCode,
 			MultipartBody multipartBody)
 		throws Exception {
 
@@ -501,7 +493,7 @@ public abstract class BaseSiteResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'PUT' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{externalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
+	 * curl -X 'PUT' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{siteExternalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
 		description = "Adds or update a new site",
@@ -511,7 +503,7 @@ public abstract class BaseSiteResourceImpl
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
+				name = "siteExternalReferenceCode"
 			)
 		}
 	)
@@ -519,15 +511,15 @@ public abstract class BaseSiteResourceImpl
 		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "Site")}
 	)
 	@jakarta.ws.rs.Consumes("multipart/form-data")
-	@jakarta.ws.rs.Path("/sites/{externalReferenceCode}/site-initializer")
+	@jakarta.ws.rs.Path("/sites/{siteExternalReferenceCode}/site-initializer")
 	@jakarta.ws.rs.Produces({"application/json", "application/xml"})
 	@jakarta.ws.rs.PUT
 	@Override
 	public Site putSiteSiteInitializer(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@jakarta.validation.constraints.NotNull
-			@jakarta.ws.rs.PathParam("externalReferenceCode")
-			String externalReferenceCode,
+			@jakarta.ws.rs.PathParam("siteExternalReferenceCode")
+			String siteExternalReferenceCode,
 			MultipartBody multipartBody)
 		throws Exception {
 
@@ -574,9 +566,14 @@ public abstract class BaseSiteResourceImpl
 		throws Exception {
 
 		UnsafeFunction<Site, Site, Exception> siteUnsafeFunction = site -> {
-			deleteSite(site.getId());
+			if (site.getExternalReferenceCode() != null) {
+				deleteSite(site.getExternalReferenceCode());
 
-			return site;
+				return site;
+			}
+
+			throw new UnsupportedOperationException(
+				"Unable to delete by external reference code or ID");
 		};
 
 		if (contextBatchUnsafeBiConsumer != null) {
