@@ -60,8 +60,7 @@ public interface SiteResource {
 	public Site getSiteByExternalReferenceCode(String externalReferenceCode)
 		throws Exception;
 
-	public Response getSiteByExternalReferenceCodeSiteInitializer(
-			String externalReferenceCode)
+	public Response getSiteSiteInitializer(String externalReferenceCode)
 		throws Exception;
 
 	public Page<Site> getSitesPage(
@@ -73,7 +72,8 @@ public interface SiteResource {
 	public Response postSiteBatch(String callbackURL, Object object)
 		throws Exception;
 
-	public Site postSiteSiteInitializer(MultipartBody multipartBody)
+	public Site postSiteSiteInitializer(
+			String externalReferenceCode, MultipartBody multipartBody)
 		throws Exception;
 
 	public Response postSitesPageExportBatch(

@@ -553,9 +553,7 @@ public abstract class BaseSiteResourceTestCase {
 	}
 
 	@Test
-	public void testGetSiteByExternalReferenceCodeSiteInitializer()
-		throws Exception {
-
+	public void testGetSiteSiteInitializer() throws Exception {
 		Assert.assertTrue(false);
 	}
 

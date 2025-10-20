@@ -244,7 +244,7 @@ public abstract class BaseSiteResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'GET' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/by-external-reference-code/{externalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
+	 * curl -X 'GET' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{externalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -258,12 +258,10 @@ public abstract class BaseSiteResourceImpl
 		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "Site")}
 	)
 	@jakarta.ws.rs.GET
-	@jakarta.ws.rs.Path(
-		"/sites/by-external-reference-code/{externalReferenceCode}/site-initializer"
-	)
+	@jakarta.ws.rs.Path("/sites/{externalReferenceCode}/site-initializer")
 	@jakarta.ws.rs.Produces("application/zip")
 	@Override
-	public Response getSiteByExternalReferenceCodeSiteInitializer(
+	public Response getSiteSiteInitializer(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@jakarta.validation.constraints.NotNull
 			@jakarta.ws.rs.PathParam("externalReferenceCode")
@@ -388,21 +386,34 @@ public abstract class BaseSiteResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'POST' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/site-initializer'  -u 'test@liferay.com:test'
+	 * curl -X 'POST' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{externalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
 		description = "Adds a new site based on a multipart/form-data",
 		requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "multipart/form-data", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = PostSiteSiteInitializerRequestBody.class)))
 	)
+	@io.swagger.v3.oas.annotations.Parameters(
+		value = {
+			@io.swagger.v3.oas.annotations.Parameter(
+				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
+				name = "externalReferenceCode"
+			)
+		}
+	)
 	@io.swagger.v3.oas.annotations.tags.Tags(
 		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "Site")}
 	)
 	@jakarta.ws.rs.Consumes("multipart/form-data")
-	@jakarta.ws.rs.Path("/sites/site-initializer")
+	@jakarta.ws.rs.Path("/sites/{externalReferenceCode}/site-initializer")
 	@jakarta.ws.rs.POST
 	@jakarta.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public Site postSiteSiteInitializer(MultipartBody multipartBody)
+	public Site postSiteSiteInitializer(
+			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
+			@jakarta.validation.constraints.NotNull
+			@jakarta.ws.rs.PathParam("externalReferenceCode")
+			String externalReferenceCode,
+			MultipartBody multipartBody)
 		throws Exception {
 
 		return new Site();
