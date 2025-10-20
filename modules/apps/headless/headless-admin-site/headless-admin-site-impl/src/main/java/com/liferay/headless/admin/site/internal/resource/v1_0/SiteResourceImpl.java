@@ -148,8 +148,7 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 	}
 
 	@Override
-	public Response getSiteByExternalReferenceCodeSiteInitializer(
-			String externalReferenceCode)
+	public Response getSiteSiteInitializer(String externalReferenceCode)
 		throws Exception {
 
 		if (!FeatureFlagManagerUtil.isEnabled(
@@ -251,7 +250,8 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 	}
 
 	@Override
-	public Site postSiteSiteInitializer(MultipartBody multipartBody)
+	public Site postSiteSiteInitializer(
+			String externalReferenceCode, MultipartBody multipartBody)
 		throws Exception {
 
 		if (!FeatureFlagManagerUtil.isEnabled(
@@ -262,8 +262,14 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 
 		Site site = multipartBody.getValueAsInstance("site", Site.class);
 
+		if (!Objects.equals(
+				site.getExternalReferenceCode(), externalReferenceCode)) {
+
+			throw new UnsupportedOperationException();
+		}
+
 		return putSiteByExternalReferenceCode(
-			site.getExternalReferenceCode(), multipartBody);
+			externalReferenceCode, multipartBody);
 	}
 
 	@Override

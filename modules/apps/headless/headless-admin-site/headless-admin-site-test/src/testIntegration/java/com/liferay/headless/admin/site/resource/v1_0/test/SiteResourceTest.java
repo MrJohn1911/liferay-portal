@@ -179,8 +179,7 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 	@Ignore
 	@Override
 	@Test
-	public void testGetSiteByExternalReferenceCodeSiteInitializer()
-		throws Exception {
+	public void testGetSiteSiteInitializer() throws Exception {
 	}
 
 	@Override
@@ -335,7 +334,7 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 		throws Exception {
 
 		Site postSite = siteResource.postSiteSiteInitializer(
-			site, multipartFiles);
+			site.getExternalReferenceCode(), site, multipartFiles);
 
 		_sites.add(postSite);
 
