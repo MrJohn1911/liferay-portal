@@ -86,20 +86,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 public class SiteResourceImpl extends BaseSiteResourceImpl {
 
 	@Override
-	public void deleteSite(Long siteId) throws Exception {
-		if (!FeatureFlagManagerUtil.isEnabled(
-				contextCompany.getCompanyId(), "LPD-41306")) {
-
-			throw new UnsupportedOperationException();
-		}
-
-		_groupService.deleteGroup(siteId);
-	}
-
-	@Override
-	public void deleteSiteByExternalReferenceCode(String externalReferenceCode)
-		throws Exception {
-
+	public void deleteSite(String externalReferenceCode) throws Exception {
 		if (!FeatureFlagManagerUtil.isEnabled(
 				contextCompany.getCompanyId(), "LPD-41306")) {
 
@@ -119,22 +106,7 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 	}
 
 	@Override
-	public Site getSite(Long siteId) {
-		if (!FeatureFlagManagerUtil.isEnabled(
-				contextCompany.getCompanyId(), "LPD-41306")) {
-
-			throw new UnsupportedOperationException();
-		}
-
-		Group group = _groupLocalService.fetchGroup(siteId);
-
-		return _toSite(group);
-	}
-
-	@Override
-	public Site getSiteByExternalReferenceCode(String externalReferenceCode)
-		throws Exception {
-
+	public Site getSite(String externalReferenceCode) throws Exception {
 		if (!FeatureFlagManagerUtil.isEnabled(
 				contextCompany.getCompanyId(), "LPD-41306")) {
 
