@@ -268,8 +268,7 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 			throw new UnsupportedOperationException();
 		}
 
-		return putSiteByExternalReferenceCode(
-			externalReferenceCode, multipartBody);
+		return putSiteSiteInitializer(externalReferenceCode, multipartBody);
 	}
 
 	@Override
@@ -296,7 +295,7 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 	}
 
 	@Override
-	public Site putSiteByExternalReferenceCode(
+	public Site putSiteSiteInitializer(
 			String externalReferenceCode, MultipartBody multipartBody)
 		throws Exception {
 

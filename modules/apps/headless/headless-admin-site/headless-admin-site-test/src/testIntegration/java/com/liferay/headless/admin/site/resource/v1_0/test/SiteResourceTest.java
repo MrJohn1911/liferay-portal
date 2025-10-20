@@ -288,14 +288,14 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 
 	@Override
 	protected Site testDeleteSite_addSite() throws Exception {
-		return testPutSiteByExternalReferenceCode_addSite();
+		return testPutSiteSiteInitializer_addSite();
 	}
 
 	@Override
 	protected Site testDeleteSiteByExternalReferenceCode_addSite()
 		throws Exception {
 
-		return testPutSiteByExternalReferenceCode_addSite();
+		return testPutSiteSiteInitializer_addSite();
 	}
 
 	@Override
@@ -307,7 +307,7 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 	protected Site testGetSiteByExternalReferenceCode_addSite()
 		throws Exception {
 
-		return testPutSiteByExternalReferenceCode_addSite();
+		return testPutSiteSiteInitializer_addSite();
 	}
 
 	@Override
@@ -347,10 +347,8 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 	}
 
 	@Override
-	protected Site testPutSiteByExternalReferenceCode_addSite()
-		throws Exception {
-
-		return siteResource.putSiteByExternalReferenceCode(
+	protected Site testPutSiteSiteInitializer_addSite() throws Exception {
+		return siteResource.putSiteSiteInitializer(
 			RandomTestUtil.randomString(), randomSite(), getMultipartFiles());
 	}
 
@@ -379,7 +377,7 @@ public class SiteResourceTest extends BaseSiteResourceTestCase {
 	private void _testGetSiteByExternalReferenceCodeWithDollar()
 		throws Exception {
 
-		Site postSite = siteResource.putSiteByExternalReferenceCode(
+		Site postSite = siteResource.putSiteSiteInitializer(
 			RandomTestUtil.randomString() + StringPool.DOLLAR, randomSite(),
 			getMultipartFiles());
 
