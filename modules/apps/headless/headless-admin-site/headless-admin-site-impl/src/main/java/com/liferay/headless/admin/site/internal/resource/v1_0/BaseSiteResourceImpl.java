@@ -560,11 +560,11 @@ public abstract class BaseSiteResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'PUT' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/by-external-reference-code/{externalReferenceCode}'  -u 'test@liferay.com:test'
+	 * curl -X 'PUT' 'http://localhost:8080/o/headless-admin-site/v1.0/sites/{externalReferenceCode}/site-initializer'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
 		description = "Adds or update a new site",
-		requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "multipart/form-data", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = PutSiteByExternalReferenceCodeRequestBody.class)))
+		requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "multipart/form-data", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = PutSiteSiteInitializerRequestBody.class)))
 	)
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -578,13 +578,11 @@ public abstract class BaseSiteResourceImpl
 		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "Site")}
 	)
 	@jakarta.ws.rs.Consumes("multipart/form-data")
-	@jakarta.ws.rs.Path(
-		"/sites/by-external-reference-code/{externalReferenceCode}"
-	)
+	@jakarta.ws.rs.Path("/sites/{externalReferenceCode}/site-initializer")
 	@jakarta.ws.rs.Produces({"application/json", "application/xml"})
 	@jakarta.ws.rs.PUT
 	@Override
-	public Site putSiteByExternalReferenceCode(
+	public Site putSiteSiteInitializer(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@jakarta.validation.constraints.NotNull
 			@jakarta.ws.rs.PathParam("externalReferenceCode")
@@ -608,22 +606,6 @@ public abstract class BaseSiteResourceImpl
 
 		if (StringUtil.equalsIgnoreCase(createStrategy, "INSERT")) {
 			siteUnsafeFunction = site -> postSite(site);
-		}
-
-		if (StringUtil.equalsIgnoreCase(createStrategy, "UPSERT")) {
-			String updateStrategy = (String)parameters.getOrDefault(
-				"updateStrategy", "UPDATE");
-
-			if (StringUtil.equalsIgnoreCase(updateStrategy, "UPDATE")) {
-				siteUnsafeFunction = site -> {
-					Site persistedSite = null;
-
-					persistedSite = putSiteByExternalReferenceCode(
-						site.getExternalReferenceCode(), (MultipartBody)null);
-
-					return persistedSite;
-				};
-			}
 		}
 
 		if (siteUnsafeFunction == null) {
@@ -691,7 +673,7 @@ public abstract class BaseSiteResourceImpl
 	}
 
 	public Set<String> getAvailableCreateStrategies() {
-		return SetUtil.fromArray("INSERT", "UPSERT");
+		return SetUtil.fromArray("INSERT");
 	}
 
 	public Set<String> getAvailableUpdateStrategies() {
@@ -1364,7 +1346,7 @@ public abstract class BaseSiteResourceImpl
 
 	}
 
-	private class PutSiteByExternalReferenceCodeRequestBody {
+	private class PutSiteSiteInitializerRequestBody {
 
 		@io.swagger.v3.oas.annotations.media.Schema(
 			description = "File", format = "binary", type = "string"

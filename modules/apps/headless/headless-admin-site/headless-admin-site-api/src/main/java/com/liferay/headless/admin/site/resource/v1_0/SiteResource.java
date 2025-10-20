@@ -86,7 +86,7 @@ public interface SiteResource {
 	public Response putSiteBatch(String callbackURL, Object object)
 		throws Exception;
 
-	public Site putSiteByExternalReferenceCode(
+	public Site putSiteSiteInitializer(
 			String externalReferenceCode, MultipartBody multipartBody)
 		throws Exception;
 

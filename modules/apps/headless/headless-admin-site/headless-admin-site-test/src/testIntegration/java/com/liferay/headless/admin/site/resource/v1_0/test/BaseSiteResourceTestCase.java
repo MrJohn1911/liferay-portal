@@ -726,56 +726,31 @@ public abstract class BaseSiteResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteByExternalReferenceCode() throws Exception {
-		Site postSite = testPutSiteByExternalReferenceCode_addSite();
+	public void testPutSiteSiteInitializer() throws Exception {
+		Site postSite = testPutSiteSiteInitializer_addSite();
 
 		Site randomSite = randomSite();
 
 		Map<String, File> multipartFiles = getMultipartFiles();
 
-		Site putSite = siteResource.putSiteByExternalReferenceCode(
+		Site putSite = siteResource.putSiteSiteInitializer(
 			postSite.getExternalReferenceCode(), randomSite, multipartFiles);
 
 		assertEquals(randomSite, putSite);
 		assertValid(putSite);
 
-		Site getSite = siteResource.getSiteByExternalReferenceCode(
+		Site getSite = siteResource.getSiteSiteInitializer(
 			putSite.getExternalReferenceCode());
 
 		assertEquals(randomSite, getSite);
 		assertValid(getSite);
 
 		assertValid(getSite, multipartFiles);
-
-		Site newSite = testPutSiteByExternalReferenceCode_createSite();
-
-		putSite = siteResource.putSiteByExternalReferenceCode(
-			newSite.getExternalReferenceCode(), newSite, getMultipartFiles());
-
-		assertEquals(newSite, putSite);
-		assertValid(putSite);
-
-		getSite = siteResource.getSiteByExternalReferenceCode(
-			putSite.getExternalReferenceCode());
-
-		assertEquals(newSite, getSite);
-
-		Assert.assertEquals(
-			newSite.getExternalReferenceCode(),
-			putSite.getExternalReferenceCode());
 	}
 
-	protected Site testPutSiteByExternalReferenceCode_addSite()
-		throws Exception {
-
+	protected Site testPutSiteSiteInitializer_addSite() throws Exception {
 		throw new UnsupportedOperationException(
 			"This method needs to be implemented");
-	}
-
-	protected Site testPutSiteByExternalReferenceCode_createSite()
-		throws Exception {
-
-		return randomSite();
 	}
 
 	@Test

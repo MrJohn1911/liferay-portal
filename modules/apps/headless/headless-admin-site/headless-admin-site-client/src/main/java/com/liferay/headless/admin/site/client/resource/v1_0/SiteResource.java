@@ -127,12 +127,12 @@ public interface SiteResource {
 			String callbackURL, Object object)
 		throws Exception;
 
-	public Site putSiteByExternalReferenceCode(
+	public Site putSiteSiteInitializer(
 			String externalReferenceCode, Site site,
 			Map<String, File> multipartFiles)
 		throws Exception;
 
-	public HttpInvoker.HttpResponse putSiteByExternalReferenceCodeHttpResponse(
+	public HttpInvoker.HttpResponse putSiteSiteInitializerHttpResponse(
 			String externalReferenceCode, Site site,
 			Map<String, File> multipartFiles)
 		throws Exception;
@@ -1612,13 +1612,13 @@ public interface SiteResource {
 			return httpInvoker.invoke();
 		}
 
-		public Site putSiteByExternalReferenceCode(
+		public Site putSiteSiteInitializer(
 				String externalReferenceCode, Site site,
 				Map<String, File> multipartFiles)
 			throws Exception {
 
 			HttpInvoker.HttpResponse httpResponse =
-				putSiteByExternalReferenceCodeHttpResponse(
+				putSiteSiteInitializerHttpResponse(
 					externalReferenceCode, site, multipartFiles);
 
 			String content = httpResponse.getContent();
@@ -1680,10 +1680,9 @@ public interface SiteResource {
 			}
 		}
 
-		public HttpInvoker.HttpResponse
-				putSiteByExternalReferenceCodeHttpResponse(
-					String externalReferenceCode, Site site,
-					Map<String, File> multipartFiles)
+		public HttpInvoker.HttpResponse putSiteSiteInitializerHttpResponse(
+				String externalReferenceCode, Site site,
+				Map<String, File> multipartFiles)
 			throws Exception {
 
 			HttpInvoker httpInvoker = HttpInvoker.newHttpInvoker();
@@ -1718,7 +1717,7 @@ public interface SiteResource {
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
 					_builder._port + _builder._contextPath +
-						"/o/headless-admin-site/v1.0/sites/by-external-reference-code/{externalReferenceCode}");
+						"/o/headless-admin-site/v1.0/sites/{externalReferenceCode}/site-initializer");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
 
