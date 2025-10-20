@@ -8898,9 +8898,9 @@ paths:
                     description:
                         default response
             tags: ["Site"]
-    /sites/by-external-reference-code/{externalReferenceCode}/site-initializer:
+    /sites/{externalReferenceCode}/site-initializer:
         get:
-            operationId: getSiteByExternalReferenceCodeSiteInitializer
+            operationId: getSiteSiteInitializer
             parameters:
                 -   in: path
                     name: externalReferenceCode
@@ -8915,11 +8915,16 @@ paths:
                                 format: binary
                                 type: string
             tags: ["Site"]
-    /sites/site-initializer:
         post:
             description:
                 Adds a new site based on a multipart/form-data
             operationId: postSiteSiteInitializer
+            parameters:
+                -   in: path
+                    name: externalReferenceCode
+                    required: true
+                    schema:
+                        type: string
             requestBody:
                 content:
                     multipart/form-data:
