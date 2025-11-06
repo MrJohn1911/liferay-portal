@@ -48,6 +48,7 @@ public class AIHubSiteInitializerTest {
 
 	@Test
 	public void test() throws Exception {
+
 		SiteInitializer siteInitializer =
 			_siteInitializerRegistry.getSiteInitializer("ai-hub-initializer");
 

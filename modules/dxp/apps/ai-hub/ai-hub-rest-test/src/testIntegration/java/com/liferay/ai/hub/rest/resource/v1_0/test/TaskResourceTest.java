@@ -135,6 +135,7 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 	@Override
 	@Test
 	public void testPostTask() throws Exception {
+
 		JSONObject jsonObject = HTTPTestUtil.invokeToJSONObject(
 			JSONUtil.put(
 				"context", JSONUtil.put("text", RandomTestUtil.randomString())
