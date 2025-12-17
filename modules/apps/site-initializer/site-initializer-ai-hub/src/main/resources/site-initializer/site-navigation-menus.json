@@ -1,0 +1,21 @@
+[
+    {
+        "externalReferenceCode": "AIHUBPRIMARYNAVIGATION",
+        "menuItems": [
+            {
+                "type": "layout",
+                "title": "AI Tasks",
+                "order": 0,
+                "friendlyURL": "/ai-tasks"
+            },
+            {
+                "type": "url",
+                "title": "Liferay",
+                "order": 2,
+                "url": "https://www.liferay.com",
+                "openInNewTab": true
+            }
+        ],
+        "name": "AI Hub Navigation Menu"
+    }
+]
