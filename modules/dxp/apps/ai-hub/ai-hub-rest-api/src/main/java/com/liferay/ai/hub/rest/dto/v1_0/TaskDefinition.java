@@ -47,6 +47,45 @@ public class TaskDefinition implements Serializable {
 	}
 
 	@io.swagger.v3.oas.annotations.media.Schema
+	public Long getId() {
+		if (_idSupplier != null) {
+			id = _idSupplier.get();
+
+			_idSupplier = null;
+		}
+
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+
+		_idSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setId(UnsafeSupplier<Long, Exception> idUnsafeSupplier) {
+		_idSupplier = () -> {
+			try {
+				return idUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	protected Long id;
+
+	@JsonIgnore
+	private Supplier<Long> _idSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema
 	public String getName() {
 		if (_nameSupplier != null) {
 			name = _nameSupplier.get();
@@ -152,6 +191,18 @@ public class TaskDefinition implements Serializable {
 		StringBundler sb = new StringBundler();
 
 		sb.append("{");
+
+		Long id = getId();
+
+		if (id != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"id\": ");
+
+			sb.append(id);
+		}
 
 		String name = getName();
 

@@ -372,6 +372,7 @@ public class WorkflowDefinitionResourceTest
 					}
 				}
 			});
+		workflowDefinition.setScope("");
 		workflowDefinition.setVersion("1");
 
 		return workflowDefinition;

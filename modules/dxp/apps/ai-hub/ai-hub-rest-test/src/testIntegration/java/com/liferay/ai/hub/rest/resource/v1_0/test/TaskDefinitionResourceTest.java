@@ -10,8 +10,16 @@ import com.liferay.ai.hub.rest.client.pagination.Page;
 import com.liferay.ai.hub.rest.client.pagination.Pagination;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.AssertUtils;
+import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
@@ -37,19 +45,38 @@ public class TaskDefinitionResourceTest
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
+		_originalPermissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		PermissionThreadLocal.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(
+				_userLocalService.getUser(TestPropsValues.getUserId())));
+
+		Company company = _companyLocalService.getCompany(
+			TestPropsValues.getCompanyId());
+
+		ServiceContextThreadLocal.pushServiceContext(
+			ServiceContextTestUtil.getServiceContext(
+				company.getGroupId(), TestPropsValues.getUserId()));
+
 		_originalName = PrincipalThreadLocal.getName();
 
 		PrincipalThreadLocal.setName(TestPropsValues.getUserId());
 
 		SiteInitializer siteInitializer =
-			_siteInitializerRegistry.getSiteInitializer("ai-hub-initializer");
+			_siteInitializerRegistry.getSiteInitializer(
+				"com.liferay.site.initializer.ai.hub");
 
 		siteInitializer.initialize(TestPropsValues.getGroupId());
 	}
 
 	@AfterClass
 	public static void tearDownClass() {
+		PermissionThreadLocal.setPermissionChecker(_originalPermissionChecker);
+
 		PrincipalThreadLocal.setName(_originalName);
+
+		ServiceContextThreadLocal.popServiceContext();
 	}
 
 	@Test
@@ -82,9 +109,16 @@ public class TaskDefinitionResourceTest
 		return taskDefinition;
 	}
 
+	@Inject
+	private static CompanyLocalService _companyLocalService;
+
 	private static String _originalName;
+	private static PermissionChecker _originalPermissionChecker;
 
 	@Inject
 	private static SiteInitializerRegistry _siteInitializerRegistry;
+
+	@Inject
+	private static UserLocalService _userLocalService;
 
 }

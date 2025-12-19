@@ -29,11 +29,13 @@ import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.odata.entity.EntityModel;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
 import com.liferay.portal.workflow.comparator.WorkflowComparatorFactory;
+import com.liferay.portal.workflow.constants.WorkflowDefinitionConstants;
 import com.liferay.portal.workflow.manager.WorkflowDefinitionManager;
 
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -217,7 +219,7 @@ public class WorkflowDefinitionResourceImpl
 				workflowDefinition.getExternalReferenceCode(),
 				contextCompany.getCompanyId(), contextUser.getUserId(),
 				_getTitle(workflowDefinition), workflowDefinition.getName(),
-				content.getBytes()));
+				_getScope(workflowDefinition), content.getBytes()));
 	}
 
 	@Override
@@ -232,7 +234,7 @@ public class WorkflowDefinitionResourceImpl
 				workflowDefinition.getExternalReferenceCode(),
 				contextCompany.getCompanyId(), contextUser.getUserId(),
 				_getTitle(workflowDefinition), workflowDefinition.getName(),
-				content.getBytes()));
+				_getScope(workflowDefinition), content.getBytes()));
 	}
 
 	@Override
@@ -255,6 +257,14 @@ public class WorkflowDefinitionResourceImpl
 			contextCompany.getCompanyId(), workflowDefinition.getName());
 
 		return postWorkflowDefinitionDeploy(workflowDefinition);
+	}
+
+	private String _getScope(WorkflowDefinition workflowDefinition) {
+		if (Validator.isNull(workflowDefinition.getScope())) {
+			return WorkflowDefinitionConstants.SCOPE_ALL;
+		}
+
+		return workflowDefinition.getScope();
 	}
 
 	private String _getTitle(WorkflowDefinition workflowDefinition)
@@ -359,6 +369,7 @@ public class WorkflowDefinitionResourceImpl
 							contextAcceptLanguage.getPreferredLocale(),
 							workflowNode),
 						Node.class));
+				setScope(workflowDefinition::getScope);
 				setTitle(
 					() -> workflowDefinition.getTitle(
 						_language.getLanguageId(

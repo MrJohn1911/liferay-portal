@@ -28,6 +28,7 @@ import com.liferay.asset.list.model.AssetListEntry;
 import com.liferay.asset.list.service.AssetListEntryLocalService;
 import com.liferay.asset.list.util.comparator.ClassNameModelResourceComparator;
 import com.liferay.asset.util.AssetRendererFactoryWrapper;
+import com.liferay.batch.engine.unit.BatchEngineUnitThreadLocal;
 import com.liferay.blogs.model.BlogsEntry;
 import com.liferay.client.extension.constants.ClientExtensionEntryConstants;
 import com.liferay.client.extension.service.ClientExtensionEntryLocalService;
@@ -260,6 +261,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
@@ -1272,9 +1274,19 @@ public class BundleSiteInitializer implements SiteInitializer {
 						objectDefinition.getName(), objectDefinition);
 				}
 
-				objectDefinition =
-					objectDefinitionResource.postObjectDefinition(
-						objectDefinition);
+				try {
+					BatchEngineUnitThreadLocal.setFileName(
+						String.valueOf(
+							FrameworkUtil.getBundle(
+								BundleSiteInitializer.class)));
+
+					objectDefinition =
+						objectDefinitionResource.postObjectDefinition(
+							objectDefinition);
+				}
+				finally {
+					BatchEngineUnitThreadLocal.setFileName(StringPool.BLANK);
+				}
 
 				objectDefinitionIds.add(objectDefinition.getId());
 			}
