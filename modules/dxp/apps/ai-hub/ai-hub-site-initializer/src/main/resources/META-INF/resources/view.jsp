@@ -13,7 +13,7 @@ TaskDefinitionDisplayContext taskDefinitionDisplayContext = (TaskDefinitionDispl
 
 <div class="ml-8 mr-8 mt-5">
 	<div class="mb-6">
-		<h2>AI Tasks</h2>
+		<h2><liferay-ui:message key="ai-tasks" /></h2>
 	</div>
 
 	<frontend-data-set:headless-display

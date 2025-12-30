@@ -50,7 +50,7 @@ renderResponse.setTitle(LanguageUtil.get(request, titleKey));
 		).put(
 			"portletNamespace", PortalUtil.getPortletNamespace(KaleoDesignerPortletKeys.KALEO_DESIGNER)
 		).put(
-			"scope", kaleoDesignerDisplayContext.getScope()
+			"scope", kaleoDesignerDisplayContext.getScope(renderRequest)
 		).put(
 			"scriptManagementConfigurationPortletURL", kaleoDesignerDisplayContext.getScriptManagementConfigurationPortletURL()
 		).put(
