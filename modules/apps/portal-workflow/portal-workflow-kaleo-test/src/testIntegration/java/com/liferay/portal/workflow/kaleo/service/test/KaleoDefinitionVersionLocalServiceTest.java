@@ -66,7 +66,7 @@ public class KaleoDefinitionVersionLocalServiceTest
 	@Test
 	public void testGetLatestKaleoDefinitionVersions() throws Exception {
 		KaleoDefinition kaleoDefinition1 = addKaleoDefinition(
-			StringUtil.randomString(), RandomTestUtil.randomString(),
+			StringUtil.randomString(), RandomTestUtil.randomString(), null,
 			RandomTestUtil.randomString(), RandomTestUtil.randomString());
 
 		KaleoDefinitionVersion kaleoDefinition1LatestKaleoDefinitionVersion =
@@ -77,7 +77,7 @@ public class KaleoDefinitionVersionLocalServiceTest
 				kaleoDefinition1.getContent(), "2.0", serviceContext);
 
 		KaleoDefinition kaleoDefinition2 = addKaleoDefinition(
-			StringUtil.randomString(), RandomTestUtil.randomString(),
+			StringUtil.randomString(), RandomTestUtil.randomString(), null,
 			RandomTestUtil.randomString(), RandomTestUtil.randomString());
 
 		KaleoDefinitionVersion kaleoDefinition2LatestKaleoDefinitionVersion =
@@ -88,7 +88,7 @@ public class KaleoDefinitionVersionLocalServiceTest
 				kaleoDefinition2.getContent(), "2.0", serviceContext);
 
 		KaleoDefinition kaleoDefinition3 = addKaleoDefinition(
-			StringUtil.randomString(), StringUtil.randomString(),
+			StringUtil.randomString(), StringUtil.randomString(), null,
 			StringUtil.randomString(), RandomTestUtil.randomString());
 
 		KaleoDefinitionVersion kaleoDefinition3LatestKaleoDefinitionVersion =
