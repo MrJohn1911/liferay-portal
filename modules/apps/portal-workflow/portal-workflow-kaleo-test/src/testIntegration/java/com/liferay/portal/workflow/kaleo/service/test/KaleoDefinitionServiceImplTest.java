@@ -5,6 +5,10 @@
 
 package com.liferay.portal.workflow.kaleo.service.test;
 
+import com.liferay.account.constants.AccountConstants;
+import com.liferay.account.model.AccountEntry;
+import com.liferay.account.service.AccountEntryLocalService;
+import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -155,6 +159,8 @@ public class KaleoDefinitionServiceImplTest {
 			kaleoDefinition,
 			_kaleoDefinitionService.getKaleoDefinition(
 				kaleoDefinition.getKaleoDefinitionId()));
+
+		_testGetKaleoDefinitionWithAccountEntry(user);
 	}
 
 	@Test
@@ -271,12 +277,59 @@ public class KaleoDefinitionServiceImplTest {
 			PermissionCheckerFactoryUtil.create(user));
 	}
 
+	private void _testGetKaleoDefinitionWithAccountEntry(User user)
+		throws Exception {
+
+		ConfigurationTestUtil.saveConfiguration(
+			_configuration,
+			HashMapDictionaryBuilder.<String, Object>put(
+				"company.administrator.can.publish", true
+			).build());
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext();
+
+		AccountEntry accountEntry = _accountEntryLocalService.addAccountEntry(
+			StringPool.BLANK, _companyAdminUser.getUserId(),
+			AccountConstants.PARENT_ACCOUNT_ENTRY_ID_DEFAULT,
+			RandomTestUtil.randomString(), null, null,
+			RandomTestUtil.randomString() + "@liferay.com", null, null,
+			AccountConstants.ACCOUNT_ENTRY_TYPE_BUSINESS,
+			WorkflowConstants.STATUS_APPROVED, serviceContext);
+
+		_accountEntryUserRelLocalService.addAccountEntryUserRel(
+			accountEntry.getAccountEntryId(), user.getUserId());
+
+		serviceContext.setScopeGroupId(accountEntry.getAccountEntryGroupId());
+
+		serviceContext.setUserId(user.getUserId());
+
+		KaleoDefinition kaleoDefinition =
+			_kaleoDefinitionService.addKaleoDefinition(
+				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+				_read(), "ai", 1, serviceContext);
+
+		_setUpPermissionThreadLocal(user);
+
+		Assert.assertEquals(
+			kaleoDefinition,
+			_kaleoDefinitionService.getKaleoDefinition(
+				kaleoDefinition.getKaleoDefinitionId()));
+	}
+
 	private static Company _company;
 	private static User _companyAdminUser;
 	private static Configuration _configuration;
 
 	@Inject
 	private static ConfigurationAdmin _configurationAdmin;
+
+	@Inject
+	private AccountEntryLocalService _accountEntryLocalService;
+
+	@Inject
+	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
 
 	@Inject
 	private KaleoDefinitionLocalService _kaleoDefinitionLocalService;
