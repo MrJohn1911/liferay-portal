@@ -6,8 +6,8 @@
 package com.liferay.ai.hub.internal.assistant.handler;
 
 import dev.langchain4j.invocation.InvocationParameters;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiStreamingChatModel;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.tool.ToolProvider;
 
@@ -33,8 +33,7 @@ public class AssistantHandlerContext {
 		_tools = builder._tools;
 		_toolProvider = builder._toolProvider;
 		_userMessage = builder._userMessage;
-		_vertexAiGeminiStreamingChatModel =
-			builder._vertexAiGeminiStreamingChatModel;
+		_streamingChatModel = builder._streamingChatModel;
 	}
 
 	public ContentRetriever getContentRetriever() {
@@ -57,6 +56,10 @@ public class AssistantHandlerContext {
 		return _onErrorConsumer;
 	}
 
+	public StreamingChatModel getStreamingChatModel() {
+		return _streamingChatModel;
+	}
+
 	public Function<Object, String> getSystemMessageProviderFunction() {
 		return _systemMessageProviderFunction;
 	}
@@ -71,12 +74,6 @@ public class AssistantHandlerContext {
 
 	public String getUserMessage() {
 		return _userMessage;
-	}
-
-	public VertexAiGeminiStreamingChatModel
-		getVertexAiGeminiStreamingChatModel() {
-
-		return _vertexAiGeminiStreamingChatModel;
 	}
 
 	public static class Builder {
@@ -119,6 +116,14 @@ public class AssistantHandlerContext {
 			return this;
 		}
 
+		public Builder streamingChatModel(
+			StreamingChatModel streamingChatModel) {
+
+			_streamingChatModel = streamingChatModel;
+
+			return this;
+		}
+
 		public Builder systemMessageProviderFunction(
 			Function<Object, String> systemMessageProviderFunction) {
 
@@ -147,26 +152,16 @@ public class AssistantHandlerContext {
 			return this;
 		}
 
-		public Builder vertexAiGeminiStreamingChatModel(
-			VertexAiGeminiStreamingChatModel vertexAiGeminiStreamingChatModel) {
-
-			_vertexAiGeminiStreamingChatModel =
-				vertexAiGeminiStreamingChatModel;
-
-			return this;
-		}
-
 		private ContentRetriever _contentRetriever;
 		private InvocationParameters _invocationParameters;
 		private String _memoryId;
 		private Consumer<ChatResponse> _onCompleteResponseConsumer;
 		private Consumer<Throwable> _onErrorConsumer;
+		private StreamingChatModel _streamingChatModel;
 		private Function<Object, String> _systemMessageProviderFunction;
 		private ToolProvider _toolProvider;
 		private Object[] _tools = new Object[0];
 		private String _userMessage;
-		private VertexAiGeminiStreamingChatModel
-			_vertexAiGeminiStreamingChatModel;
 
 	}
 
@@ -175,11 +170,10 @@ public class AssistantHandlerContext {
 	private final String _memoryId;
 	private final Consumer<ChatResponse> _onCompleteResponseConsumer;
 	private final Consumer<Throwable> _onErrorConsumer;
+	private final StreamingChatModel _streamingChatModel;
 	private final Function<Object, String> _systemMessageProviderFunction;
 	private final ToolProvider _toolProvider;
 	private final Object[] _tools;
 	private final String _userMessage;
-	private final VertexAiGeminiStreamingChatModel
-		_vertexAiGeminiStreamingChatModel;
 
 }

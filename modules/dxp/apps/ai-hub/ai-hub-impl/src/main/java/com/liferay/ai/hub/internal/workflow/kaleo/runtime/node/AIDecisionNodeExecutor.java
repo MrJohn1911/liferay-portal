@@ -8,6 +8,8 @@ package com.liferay.ai.hub.internal.workflow.kaleo.runtime.node;
 import com.liferay.ai.hub.internal.assistant.handler.AssistantHandlerContext;
 import com.liferay.ai.hub.internal.assistant.handler.AssistantHandlerUtil;
 import com.liferay.ai.hub.internal.mcp.tool.provider.MCPToolProviderUtil;
+import com.liferay.ai.hub.internal.model.ChatModelFactory;
+import com.liferay.ai.hub.internal.model.util.StreamingChatModelUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.ContentRetrieverUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.KaleoLogUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.ToolsUtil;
@@ -38,7 +40,7 @@ import com.liferay.portal.workflow.kaleo.service.KaleoNodeSettingLocalService;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.invocation.InvocationParameters;
-import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiStreamingChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 
 import java.io.Serializable;
 
@@ -131,15 +133,8 @@ public class AIDecisionNodeExecutor extends BaseNodeExecutor {
 
 		ServiceContext serviceContext = executionContext.getServiceContext();
 
-		VertexAiGeminiStreamingChatModel vertexAiGeminiStreamingChatModel =
-			VertexAiGeminiStreamingChatModel.builder(
-			).location(
-				"europe-central2"
-			).modelName(
-				"gemini-2.5-flash-lite"
-			).project(
-				"ai-hub-liferay"
-			).build();
+		StreamingChatModel streamingChatModel = ChatModelFactory.create();
+
 		Map<String, Serializable> workflowContext =
 			executionContext.getWorkflowContext();
 
@@ -160,7 +155,7 @@ public class AIDecisionNodeExecutor extends BaseNodeExecutor {
 				GetterUtil.getString(workflowContext.get("memoryId"))
 			).onCompleteResponseConsumer(
 				response -> {
-					vertexAiGeminiStreamingChatModel.close();
+					StreamingChatModelUtil.close(streamingChatModel);
 
 					KaleoLogUtil.addNodeUsageKaleoLog(
 						response, kaleoInstanceToken,
@@ -170,10 +165,12 @@ public class AIDecisionNodeExecutor extends BaseNodeExecutor {
 				}
 			).onErrorConsumer(
 				throwable -> {
-					vertexAiGeminiStreamingChatModel.close();
+					StreamingChatModelUtil.close(streamingChatModel);
 
 					_log.error(throwable);
 				}
+			).streamingChatModel(
+				streamingChatModel
 			).systemMessageProviderFunction(
 				memoryId -> prompt
 			).tools(
@@ -187,8 +184,6 @@ public class AIDecisionNodeExecutor extends BaseNodeExecutor {
 					_objectEntryManager, serviceContext.getUserId())
 			).userMessage(
 				userMessage
-			).vertexAiGeminiStreamingChatModel(
-				vertexAiGeminiStreamingChatModel
 			).build());
 	}
 
