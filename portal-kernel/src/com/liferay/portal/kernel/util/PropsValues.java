@@ -95,6 +95,15 @@ public class PropsValues {
 		GetterUtil.getBoolean(
 			PropsUtil.get(PropsKeys.ADMIN_SYNC_DEFAULT_ASSOCIATIONS));
 
+	public static final String AI_HUB_VERTEX_AI_LOCATION = PropsUtil.get(
+		PropsKeys.AI_HUB_VERTEX_AI_LOCATION);
+
+	public static final String AI_HUB_VERTEX_AI_MODEL_NAME = PropsUtil.get(
+		PropsKeys.AI_HUB_VERTEX_AI_MODEL_NAME);
+
+	public static final String AI_HUB_VERTEX_AI_PROJECT = PropsUtil.get(
+		PropsKeys.AI_HUB_VERTEX_AI_PROJECT);
+
 	public static final String ANNOUNCEMENTS_EMAIL_BODY = PropsUtil.get(
 		PropsKeys.ANNOUNCEMENTS_EMAIL_BODY);
 

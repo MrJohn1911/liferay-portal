@@ -121,6 +121,15 @@ public interface PropsKeys {
 	public static final String ADMIN_SYNC_DEFAULT_ASSOCIATIONS =
 		"admin.sync.default.associations";
 
+	public static final String AI_HUB_VERTEX_AI_LOCATION =
+		"ai.hub.vertex.ai.model.location";
+
+	public static final String AI_HUB_VERTEX_AI_MODEL_NAME =
+		"ai.hub.vertex.ai.model.name";
+
+	public static final String AI_HUB_VERTEX_AI_PROJECT =
+		"ai.hub.vertex.ai.model.project";
+
 	public static final String ANALYTICS_CLOUD_CLIENT_JS_VERSION =
 		"analytics.cloud.client.js.version";
 
