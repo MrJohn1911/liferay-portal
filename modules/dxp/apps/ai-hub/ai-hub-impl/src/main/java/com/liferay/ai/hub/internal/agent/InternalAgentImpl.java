@@ -7,6 +7,12 @@ package com.liferay.ai.hub.internal.agent;
 
 import com.liferay.ai.hub.agent.AgentContext;
 import com.liferay.ai.hub.internal.agent.util.AgentUtil;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
@@ -83,11 +89,27 @@ public class InternalAgentImpl implements InternalAgent, InvocationHandler {
 			return null;
 		}
 
+		String name = PrincipalThreadLocal.getName();
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
 		try {
+			ServiceContext serviceContext = _agentContext.getServiceContext();
+
+			User user = serviceContext.fetchUser();
+
+			if (PrincipalThreadLocal.getUserId() == 0) {
+				PrincipalThreadLocal.setName(user.getUserId());
+			}
+
+			if (permissionChecker == null) {
+				PermissionThreadLocal.setPermissionChecker(
+					PermissionCheckerFactoryUtil.create(user));
+			}
+
 			Map<String, Serializable> workflowContext =
 				HashMapBuilder.<String, Serializable>put(
-					WorkflowConstants.CONTEXT_SERVICE_CONTEXT,
-					_agentContext.getServiceContext()
+					WorkflowConstants.CONTEXT_SERVICE_CONTEXT, serviceContext
 				).put(
 					"accessToken", _agentContext.getAccessToken()
 				).put(
@@ -97,15 +119,16 @@ public class InternalAgentImpl implements InternalAgent, InvocationHandler {
 				).build();
 
 			for (AgentArgument agentArgument : arguments()) {
-				String name = agentArgument.name();
+				String agentArgumentName = agentArgument.name();
 
-				if (workflowContext.containsKey(name)) {
+				if (workflowContext.containsKey(agentArgumentName)) {
 					continue;
 				}
 
 				workflowContext.put(
-					name,
-					MapUtil.getString((Map<String, Object>)arguments[0], name));
+					agentArgumentName,
+					MapUtil.getString(
+						(Map<String, Object>)arguments[0], agentArgumentName));
 			}
 
 			WorkflowDefinition workflowDefinition =
@@ -120,6 +143,10 @@ public class InternalAgentImpl implements InternalAgent, InvocationHandler {
 		}
 		catch (Exception exception) {
 			throw new RuntimeException(exception);
+		}
+		finally {
+			PrincipalThreadLocal.setName(name);
+			PermissionThreadLocal.setPermissionChecker(permissionChecker);
 		}
 	}
 
