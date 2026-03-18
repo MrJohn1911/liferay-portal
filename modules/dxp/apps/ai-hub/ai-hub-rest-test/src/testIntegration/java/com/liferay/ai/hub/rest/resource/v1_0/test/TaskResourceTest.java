@@ -11,9 +11,11 @@ import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.ai.hub.configuration.AIHubConfiguration;
 import com.liferay.ai.hub.rest.resource.v1_0.test.util.SseEventSourceTestUtil;
+import com.liferay.ai.hub.rest.resource.v1_0.test.util.TokenTestUtil;
 import com.liferay.ai.hub.rest.resource.v1_0.util.SseUtil;
 import com.liferay.ai.hub.security.JWTTokenUtil;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.oauth2.provider.service.OAuth2ApplicationLocalService;
 import com.liferay.object.field.builder.LongTextObjectFieldBuilder;
 import com.liferay.object.field.builder.TextObjectFieldBuilder;
 import com.liferay.object.model.ObjectDefinition;
@@ -86,7 +88,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -205,28 +206,33 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 
 		_workflowDefinitionManager.deployWorkflowDefinition(
 			_getContentBytes("ai-decision-node-workflow-definition.json"),
-			TestPropsValues.getCompanyId(), null,
-			"AI Decision Node Workflow Definition", StringUtil.randomId(),
+			TestPropsValues.getCompanyId(), null, _group.getGroupId(),
+			"AI Decision Node Workflow Definition",
+			WorkflowDefinitionConstants.SCOPE_ALL, StringUtil.randomId(),
 			TestPropsValues.getUserId());
 		_workflowDefinitionManager.deployWorkflowDefinition(
 			_getContentBytes(
 				"ai-decision-node-with-tool-workflow-definition.json"),
-			TestPropsValues.getCompanyId(), null,
+			TestPropsValues.getCompanyId(), null, _group.getGroupId(),
 			"AI Decision Node With Tool Workflow Definition",
-			StringUtil.randomId(), TestPropsValues.getUserId());
+			WorkflowDefinitionConstants.SCOPE_ALL, StringUtil.randomId(),
+			TestPropsValues.getUserId());
 		_workflowDefinitionManager.deployWorkflowDefinition(
 			_getContentBytes("llm-node-with-rag-workflow-definition.json"),
-			TestPropsValues.getCompanyId(), null,
-			"LLM Node With RAG Workflow Definition", StringUtil.randomId(),
+			TestPropsValues.getCompanyId(), null, _group.getGroupId(),
+			"LLM Node With RAG Workflow Definition",
+			WorkflowDefinitionConstants.SCOPE_ALL, StringUtil.randomId(),
 			TestPropsValues.getUserId());
 		_workflowDefinitionManager.deployWorkflowDefinition(
 			_getContentBytes("llm-node-with-tool-workflow-definition.json"),
-			TestPropsValues.getCompanyId(), null,
-			"LLM Node With Tool Workflow Definition", StringUtil.randomId(),
+			TestPropsValues.getCompanyId(), null, _group.getGroupId(),
+			"LLM Node With Tool Workflow Definition",
+			WorkflowDefinitionConstants.SCOPE_ALL, StringUtil.randomId(),
 			TestPropsValues.getUserId());
 		_workflowDefinitionManager.deployWorkflowDefinition(
 			_getContentBytes("workflow-definition.json"),
-			TestPropsValues.getCompanyId(), null, "Workflow Definition",
+			TestPropsValues.getCompanyId(), null, _group.getGroupId(),
+			"Workflow Definition", WorkflowDefinitionConstants.SCOPE_ALL,
 			StringUtil.randomId(), TestPropsValues.getUserId());
 	}
 
@@ -240,16 +246,20 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			_objectDefinition.getObjectDefinitionId());
 
 		PrincipalThreadLocal.setName(_originalName);
-
-		ConfigurationTestUtil.deleteConfiguration(
-			AIHubConfiguration.class.getName());
 	}
 
 	@After
 	public void tearDown() {
 		ServiceContextThreadLocal.popServiceContext();
-
 		SseUtil.closeAll();
+
+		try {
+			ConfigurationTestUtil.deleteConfiguration(
+				AIHubConfiguration.class.getName());
+		}
+		catch (Exception exception) {
+			throw new RuntimeException(exception);
+		}
 	}
 
 	@Override
@@ -260,7 +270,6 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 				List.of(), new ArrayList<>(), "tasks/subscribe"));
 	}
 
-	@Ignore
 	@Override
 	@Test
 	public void testPostTask() throws Exception {
@@ -324,6 +333,33 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			userId);
 	}
 
+	private JSONObject _postTask(
+			String inputText, String inputVariable, String sseEventSinkKey,
+			String type, String userToken)
+		throws Exception {
+
+		JSONObject tokenjsonObject = TokenTestUtil.generateToken();
+
+		return HTTPTestUtil.invokeToJSONObject(
+			JSONUtil.put(
+				"context", JSONUtil.put(inputVariable, inputText)
+			).put(
+				"sseEventSinkKey", sseEventSinkKey
+			).put(
+				"type", type
+			).toString(),
+			"ai-hub/v1.0/tasks",
+			HashMapBuilder.put(
+				"Authorization",
+				"Bearer " + tokenjsonObject.getString("accessToken")
+			).put(
+				"Liferay-AI-Hub-On-Behalf-Of",
+				GetterUtil.get(
+					userToken, _generateToken(TestPropsValues.getUserId()))
+			).build(),
+			Http.Method.POST);
+	}
+
 	private void _testPostTask() throws Exception {
 		JSONObject jsonObject = HTTPTestUtil.invokeToJSONObject(
 			JSONUtil.put(
@@ -371,6 +407,9 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 	private void _testPostTaskWithTypeAIDecisionNodeWithToolWorkflowDefinition()
 		throws Exception {
 
+		PermissionChecker originalPermissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
 		JSONObject jsonObject = HTTPTestUtil.invokeToJSONObject(
 			JSONUtil.put(
 				"context",
@@ -382,7 +421,7 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			"ai-hub/v1.0/tasks", Http.Method.POST);
 
 		IdempotentRetryAssert.retryAssert(
-			5, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
+			10, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
 			() -> {
 				WorkflowInstance workflowInstance =
 					_workflowInstanceManager.getWorkflowInstance(
@@ -398,6 +437,10 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 
 				return null;
 			});
+
+		Assert.assertEquals(
+			originalPermissionChecker,
+			PermissionThreadLocal.getPermissionChecker());
 	}
 
 	private void _testPostTaskWithTypeAIDecisionNodeWorkflowDefinition()
@@ -417,18 +460,12 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			String content, String workflowNodeName)
 		throws Exception {
 
-		JSONObject jsonObject = HTTPTestUtil.invokeToJSONObject(
-			JSONUtil.put(
-				"context", JSONUtil.put("content", content)
-			).put(
-				"sseEventSinkKey", RandomTestUtil.randomString()
-			).put(
-				"type", "AI Decision Node Workflow Definition"
-			).toString(),
-			"ai-hub/v1.0/tasks", Http.Method.POST);
+		JSONObject jsonObject = _postTask(
+			content, "content", RandomTestUtil.randomString(),
+			"AI Decision Node Workflow Definition", null);
 
 		IdempotentRetryAssert.retryAssert(
-			5, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
+			10, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
 			() -> {
 				WorkflowInstance workflowInstance =
 					_workflowInstanceManager.getWorkflowInstance(
@@ -453,21 +490,9 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 		String sseEventSinkKey = SseEventSourceTestUtil.open(
 			List.of(countDownLatch), lines, "tasks/subscribe");
 
-		JSONObject jsonObject = HTTPTestUtil.invokeToJSONObject(
-			JSONUtil.put(
-				"context", JSONUtil.put("text", "Thi text ix wrong.")
-			).put(
-				"sseEventSinkKey", sseEventSinkKey
-			).put(
-				"type",
-				WorkflowDefinitionConstants.NAME_FIX_SPELLING_AND_GRAMMAR
-			).toString(),
-			"ai-hub/v1.0/tasks",
-			HashMapBuilder.put(
-				"Liferay-AI-Hub-On-Behalf-Of",
-				_generateToken(TestPropsValues.getUserId())
-			).build(),
-			Http.Method.POST);
+		JSONObject jsonObject = _postTask(
+			"Thi text ix wrong.", "text", sseEventSinkKey,
+			WorkflowDefinitionConstants.NAME_FIX_SPELLING_AND_GRAMMAR, null);
 
 		Assert.assertTrue(countDownLatch.await(10, TimeUnit.SECONDS));
 
@@ -517,21 +542,9 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			List.of(countDownLatch1, countDownLatch2), lines,
 			"tasks/subscribe");
 
-		HTTPTestUtil.invokeToJSONObject(
-			JSONUtil.put(
-				"context",
-				JSONUtil.put("userMessage", "What is Feliphe's favorite food?")
-			).put(
-				"sseEventSinkKey", sseEventSinkKey
-			).put(
-				"type", "LLM Node With RAG Workflow Definition"
-			).toString(),
-			"ai-hub/v1.0/tasks",
-			HashMapBuilder.put(
-				"Liferay-AI-Hub-On-Behalf-Of",
-				_generateToken(TestPropsValues.getUserId())
-			).build(),
-			Http.Method.POST);
+		_postTask(
+			"What is Feliphe's favorite food?", "userMessage", sseEventSinkKey,
+			"LLM Node With RAG Workflow Definition", null);
 
 		Assert.assertTrue(countDownLatch1.await(10, TimeUnit.SECONDS));
 
@@ -553,21 +566,9 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			).build(),
 			ServiceContextTestUtil.getServiceContext());
 
-		HTTPTestUtil.invokeToJSONObject(
-			JSONUtil.put(
-				"context",
-				JSONUtil.put("userMessage", "What is Feliphe's favorite food?")
-			).put(
-				"sseEventSinkKey", sseEventSinkKey
-			).put(
-				"type", "LLM Node With RAG Workflow Definition"
-			).toString(),
-			"ai-hub/v1.0/tasks",
-			HashMapBuilder.put(
-				"Liferay-AI-Hub-On-Behalf-Of",
-				_generateToken(TestPropsValues.getUserId())
-			).build(),
-			Http.Method.POST);
+		_postTask(
+			"What is Feliphe's favorite food?", "userMessage", sseEventSinkKey,
+			"LLM Node With RAG Workflow Definition", null);
 
 		Assert.assertTrue(countDownLatch2.await(10, TimeUnit.SECONDS));
 
@@ -625,21 +626,10 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			user.getEmailAddress(), password
 		).apply(
 			() -> {
-				HTTPTestUtil.invokeToJSONObject(
-					JSONUtil.put(
-						"context",
-						JSONUtil.put(
-							"userMessage", "What is Feliphe's favorite food?")
-					).put(
-						"sseEventSinkKey", sseEventSinkKey
-					).put(
-						"type", "LLM Node With RAG Workflow Definition"
-					).toString(),
-					"ai-hub/v1.0/tasks",
-					HashMapBuilder.put(
-						"Liferay-AI-Hub-On-Behalf-Of", userToken
-					).build(),
-					Http.Method.POST);
+				_postTask(
+					"What is Feliphe's favorite food?", "userMessage",
+					sseEventSinkKey, "LLM Node With RAG Workflow Definition",
+					userToken);
 
 				Assert.assertTrue(countDownLatch1.await(10, TimeUnit.SECONDS));
 
@@ -663,21 +653,10 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 
 				_userLocalService.addRoleUser(role.getRoleId(), userId);
 
-				HTTPTestUtil.invokeToJSONObject(
-					JSONUtil.put(
-						"context",
-						JSONUtil.put(
-							"userMessage", "What is Feliphe's favorite food?")
-					).put(
-						"sseEventSinkKey", sseEventSinkKey
-					).put(
-						"type", "LLM Node With RAG Workflow Definition"
-					).toString(),
-					"ai-hub/v1.0/tasks",
-					HashMapBuilder.put(
-						"Liferay-AI-Hub-On-Behalf-Of", userToken
-					).build(),
-					Http.Method.POST);
+				_postTask(
+					"What is Feliphe's favorite food?", "userMessage",
+					sseEventSinkKey, "LLM Node With RAG Workflow Definition",
+					userToken);
 
 				Assert.assertTrue(countDownLatch2.await(10, TimeUnit.SECONDS));
 
@@ -739,20 +718,9 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			"This is a long and detailed sentence that should be shortened " +
 				"by the AI model for testing purposes.";
 
-		JSONObject jsonObject = HTTPTestUtil.invokeToJSONObject(
-			JSONUtil.put(
-				"context", JSONUtil.put("text", inputText)
-			).put(
-				"sseEventSinkKey", sseEventSinkKey
-			).put(
-				"type", WorkflowDefinitionConstants.NAME_MAKE_SHORTER
-			).toString(),
-			"ai-hub/v1.0/tasks",
-			HashMapBuilder.put(
-				"Liferay-AI-Hub-On-Behalf-Of",
-				_generateToken(TestPropsValues.getUserId())
-			).build(),
-			Http.Method.POST);
+		JSONObject jsonObject = _postTask(
+			inputText, "text", sseEventSinkKey,
+			WorkflowDefinitionConstants.NAME_MAKE_SHORTER, null);
 
 		Assert.assertTrue(countDownLatch.await(10, TimeUnit.SECONDS));
 
@@ -828,6 +796,9 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 
 	@Inject
 	private KaleoWorkflowModelConverter _kaleoWorkflowModelConverter;
+
+	@Inject
+	private OAuth2ApplicationLocalService _oAuth2ApplicationLocalService;
 
 	@Inject
 	private ResourcePermissionLocalService _resourcePermissionLocalService;
