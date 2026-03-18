@@ -5,10 +5,17 @@
 
 package com.liferay.ai.hub.rest.resource.v1_0.test;
 
+import com.liferay.account.constants.AccountConstants;
+import com.liferay.account.model.AccountEntry;
+import com.liferay.account.service.AccountEntryLocalService;
+import com.liferay.account.service.AccountEntryUserRelLocalService;
+import com.liferay.ai.hub.cell.configuration.AIHubCellConfiguration;
 import com.liferay.ai.hub.cell.security.JWTTokenUtil;
 import com.liferay.ai.hub.rest.resource.v1_0.test.util.SseEventSourceTestUtil;
+import com.liferay.ai.hub.rest.resource.v1_0.test.util.TokenTestUtil;
 import com.liferay.ai.hub.rest.resource.v1_0.util.SseUtil;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.portal.configuration.test.util.ConfigurationTestUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
@@ -22,6 +29,7 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.site.initializer.SiteInitializer;
@@ -49,6 +57,19 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
+		AccountEntry accountEntry = _accountEntryLocalService.addAccountEntry(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+			AccountConstants.PARENT_ACCOUNT_ENTRY_ID_DEFAULT,
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(), null,
+			RandomTestUtil.randomString() + "@liferay.com", null,
+			RandomTestUtil.randomString(),
+			AccountConstants.ACCOUNT_ENTRY_TYPE_BUSINESS,
+			WorkflowConstants.STATUS_APPROVED,
+			ServiceContextTestUtil.getServiceContext());
+
+		_accountEntryUserRelLocalService.addAccountEntryUserRel(
+			accountEntry.getAccountEntryId(), TestPropsValues.getUserId());
+
 		_originalPermissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
 
@@ -68,6 +89,13 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 				"com.liferay.ai.hub.site.initializer");
 
 		siteInitializer.initialize(TestPropsValues.getGroupId());
+
+		AccountEntry aiHubAccountEntry =
+			_accountEntryLocalService.getAccountEntryByExternalReferenceCode(
+				"L_AI_HUB", TestPropsValues.getCompanyId());
+
+		_accountEntryUserRelLocalService.addAccountEntryUserRel(
+			aiHubAccountEntry.getAccountEntryId(), TestPropsValues.getUserId());
 	}
 
 	@AfterClass
@@ -82,6 +110,14 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 	@After
 	public void tearDown() {
 		SseUtil.closeAll();
+
+		try {
+			ConfigurationTestUtil.deleteConfiguration(
+				AIHubCellConfiguration.class.getName());
+		}
+		catch (Exception exception) {
+			throw new RuntimeException(exception);
+		}
 	}
 
 	@Ignore
@@ -98,6 +134,8 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 
 		String text = "this is a short text.";
 
+		JSONObject tokenjsonObject = TokenTestUtil.generate();
+
 		JSONObject jsonObject = HTTPTestUtil.invokeToJSONObject(
 			JSONUtil.put(
 				"text", "Expand the following text: " + text
@@ -105,6 +143,9 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 			"ai-hub/v1.0/chats/by-external-reference-code/" + sseEventSinkKey +
 				"/messages",
 			HashMapBuilder.put(
+				"Authorization",
+				"Bearer " + tokenjsonObject.getString("accessToken")
+			).put(
 				"Liferay-AI-Hub-Cell-On-Behalf-Of",
 				_generateToken(TestPropsValues.getUserId())
 			).build(),
@@ -124,6 +165,8 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 
 		Assert.assertTrue(expandedText.length() > text.length());
 
+		tokenjsonObject = TokenTestUtil.generate();
+
 		jsonObject = HTTPTestUtil.invokeToJSONObject(
 			JSONUtil.put(
 				"text", "What was the first message that I sent in this chat?"
@@ -131,6 +174,9 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 			"ai-hub/v1.0/chats/by-external-reference-code/" + sseEventSinkKey +
 				"/messages",
 			HashMapBuilder.put(
+				"Authorization",
+				"Bearer " + tokenjsonObject.getString("accessToken")
+			).put(
 				"Liferay-AI-Hub-Cell-On-Behalf-Of",
 				_generateToken(TestPropsValues.getUserId())
 			).build(),
@@ -157,6 +203,13 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 			TimeUnit.MINUTES.toMillis(1), RandomTestUtil.randomString(),
 			userId);
 	}
+
+	@Inject
+	private static AccountEntryLocalService _accountEntryLocalService;
+
+	@Inject
+	private static AccountEntryUserRelLocalService
+		_accountEntryUserRelLocalService;
 
 	private static String _originalName;
 	private static PermissionChecker _originalPermissionChecker;
