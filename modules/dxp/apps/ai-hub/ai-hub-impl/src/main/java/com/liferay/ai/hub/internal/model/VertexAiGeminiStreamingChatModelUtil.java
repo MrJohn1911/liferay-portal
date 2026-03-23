@@ -5,6 +5,8 @@
 
 package com.liferay.ai.hub.internal.model;
 
+import com.liferay.portal.kernel.util.PropsValues;
+
 import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiStreamingChatModel;
 
 /**
@@ -15,11 +17,11 @@ public class VertexAiGeminiStreamingChatModelUtil {
 	public static VertexAiGeminiStreamingChatModel create() {
 		return VertexAiGeminiStreamingChatModel.builder(
 		).location(
-			"europe-central2"
+			PropsValues.AI_HUB_VERTEX_AI_LOCATION
 		).modelName(
-			"gemini-2.5-flash-lite"
+			PropsValues.AI_HUB_VERTEX_AI_MODEL_NAME
 		).project(
-			"ai-hub-liferay"
+			PropsValues.AI_HUB_VERTEX_AI_PROJECT
 		).build();
 	}
 

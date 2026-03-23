@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.security.auth.CompanyInheritableThreadLocalCall
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.workflow.WorkflowInstanceManager;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
@@ -60,11 +61,11 @@ public class SupervisorAgentImpl implements SupervisorAgent {
 					try (VertexAiGeminiChatModel vertexAiGeminiChatModel =
 							VertexAiGeminiChatModel.builder(
 							).location(
-								"europe-central2"
+								PropsValues.AI_HUB_VERTEX_AI_LOCATION
 							).modelName(
-								"gemini-2.5-flash-lite"
+								PropsValues.AI_HUB_VERTEX_AI_MODEL_NAME
 							).project(
-								"ai-hub-liferay"
+								PropsValues.AI_HUB_VERTEX_AI_PROJECT
 							).build()) {
 
 						PermissionThreadLocal.setPermissionChecker(
