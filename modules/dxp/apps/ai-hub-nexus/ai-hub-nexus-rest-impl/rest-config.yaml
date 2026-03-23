@@ -10,4 +10,4 @@ compatibilityVersion: 15
 forcePredictableOperationId: true
 generateGraphQL: false
 javaEEPackage: jakarta
-testDir: ../ai-hub-rest-test/src/testIntegration/java
+testDir: ../ai-hub-nexus-rest-test/src/testIntegration/java

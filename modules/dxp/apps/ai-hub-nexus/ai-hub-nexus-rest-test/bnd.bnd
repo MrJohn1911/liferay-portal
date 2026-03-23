@@ -1,5 +1,5 @@
-Bundle-Name: Liferay AI Hub REST Test
-Bundle-SymbolicName: com.liferay.ai.hub.rest.test
+Bundle-Name: Liferay AI Hub Nexus REST Test
+Bundle-SymbolicName: com.liferay.ai.hub.nexus.rest.test
 Bundle-Version: 1.0.0
 -includeresource:\
 	com.liferay.ai.hub.rest.client.jar=com.liferay.ai.hub.rest.client-*.jar;lib:=true,\
