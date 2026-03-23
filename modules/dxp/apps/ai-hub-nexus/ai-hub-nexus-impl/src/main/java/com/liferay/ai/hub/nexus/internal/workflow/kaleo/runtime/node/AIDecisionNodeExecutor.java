@@ -5,7 +5,6 @@
 
 package com.liferay.ai.hub.nexus.internal.workflow.kaleo.runtime.node;
 
-
 import com.liferay.ai.hub.nexus.internal.assistant.handler.AssistantHandlerContext;
 import com.liferay.ai.hub.nexus.internal.assistant.handler.AssistantHandlerUtil;
 import com.liferay.ai.hub.nexus.internal.mcp.tool.provider.MCPToolProviderUtil;

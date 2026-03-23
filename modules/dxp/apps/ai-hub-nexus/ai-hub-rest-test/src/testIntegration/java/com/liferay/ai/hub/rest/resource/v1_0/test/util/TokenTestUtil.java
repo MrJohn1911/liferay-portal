@@ -41,7 +41,7 @@ public class TokenTestUtil {
 				OAuth2SecureRandomGenerator.generateClientSecret(), "",
 				List.of(), "http://localhost:8080", 0, null, "AI Hub", "",
 				List.of("http://localhost:8080"), false,
-				Arrays.asList("Liferay.AI.Hub.REST.everything"), false,
+				Arrays.asList("Liferay.AI.Hub.Nexus.REST.everything"), false,
 				new ServiceContext());
 
 		ConfigurationTestUtil.saveConfiguration(
