@@ -5,7 +5,7 @@ application:
     className: AIHubRESTApplication
     name: Liferay.AI.Hub.REST
 author: Feliphe Marinho
-clientDir: ../ai-hub-rest-client/src/main/java
+clientDir: ../ai-hub-nexus-rest-client/src/main/java
 compatibilityVersion: 15
 forcePredictableOperationId: true
 generateGraphQL: false

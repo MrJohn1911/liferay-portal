@@ -25,6 +25,6 @@ dependencies {
 	testIntegrationImplementation project(":apps:site:site-api")
 	testIntegrationImplementation project(":dxp:apps:ai-hub-nexus:ai-hub-nexus-api")
 	testIntegrationImplementation project(":dxp:apps:ai-hub-nexus:ai-hub-nexus-rest-api")
-	testIntegrationImplementation project(":dxp:apps:ai-hub:ai-hub-rest-client")
+	testIntegrationImplementation project(":dxp:apps:ai-hub-nexus:ai-hub-nexus-rest-client")
 	testIntegrationImplementation project(":test:arquillian-extension-junit-bridge")
 }

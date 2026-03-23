@@ -5,8 +5,8 @@
 
 package com.liferay.ai.hub.rest.client.serdes.v1_0;
 
-import com.liferay.ai.hub.rest.client.dto.v1_0.Chat;
-import com.liferay.ai.hub.rest.client.json.BaseJSONParser;
+import com.liferay.ai.hub.nexus.rest.client.dto.v1_0.Chat;
+import com.liferay.ai.hub.nexus.rest.client.json.BaseJSONParser;
 
 import jakarta.annotation.Generated;
 

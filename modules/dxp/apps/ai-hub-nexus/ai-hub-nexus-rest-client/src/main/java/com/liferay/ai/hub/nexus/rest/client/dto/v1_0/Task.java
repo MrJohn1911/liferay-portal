@@ -5,8 +5,8 @@
 
 package com.liferay.ai.hub.rest.client.dto.v1_0;
 
-import com.liferay.ai.hub.rest.client.function.UnsafeSupplier;
-import com.liferay.ai.hub.rest.client.serdes.v1_0.TaskSerDes;
+import com.liferay.ai.hub.nexus.rest.client.function.UnsafeSupplier;
+import com.liferay.ai.hub.nexus.rest.client.serdes.v1_0.TaskSerDes;
 
 import jakarta.annotation.Generated;
 
