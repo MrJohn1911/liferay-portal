@@ -7,7 +7,7 @@ package com.liferay.ai.hub.nexus.rest.internal.resource.v1_0;
 
 import com.liferay.ai.hub.nexus.rest.dto.v1_0.AgentDefinition;
 import com.liferay.ai.hub.nexus.rest.manager.v1_0.AgentDefinitionManager;
-import com.liferay.ai.hub.nexus.rest.resource.v1_0.util.AgentDefinitionResource;
+import com.liferay.ai.hub.nexus.rest.resource.v1_0.AgentDefinitionResource;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.filter.Filter;
