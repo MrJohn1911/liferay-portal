@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.ai.hub.rest.client.resource.v1_0;
+package com.liferay.ai.hub.nexus.rest.client.resource.v1_0;
 
-import com.liferay.ai.hub.rest.client.dto.v1_0.AgentDefinition;
-import com.liferay.ai.hub.rest.client.http.HttpInvoker;
-import com.liferay.ai.hub.rest.client.pagination.Page;
-import com.liferay.ai.hub.rest.client.pagination.Pagination;
-import com.liferay.ai.hub.rest.client.problem.Problem;
-import com.liferay.ai.hub.rest.client.serdes.v1_0.AgentDefinitionSerDes;
+import com.liferay.ai.hub.nexus.rest.client.dto.v1_0.AgentDefinition;
+import com.liferay.ai.hub.nexus.rest.client.http.HttpInvoker;
+import com.liferay.ai.hub.nexus.rest.client.pagination.Page;
+import com.liferay.ai.hub.nexus.rest.client.pagination.Pagination;
+import com.liferay.ai.hub.nexus.rest.client.problem.Problem;
+import com.liferay.ai.hub.nexus.rest.client.serdes.v1_0.AgentDefinitionSerDes;
 
 import jakarta.annotation.Generated;
 
@@ -288,7 +288,7 @@ public interface AgentDefinitionResource {
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
 					_builder._port + _builder._contextPath +
-						"/o/ai-hub/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}");
+						"/o/ai-hub-nexus/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
 
@@ -416,7 +416,7 @@ public interface AgentDefinitionResource {
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
 					_builder._port + _builder._contextPath +
-						"/o/ai-hub/v1.0/agent-definitions");
+						"/o/ai-hub-nexus/v1.0/agent-definitions");
 
 			if ((_builder._login != null) && (_builder._password != null)) {
 				httpInvoker.userNameAndPassword(
@@ -529,7 +529,7 @@ public interface AgentDefinitionResource {
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
 					_builder._port + _builder._contextPath +
-						"/o/ai-hub/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}/update-active");
+						"/o/ai-hub-nexus/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}/update-active");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
 
@@ -639,7 +639,7 @@ public interface AgentDefinitionResource {
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
 					_builder._port + _builder._contextPath +
-						"/o/ai-hub/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}/copy");
+						"/o/ai-hub-nexus/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}/copy");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
 
@@ -767,7 +767,7 @@ public interface AgentDefinitionResource {
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
 					_builder._port + _builder._contextPath +
-						"/o/ai-hub/v1.0/agent-definitions/export-batch");
+						"/o/ai-hub-nexus/v1.0/agent-definitions/export-batch");
 
 			if ((_builder._login != null) && (_builder._password != null)) {
 				httpInvoker.userNameAndPassword(

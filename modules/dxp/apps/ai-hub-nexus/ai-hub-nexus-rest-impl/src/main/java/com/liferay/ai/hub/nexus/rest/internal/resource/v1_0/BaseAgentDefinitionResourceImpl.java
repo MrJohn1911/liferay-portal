@@ -6,7 +6,7 @@
 package com.liferay.ai.hub.nexus.rest.internal.resource.v1_0;
 
 import com.liferay.ai.hub.nexus.rest.dto.v1_0.AgentDefinition;
-import com.liferay.ai.hub.nexus.rest.resource.v1_0.util.AgentDefinitionResource;
+import com.liferay.ai.hub.nexus.rest.resource.v1_0.AgentDefinitionResource;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
 import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
@@ -70,7 +70,7 @@ public abstract class BaseAgentDefinitionResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'DELETE' 'http://localhost:8080/o/ai-hub/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}'  -u 'test@liferay.com:test'
+	 * curl -X 'DELETE' 'http://localhost:8080/o/ai-hub-nexus/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -102,7 +102,7 @@ public abstract class BaseAgentDefinitionResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'GET' 'http://localhost:8080/o/ai-hub/v1.0/agent-definitions'  -u 'test@liferay.com:test'
+	 * curl -X 'GET' 'http://localhost:8080/o/ai-hub-nexus/v1.0/agent-definitions'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -154,7 +154,7 @@ public abstract class BaseAgentDefinitionResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'PATCH' 'http://localhost:8080/o/ai-hub/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}/update-active'  -u 'test@liferay.com:test'
+	 * curl -X 'PATCH' 'http://localhost:8080/o/ai-hub-nexus/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}/update-active'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -197,7 +197,7 @@ public abstract class BaseAgentDefinitionResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'POST' 'http://localhost:8080/o/ai-hub/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}/copy'  -u 'test@liferay.com:test'
+	 * curl -X 'POST' 'http://localhost:8080/o/ai-hub-nexus/v1.0/agent-definitions/by-external-reference-code/{externalReferenceCode}/copy'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -231,7 +231,7 @@ public abstract class BaseAgentDefinitionResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'POST' 'http://localhost:8080/o/ai-hub/v1.0/agent-definitions/export-batch'  -u 'test@liferay.com:test'
+	 * curl -X 'POST' 'http://localhost:8080/o/ai-hub-nexus/v1.0/agent-definitions/export-batch'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -527,7 +527,7 @@ public abstract class BaseAgentDefinitionResourceImpl
 	}
 
 	protected String getApplicationPath() {
-		return "ai-hub";
+		return "ai-hub-nexus";
 	}
 
 	public void setVulcanBatchEngineExportTaskResource(

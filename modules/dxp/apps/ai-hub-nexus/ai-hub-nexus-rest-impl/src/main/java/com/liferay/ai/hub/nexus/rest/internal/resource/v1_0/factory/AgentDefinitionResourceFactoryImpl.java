@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.ai.hub.rest.internal.resource.v1_0.factory;
+package com.liferay.ai.hub.nexus.rest.internal.resource.v1_0.factory;
 
-import com.liferay.ai.hub.rest.internal.security.permission.LiberalPermissionChecker;
-import com.liferay.ai.hub.rest.resource.v1_0.AgentDefinitionResource;
+import com.liferay.ai.hub.nexus.rest.internal.security.permission.LiberalPermissionChecker;
+import com.liferay.ai.hub.nexus.rest.resource.v1_0.AgentDefinitionResource;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.filter.Filter;
@@ -55,7 +55,7 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @generated
  */
 @Component(
-	property = "resource.locator.key=/ai-hub/v1.0/AgentDefinition",
+	property = "resource.locator.key=/ai-hub-nexus/v1.0/AgentDefinition",
 	service = AgentDefinitionResource.Factory.class
 )
 @Generated("")

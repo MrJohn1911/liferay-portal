@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.ai.hub.rest.client.serdes.v1_0;
+package com.liferay.ai.hub.nexus.rest.client.serdes.v1_0;
 
 import com.liferay.ai.hub.nexus.rest.client.dto.v1_0.Chat;
 import com.liferay.ai.hub.nexus.rest.client.json.BaseJSONParser;

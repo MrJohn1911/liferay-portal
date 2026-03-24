@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.ai.hub.rest.client.resource.v1_0;
+package com.liferay.ai.hub.nexus.rest.client.resource.v1_0;
 
-import com.liferay.ai.hub.rest.client.http.HttpInvoker;
-import com.liferay.ai.hub.rest.client.problem.Problem;
+import com.liferay.ai.hub.nexus.rest.client.http.HttpInvoker;
+import com.liferay.ai.hub.nexus.rest.client.problem.Problem;
 
 import jakarta.annotation.Generated;
 
@@ -239,7 +239,7 @@ public interface ChatResource {
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
 					_builder._port + _builder._contextPath +
-						"/o/ai-hub/v1.0/chats/subscribe");
+						"/o/ai-hub-nexus/v1.0/chats/subscribe");
 
 			if ((_builder._login != null) && (_builder._password != null)) {
 				httpInvoker.userNameAndPassword(

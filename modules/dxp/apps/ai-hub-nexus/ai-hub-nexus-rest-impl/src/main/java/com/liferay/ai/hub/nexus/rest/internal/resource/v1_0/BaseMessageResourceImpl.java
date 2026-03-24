@@ -6,7 +6,7 @@
 package com.liferay.ai.hub.nexus.rest.internal.resource.v1_0;
 
 import com.liferay.ai.hub.nexus.rest.dto.v1_0.Message;
-import com.liferay.ai.hub.nexus.rest.resource.v1_0.util.MessageResource;
+import com.liferay.ai.hub.nexus.rest.resource.v1_0.MessageResource;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -44,7 +44,7 @@ public abstract class BaseMessageResourceImpl implements MessageResource {
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'POST' 'http://localhost:8080/o/ai-hub/v1.0/chats/by-external-reference-code/{externalReferenceCode}/messages' -d $'{"context": ___, "text": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
+	 * curl -X 'POST' 'http://localhost:8080/o/ai-hub-nexus/v1.0/chats/by-external-reference-code/{externalReferenceCode}/messages' -d $'{"context": ___, "text": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -146,7 +146,7 @@ public abstract class BaseMessageResourceImpl implements MessageResource {
 	}
 
 	protected String getApplicationPath() {
-		return "ai-hub";
+		return "ai-hub-nexus";
 	}
 
 	protected Map<String, String> addAction(

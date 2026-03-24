@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.ai.hub.rest.resource.v1_0;
+package com.liferay.ai.hub.nexus.rest.resource.v1_0;
 
-import com.liferay.ai.hub.rest.dto.v1_0.Task;
+import com.liferay.ai.hub.nexus.rest.dto.v1_0.Task;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
@@ -35,7 +35,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * To access this resource, run:
  *
- *     curl -u your@email.com:yourpassword -D - http://localhost:8080/o/ai-hub/v1.0
+ *     curl -u your@email.com:yourpassword -D - http://localhost:8080/o/ai-hub-nexus/v1.0
  *
  * @author Feliphe Marinho
  * @generated

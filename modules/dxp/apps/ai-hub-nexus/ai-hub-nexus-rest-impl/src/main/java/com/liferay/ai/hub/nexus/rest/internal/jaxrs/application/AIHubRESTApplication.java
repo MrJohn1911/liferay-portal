@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.ai.hub.rest.internal.jaxrs.application;
+package com.liferay.ai.hub.nexus.rest.internal.jaxrs.application;
 
 import jakarta.annotation.Generated;
 
@@ -17,9 +17,9 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(
 	property = {
-		"liferay.jackson=false", "osgi.jaxrs.application.base=/ai-hub",
+		"liferay.jackson=false", "osgi.jaxrs.application.base=/ai-hub-nexus",
 		"osgi.jaxrs.extension.select=(osgi.jaxrs.name=Liferay.Vulcan)",
-		"osgi.jaxrs.name=Liferay.AI.Hub.REST"
+		"osgi.jaxrs.name=Liferay.AI.Hub.Nexus.REST"
 	},
 	service = Application.class
 )
