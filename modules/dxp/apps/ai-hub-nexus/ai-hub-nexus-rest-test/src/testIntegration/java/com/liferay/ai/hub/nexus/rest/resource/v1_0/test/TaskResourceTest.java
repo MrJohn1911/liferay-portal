@@ -336,7 +336,7 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			).put(
 				"type", type
 			).toString(),
-			"ai-hub/v1.0/tasks",
+			"ai-hub-nexus/v1.0/tasks",
 			HashMapBuilder.put(
 				"Authorization",
 				"Bearer " + tokenJSONObject.getString("accessToken")
@@ -356,7 +356,7 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			).put(
 				"type", "Workflow Definition"
 			).toString(),
-			"ai-hub/v1.0/tasks", Http.Method.POST);
+			"ai-hub-nexus/v1.0/tasks", Http.Method.POST);
 
 		WorkflowInstance workflowInstance =
 			_workflowInstanceManager.getWorkflowInstance(
@@ -384,7 +384,7 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			).put(
 				"type", "Workflow Definition"
 			).toString(),
-			"ai-hub/v1.0/tasks", Http.Method.POST);
+			"ai-hub-nexus/v1.0/tasks", Http.Method.POST);
 
 		workflowInstance = _workflowInstanceManager.getWorkflowInstance(
 			TestPropsValues.getCompanyId(),
@@ -407,7 +407,7 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			).put(
 				"type", "AI Decision Node With Tool Workflow Definition"
 			).toString(),
-			"ai-hub/v1.0/tasks", Http.Method.POST);
+			"ai-hub-nexus/v1.0/tasks", Http.Method.POST);
 
 		IdempotentRetryAssert.retryAssert(
 			5, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
@@ -678,7 +678,7 @@ public class TaskResourceTest extends BaseTaskResourceTestCase {
 			).put(
 				"type", "LLM Node With Tool Workflow Definition"
 			).toString(),
-			"ai-hub/v1.0/tasks", Http.Method.POST);
+			"ai-hub-nexus/v1.0/tasks", Http.Method.POST);
 
 		Assert.assertTrue(countDownLatch.await(10, TimeUnit.SECONDS));
 

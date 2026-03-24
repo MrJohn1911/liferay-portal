@@ -6,7 +6,7 @@
 import {EventSource} from 'eventsource';
 import {fetch} from 'frontend-js-web';
 
-const AI_HUB_ENDPOINT = '/o/ai-hub/v1.0';
+const AI_HUB_ENDPOINT = '/o/ai-hub-nexus/v1.0';
 
 export async function createEventSource() {
 	const token = await postToken();

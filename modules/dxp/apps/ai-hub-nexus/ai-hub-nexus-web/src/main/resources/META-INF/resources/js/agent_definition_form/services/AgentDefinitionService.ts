@@ -8,7 +8,7 @@ import {fetch} from 'frontend-js-web';
 import {AgentDefinition} from '../types/AgentDefinition';
 
 const AGENT_DEFINITION_BASE_URI =
-	'/o/ai-hub/agent-definitions/by-external-reference-code/';
+	'/o/ai-hub-nexus/agent-definitions/by-external-reference-code/';
 
 async function getAgentDefinition(externalReferenceCode: string) {
 	const response = await fetch(

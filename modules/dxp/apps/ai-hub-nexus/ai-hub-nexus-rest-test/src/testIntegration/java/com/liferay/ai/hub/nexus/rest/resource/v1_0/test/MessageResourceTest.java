@@ -172,8 +172,8 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 			JSONUtil.put(
 				"text", inputText
 			).toString(),
-			"ai-hub/v1.0/chats/by-external-reference-code/" + sseEventSinkKey +
-				"/messages",
+			"ai-hub-nexus/v1.0/chats/by-external-reference-code/" +
+				sseEventSinkKey + "/messages",
 			HashMapBuilder.put(
 				"Authorization",
 				"Bearer " + tokenJSONObject.getString("accessToken")
