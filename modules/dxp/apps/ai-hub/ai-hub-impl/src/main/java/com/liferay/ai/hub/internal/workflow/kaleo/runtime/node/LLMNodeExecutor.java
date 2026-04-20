@@ -5,16 +5,34 @@
 
 package com.liferay.ai.hub.internal.workflow.kaleo.runtime.node;
 
+import com.google.cloud.modelarmor.v1.DataItem;
+import com.google.cloud.modelarmor.v1.FilterMatchState;
+import com.google.cloud.modelarmor.v1.ModelArmorClient;
+import com.google.cloud.modelarmor.v1.ModelArmorSettings;
+import com.google.cloud.modelarmor.v1.SanitizationResult;
+import com.google.cloud.modelarmor.v1.SanitizeModelResponseRequest;
+import com.google.cloud.modelarmor.v1.SanitizeModelResponseResponse;
+import com.google.cloud.modelarmor.v1.SanitizeUserPromptRequest;
+import com.google.cloud.modelarmor.v1.SanitizeUserPromptResponse;
+import com.google.cloud.modelarmor.v1.Template;
+
 import com.liferay.ai.hub.internal.assistant.handler.AssistantHandlerContext;
 import com.liferay.ai.hub.internal.assistant.handler.AssistantHandlerUtil;
 import com.liferay.ai.hub.internal.mcp.tool.provider.MCPToolProviderUtil;
 import com.liferay.ai.hub.internal.model.VertexAiGeminiStreamingChatModelUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.KaleoLogUtil;
+import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.ModelArmorTemplateUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.PromptUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.RetrievalAugmentorUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.ToolsUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.VariablesUtil;
 import com.liferay.ai.hub.rest.resource.v1_0.util.SseUtil;
+import com.liferay.dynamic.data.mapping.expression.CreateExpressionRequest;
+import com.liferay.dynamic.data.mapping.expression.DDMExpression;
+import com.liferay.dynamic.data.mapping.expression.DDMExpressionFactory;
+import com.liferay.dynamic.data.mapping.expression.DDMExpressionFieldAccessor;
+import com.liferay.dynamic.data.mapping.expression.GetFieldPropertyRequest;
+import com.liferay.dynamic.data.mapping.expression.GetFieldPropertyResponse;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.rest.manager.v1_0.ObjectEntryManager;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -45,12 +63,19 @@ import com.liferay.portal.workflow.kaleo.runtime.node.NodeExecutor;
 import com.liferay.portal.workflow.kaleo.service.KaleoNodeSettingLocalService;
 
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.guardrail.InputGuardrail;
+import dev.langchain4j.guardrail.InputGuardrailResult;
+import dev.langchain4j.guardrail.OutputGuardrail;
+import dev.langchain4j.guardrail.OutputGuardrailResult;
 import dev.langchain4j.invocation.InvocationParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiStreamingChatModel;
 
+import java.io.IOException;
 import java.io.Serializable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +94,228 @@ public class LLMNodeExecutor extends BaseNodeExecutor {
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.LLM;
+	}
+
+	public static class MessageDDMExpressionFieldAccessor
+		implements DDMExpressionFieldAccessor {
+
+		public MessageDDMExpressionFieldAccessor(String message) {
+			_message = message;
+		}
+
+		@Override
+		public GetFieldPropertyResponse getFieldProperty(
+			GetFieldPropertyRequest getFieldPropertyRequest) {
+
+			GetFieldPropertyResponse.Builder builder =
+				GetFieldPropertyResponse.Builder.newBuilder(
+					isField(getFieldPropertyRequest.getField()) ? _message :
+						null);
+
+			return builder.build();
+		}
+
+		@Override
+		public boolean isField(String parameter) {
+			return parameter.equals("message");
+		}
+
+		private final String _message;
+
+	}
+
+	public class DDMExpressionInputGuardrail implements InputGuardrail {
+
+		public DDMExpressionInputGuardrail(String expression) {
+			_expression = expression;
+		}
+
+		@Override
+		public InputGuardrailResult validate(UserMessage userMessage) {
+			try {
+				DDMExpression<Boolean> ddmExpression =
+					_ddmExpressionFactory.createExpression(
+						CreateExpressionRequest.Builder.newBuilder(
+							_expression
+						).withDDMExpressionFieldAccessor(
+							new MessageDDMExpressionFieldAccessor(
+								userMessage.singleText())
+						).build());
+
+				if (ddmExpression.evaluate()) {
+					return fatal(
+						"Input rejected: Blocked by guardrail expression.");
+				}
+
+				return success();
+			}
+			catch (Exception exception) {
+				_log.error(exception);
+
+				return fatal(
+					"Input rejected: Guardrail expression evaluation failed.");
+			}
+		}
+
+		private final String _expression;
+
+	}
+
+	public class DDMExpressionOutputGuardrail implements OutputGuardrail {
+
+		public DDMExpressionOutputGuardrail(String expression) {
+			_expression = expression;
+		}
+
+		@Override
+		public OutputGuardrailResult validate(AiMessage aiMessage) {
+			try {
+				DDMExpression<Boolean> ddmExpression =
+					_ddmExpressionFactory.createExpression(
+						CreateExpressionRequest.Builder.newBuilder(
+							_expression
+						).withDDMExpressionFieldAccessor(
+							new MessageDDMExpressionFieldAccessor(
+								aiMessage.text())
+						).build());
+
+				if (ddmExpression.evaluate()) {
+					return fatal(
+						"Response blocked: Blocked by guardrail expression.");
+				}
+
+				return success();
+			}
+			catch (Exception exception) {
+				_log.error(exception);
+
+				return fatal(
+					"Response blocked: Guardrail expression evaluation " +
+						"failed.");
+			}
+		}
+
+		private final String _expression;
+
+	}
+
+	public class ModelArmorInputGuardrail implements InputGuardrail {
+
+		public ModelArmorInputGuardrail(String templateName) {
+			_templateName = templateName;
+		}
+
+		@Override
+		public InputGuardrailResult validate(UserMessage userMessage) {
+			try (ModelArmorClient modelArmorClient = ModelArmorClient.create(
+					ModelArmorSettings.newBuilder(
+					).setEndpoint(
+						"modelarmor.europe-southwest1.rep.googleapis.com:443"
+					).build())) {
+
+				Template template = ModelArmorTemplateUtil.getOrCreate(
+					modelArmorClient, _templateName);
+
+				if (template == null) {
+					return success();
+				}
+
+				DataItem promptData = DataItem.newBuilder(
+				).setText(
+					userMessage.singleText()
+				).build();
+
+				SanitizeUserPromptRequest request =
+					SanitizeUserPromptRequest.newBuilder(
+					).setName(
+						template.getName()
+					).setUserPromptData(
+						promptData
+					).build();
+
+				SanitizeUserPromptResponse response =
+					modelArmorClient.sanitizeUserPrompt(request);
+
+				SanitizationResult sanitizationResult =
+					response.getSanitizationResult();
+
+				if (sanitizationResult.getFilterMatchState() ==
+						FilterMatchState.MATCH_FOUND) {
+
+					return fatal(
+						"Input rejected: Security policy violation detected.");
+				}
+
+				return success();
+			}
+			catch (IOException ioException) {
+				_log.error(ioException);
+
+				return fatal(
+					"Input rejected: Security policy violation detected.");
+			}
+		}
+
+		private final String _templateName;
+
+	}
+
+	public class ModelArmorOutputGuardrail implements OutputGuardrail {
+
+		public ModelArmorOutputGuardrail(String templateName) {
+			_templateName = templateName;
+		}
+
+		@Override
+		public OutputGuardrailResult validate(AiMessage aiMessage) {
+			try (ModelArmorClient modelArmorClient = ModelArmorClient.create(
+					ModelArmorSettings.newBuilder(
+					).setEndpoint(
+						"modelarmor.europe-southwest1.rep.googleapis.com:443"
+					).build())) {
+
+				Template template = ModelArmorTemplateUtil.getOrCreate(
+					modelArmorClient, _templateName);
+
+				if (template == null) {
+					return success();
+				}
+
+				SanitizeModelResponseRequest request =
+					SanitizeModelResponseRequest.newBuilder(
+					).setName(
+						template.getName()
+					).setModelResponseData(
+						DataItem.newBuilder(
+						).setText(
+							aiMessage.text()
+						).build()
+					).build();
+
+				SanitizeModelResponseResponse response =
+					modelArmorClient.sanitizeModelResponse(request);
+
+				SanitizationResult sanitizationResult =
+					response.getSanitizationResult();
+
+				if (sanitizationResult.getFilterMatchState() ==
+						FilterMatchState.MATCH_FOUND) {
+
+					return fatal(
+						"Response blocked: Contains restricted content.");
+				}
+
+				return success();
+			}
+			catch (IOException ioException) {
+				_log.error(ioException);
+
+				return fatal("Response blocked: Contains restricted content.");
+			}
+		}
+
+		private final String _templateName;
+
 	}
 
 	@Override
@@ -130,8 +377,36 @@ public class LLMNodeExecutor extends BaseNodeExecutor {
 		String sseEventSinkKey = GetterUtil.getString(
 			workflowContext.get("sseEventSinkKey"));
 
+		List<InputGuardrail> inputGuardrails = new ArrayList<>();
+		List<OutputGuardrail> outputGuardrails = new ArrayList<>();
+
+		String templateName = "ai-hub-model-armor";
+
+		if (Validator.isNotNull(templateName)) {
+			inputGuardrails.add(new ModelArmorInputGuardrail(templateName));
+			outputGuardrails.add(new ModelArmorOutputGuardrail(templateName));
+		}
+
+		String ddmInputExpression = "contains(message, \"death\")";
+
+		if (Validator.isNotNull(ddmInputExpression)) {
+			inputGuardrails.add(
+				new DDMExpressionInputGuardrail(ddmInputExpression));
+		}
+
+		String ddmOutputExpression = "";
+
+		if (Validator.isNotNull(ddmOutputExpression)) {
+			outputGuardrails.add(
+				new DDMExpressionOutputGuardrail(ddmOutputExpression));
+		}
+
 		AssistantHandlerUtil.handle(
 			AssistantHandlerContext.builder(
+			).inputGuardrails(
+				inputGuardrails
+			).outputGuardrails(
+				outputGuardrails
 			).invocationParameters(
 				InvocationParameters.from(
 					Map.of(
@@ -266,6 +541,9 @@ public class LLMNodeExecutor extends BaseNodeExecutor {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		LLMNodeExecutor.class);
+
+	@Reference
+	private DDMExpressionFactory _ddmExpressionFactory;
 
 	@Reference
 	private DTOConverterRegistry _dtoConverterRegistry;
