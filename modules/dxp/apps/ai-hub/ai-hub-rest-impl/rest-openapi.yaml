@@ -113,6 +113,9 @@ components:
             properties:
                 customerName:
                     type: string
+                maxTokens:
+                    format: int32
+                    type: integer
             type: object
         Site:
             properties:
