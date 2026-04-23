@@ -88,6 +88,47 @@ public class ProvisioningRequest implements Serializable {
 	@JsonIgnore
 	private Supplier<String> _customerNameSupplier;
 
+	@io.swagger.v3.oas.annotations.media.Schema
+	public Integer getMaxTokens() {
+		if (_maxTokensSupplier != null) {
+			maxTokens = _maxTokensSupplier.get();
+
+			_maxTokensSupplier = null;
+		}
+
+		return maxTokens;
+	}
+
+	public void setMaxTokens(Integer maxTokens) {
+		this.maxTokens = maxTokens;
+
+		_maxTokensSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setMaxTokens(
+		UnsafeSupplier<Integer, Exception> maxTokensUnsafeSupplier) {
+
+		_maxTokensSupplier = () -> {
+			try {
+				return maxTokensUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Integer maxTokens;
+
+	@JsonIgnore
+	private Supplier<Integer> _maxTokensSupplier;
+
 	@Override
 	public boolean equals(Object object) {
 		if (this == object) {
@@ -129,6 +170,18 @@ public class ProvisioningRequest implements Serializable {
 			sb.append(_escape(customerName));
 
 			sb.append("\"");
+		}
+
+		Integer maxTokens = getMaxTokens();
+
+		if (maxTokens != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"maxTokens\": ");
+
+			sb.append(maxTokens);
 		}
 
 		sb.append("}");
@@ -232,4 +285,4 @@ public class ProvisioningRequest implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:913423964
+// LIFERAY-REST-BUILDER-HASH:-1343836082

@@ -60,6 +60,16 @@ public class ProvisioningRequestSerDes {
 			sb.append("\"");
 		}
 
+		if (provisioningRequest.getMaxTokens() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"maxTokens\": ");
+
+			sb.append(provisioningRequest.getMaxTokens());
+		}
+
 		sb.append("}");
 
 		return sb.toString();
@@ -90,6 +100,15 @@ public class ProvisioningRequestSerDes {
 				String.valueOf(provisioningRequest.getCustomerName()));
 		}
 
+		if (provisioningRequest.getMaxTokens() == null) {
+			map.put("maxTokens", null);
+		}
+		else {
+			map.put(
+				"maxTokens",
+				String.valueOf(provisioningRequest.getMaxTokens()));
+		}
+
 		return map;
 	}
 
@@ -111,6 +130,9 @@ public class ProvisioningRequestSerDes {
 			if (Objects.equals(jsonParserFieldName, "customerName")) {
 				return false;
 			}
+			else if (Objects.equals(jsonParserFieldName, "maxTokens")) {
+				return false;
+			}
 
 			return false;
 		}
@@ -124,6 +146,12 @@ public class ProvisioningRequestSerDes {
 				if (jsonParserFieldValue != null) {
 					provisioningRequest.setCustomerName(
 						(String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "maxTokens")) {
+				if (jsonParserFieldValue != null) {
+					provisioningRequest.setMaxTokens(
+						Integer.valueOf((String)jsonParserFieldValue));
 				}
 			}
 		}
@@ -207,4 +235,4 @@ public class ProvisioningRequestSerDes {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:-743840718
+// LIFERAY-REST-BUILDER-HASH:-1139552367

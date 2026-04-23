@@ -45,7 +45,7 @@ public abstract class BaseProvisioningRequestResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'POST' 'http://localhost:8080/o/ai-hub/v1.0/provisioning' -d $'{"customerName": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
+	 * curl -X 'POST' 'http://localhost:8080/o/ai-hub/v1.0/provisioning' -d $'{"customerName": ___, "maxTokens": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.tags.Tags(
 		value = {
@@ -508,4 +508,4 @@ public abstract class BaseProvisioningRequestResourceImpl
 		LogFactoryUtil.getLog(BaseProvisioningRequestResourceImpl.class);
 
 }
-// LIFERAY-REST-BUILDER-HASH:1404985212
+// LIFERAY-REST-BUILDER-HASH:-1593796829

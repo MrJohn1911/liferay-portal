@@ -46,6 +46,27 @@ public class ProvisioningRequest implements Cloneable, Serializable {
 
 	protected String customerName;
 
+	public Integer getMaxTokens() {
+		return maxTokens;
+	}
+
+	public void setMaxTokens(Integer maxTokens) {
+		this.maxTokens = maxTokens;
+	}
+
+	public void setMaxTokens(
+		UnsafeSupplier<Integer, Exception> maxTokensUnsafeSupplier) {
+
+		try {
+			maxTokens = maxTokensUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Integer maxTokens;
+
 	@Override
 	public ProvisioningRequest clone() throws CloneNotSupportedException {
 		return (ProvisioningRequest)super.clone();
@@ -78,4 +99,4 @@ public class ProvisioningRequest implements Cloneable, Serializable {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:-932506813
+// LIFERAY-REST-BUILDER-HASH:-1863931342

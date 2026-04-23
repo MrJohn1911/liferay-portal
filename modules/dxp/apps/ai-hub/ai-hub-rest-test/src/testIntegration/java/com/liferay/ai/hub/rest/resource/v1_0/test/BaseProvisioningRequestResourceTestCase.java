@@ -278,6 +278,14 @@ public abstract class BaseProvisioningRequestResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals("maxTokens", additionalAssertFieldName)) {
+				if (provisioningRequest.getMaxTokens() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			throw new IllegalArgumentException(
 				"Invalid additional assert field name " +
 					additionalAssertFieldName);
@@ -403,6 +411,17 @@ public abstract class BaseProvisioningRequestResourceTestCase {
 				if (!Objects.deepEquals(
 						provisioningRequest1.getCustomerName(),
 						provisioningRequest2.getCustomerName())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("maxTokens", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						provisioningRequest1.getMaxTokens(),
+						provisioningRequest2.getMaxTokens())) {
 
 					return false;
 				}
@@ -564,6 +583,12 @@ public abstract class BaseProvisioningRequestResourceTestCase {
 			return sb.toString();
 		}
 
+		if (entityFieldName.equals("maxTokens")) {
+			sb.append(String.valueOf(provisioningRequest.getMaxTokens()));
+
+			return sb.toString();
+		}
+
 		throw new IllegalArgumentException(
 			"Invalid entity field " + entityFieldName);
 	}
@@ -611,6 +636,7 @@ public abstract class BaseProvisioningRequestResourceTestCase {
 			{
 				customerName = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
+				maxTokens = RandomTestUtil.randomInt();
 			}
 		};
 	}
@@ -840,4 +866,4 @@ public abstract class BaseProvisioningRequestResourceTestCase {
 		_provisioningRequestResource;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1797623067
+// LIFERAY-REST-BUILDER-HASH:35283140
