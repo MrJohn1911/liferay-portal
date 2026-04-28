@@ -1,0 +1,44 @@
+.model-armor-template-form {
+	padding: 24px 0;
+
+	&-details,
+	&-filters,
+	&-rai {
+		border: 1px solid #e7e8eb;
+		border-radius: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
+	&-header {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+		margin-top: 1rem;
+	}
+
+	&-picker {
+		background-color: #e7e7ed;
+		border-color: #e7e7ed;
+	}
+
+	&-rai-row {
+		align-items: center;
+		display: flex;
+		gap: 1.5rem;
+		margin-bottom: 1rem;
+
+		label {
+			flex: 0 0 12rem;
+			margin-bottom: 0;
+		}
+
+		.model-armor-template-form-picker {
+			flex: 1;
+		}
+	}
+
+	textarea.form-control {
+		height: auto;
+	}
+}
