@@ -10,6 +10,7 @@ import com.liferay.ai.hub.internal.assistant.handler.AssistantHandlerUtil;
 import com.liferay.ai.hub.internal.mcp.tool.provider.MCPToolProviderUtil;
 import com.liferay.ai.hub.internal.model.VertexAiGeminiUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.KaleoLogUtil;
+import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.ModelArmorGuardrailsUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.PromptUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.QuotaUtil;
 import com.liferay.ai.hub.internal.workflow.kaleo.runtime.node.util.RetrievalAugmentorUtil;
@@ -46,12 +47,15 @@ import com.liferay.portal.workflow.kaleo.runtime.node.NodeExecutor;
 import com.liferay.portal.workflow.kaleo.service.KaleoNodeSettingLocalService;
 
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.guardrail.InputGuardrail;
+import dev.langchain4j.guardrail.OutputGuardrail;
 import dev.langchain4j.invocation.InvocationParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiStreamingChatModel;
 
 import java.io.Serializable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,8 +141,19 @@ public class LLMNodeExecutor extends BaseNodeExecutor {
 		String sseEventSinkKey = GetterUtil.getString(
 			workflowContext.get("sseEventSinkKey"));
 
+		List<InputGuardrail> inputGuardrails = new ArrayList<>();
+		List<OutputGuardrail> outputGuardrails = new ArrayList<>();
+
+		ModelArmorGuardrailsUtil.populate(
+			_dtoConverterRegistry, inputGuardrails, _objectEntryManager,
+			outputGuardrails, serviceContext, workflowContext);
+
 		AssistantHandlerUtil.handle(
 			AssistantHandlerContext.builder(
+			).inputGuardrails(
+				inputGuardrails
+			).outputGuardrails(
+				outputGuardrails
 			).invocationParameters(
 				InvocationParameters.from(
 					Map.of(
