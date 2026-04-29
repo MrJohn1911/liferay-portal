@@ -20,8 +20,8 @@ dependencies {
 	compileOnly group: "com.google.http-client", name: "google-http-client", version: "1.45.3"
 	compileOnly group: "com.google.http-client", name: "google-http-client-appengine", version: "1.45.3"
 	compileOnly group: "com.google.http-client", name: "google-http-client-gson", version: "1.45.3"
-	compileOnly group: "com.google.protobuf", name: "protobuf-java", version: "3.25.5"
-	compileOnly group: "com.google.protobuf", name: "protobuf-java-util", version: "3.25.5"
+	compileOnly group: "com.google.protobuf", name: "protobuf-java", version: "4.33.2"
+	compileOnly group: "com.google.protobuf", name: "protobuf-java-util", version: "4.33.2"
 	compileOnly group: "io.opencensus", name: "opencensus-api", version: "0.31.1"
 	compileOnly group: "io.opencensus", name: "opencensus-contrib-http-util", version: "0.31.1"
 }
