@@ -5927,7 +5927,7 @@
 			</library>
 			<library>
 				<file-name>com.liferay.shared.dependencies.protobuf.jar!protobuf-java-util.jar</file-name>
-				<version>3.25.5</version>
+				<version>4.33.2</version>
 				<project-name>Protocol Buffers [Util]</project-name>
 				<project-url>https://developers.google.com/protocol-buffers/</project-url>
 				<licenses>
@@ -5939,7 +5939,7 @@
 			</library>
 			<library>
 				<file-name>com.liferay.shared.dependencies.protobuf.jar!protobuf-java.jar</file-name>
-				<version>3.25.5</version>
+				<version>4.33.2</version>
 				<project-name>Protocol Buffers [Core]</project-name>
 				<project-url>https://developers.google.com/protocol-buffers/</project-url>
 				<licenses>
