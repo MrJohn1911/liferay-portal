@@ -44,12 +44,14 @@ public class TokenTestUtil {
 				Arrays.asList("Liferay.AI.Hub.REST.everything"), false,
 				new ServiceContext());
 
-		ConfigurationTestUtil.saveConfiguration(
-			AIHubCellConfiguration.class.getName(),
+		ConfigurationTestUtil.createFactoryConfiguration(
+			AIHubCellConfiguration.class.getName() + ".scoped",
 			HashMapDictionaryBuilder.<String, Object>put(
 				"clientId", oAuth2Application.getClientId()
 			).put(
 				"clientSecret", oAuth2Application.getClientSecret()
+			).put(
+				"companyId", String.valueOf(TestPropsValues.getCompanyId())
 			).put(
 				"serviceURL", "http://localhost:8080"
 			).build());

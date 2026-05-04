@@ -134,16 +134,6 @@ public class AgentInstanceResourceTest
 
 		_originalName = PrincipalThreadLocal.getName();
 
-		ConfigurationTestUtil.saveConfiguration(
-			AIHubCellConfiguration.class.getName(),
-			HashMapDictionaryBuilder.<String, Object>put(
-				"clientId", RandomTestUtil.randomString()
-			).put(
-				"clientSecret", RandomTestUtil.randomString()
-			).put(
-				"serviceURL", "http://localhost:8080"
-			).build());
-
 		PrincipalThreadLocal.setName(TestPropsValues.getUserId());
 
 		ServiceContextThreadLocal.pushServiceContext(
@@ -274,19 +264,18 @@ public class AgentInstanceResourceTest
 				List.of(), new ArrayList<>(), "agent-instances/subscribe"));
 	}
 
-	@Ignore
 	@Override
 	@Test
 	public void testPostAgentInstance() throws Exception {
-		_testPostAgentInstance();
+//		_testPostAgentInstance();
 		_testPostAgentInstanceWithTypeAIDecisionNodeWithToolWorkflowDefinition();
-		_testPostAgentInstanceWithTypeAIDecisionNodeWorkflowDefinition();
-		_testPostAgentInstanceWithTypeFixSpellingAndGrammarWithInstruction();
-		_testPostAgentInstanceWithTypeLLMNodeWithRAGWorkflowDefinition();
-		_testPostAgentInstanceWithTypeLLMNodeWithRAGWorkflowDefinitionWithRestrictedUser();
-		_testPostAgentInstanceWithTypeLLMNodeWithToolWorkflowDefinition();
-		_testPostAgentInstanceWithTypeMakeShorter();
-		_testPostAgentInstanceWithTypePageBuilder();
+//		_testPostAgentInstanceWithTypeAIDecisionNodeWorkflowDefinition();
+//		_testPostAgentInstanceWithTypeFixSpellingAndGrammarWithInstruction();
+//		_testPostAgentInstanceWithTypeLLMNodeWithRAGWorkflowDefinition();
+//		_testPostAgentInstanceWithTypeLLMNodeWithRAGWorkflowDefinitionWithRestrictedUser();
+//		_testPostAgentInstanceWithTypeLLMNodeWithToolWorkflowDefinition();
+//		_testPostAgentInstanceWithTypeMakeShorter();
+//		_testPostAgentInstanceWithTypePageBuilder();
 	}
 
 	private static void _addAgentDefinitionObjectEntry(
