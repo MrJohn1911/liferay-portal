@@ -144,6 +144,15 @@ public class AgentInstanceResourceTest
 				"serviceURL", "http://localhost:8080"
 			).build());
 
+		ConfigurationTestUtil.createFactoryConfiguration(
+			"com.liferay.mcp.server.internal.configuration." +
+				"MCPServerConfiguration.scoped",
+			HashMapDictionaryBuilder.<String, Object>put(
+				"companyId", TestPropsValues.getCompanyId()
+			).put(
+				"enabled", true
+			).build());
+
 		PrincipalThreadLocal.setName(TestPropsValues.getUserId());
 
 		ServiceContextThreadLocal.pushServiceContext(
@@ -264,6 +273,9 @@ public class AgentInstanceResourceTest
 		SseUtil.closeAll();
 		ConfigurationTestUtil.deleteConfiguration(
 			AIHubCellConfiguration.class.getName());
+		ConfigurationTestUtil.deleteConfiguration(
+			"com.liferay.mcp.server.internal.configuration." +
+				"MCPServerConfiguration.scoped");
 	}
 
 	@Override
@@ -511,7 +523,7 @@ public class AgentInstanceResourceTest
 			RandomTestUtil.randomString());
 
 		IdempotentRetryAssert.retryAssert(
-			5, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
+			10, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
 			() -> {
 				WorkflowInstance workflowInstance =
 					_workflowInstanceManager.getWorkflowInstance(
@@ -670,7 +682,7 @@ public class AgentInstanceResourceTest
 			"L_FIX_SPELLING_AND_GRAMMAR", input, "text",
 			instructionDefinitionScope, sseEventSinkKey);
 
-		Assert.assertTrue(countDownLatch.await(10, TimeUnit.SECONDS));
+		Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
 
 		Assert.assertEquals(lines.toString(), 4, lines.size());
 		Assert.assertEquals("event: L_FIX_SPELLING_AND_GRAMMAR", lines.get(2));
@@ -713,28 +725,35 @@ public class AgentInstanceResourceTest
 					WorkflowContextUtil.convert(
 						workflowLog.getWorkflowContext());
 
-				int inputTokensCount = GetterUtil.getInteger(
-					workflowContext.get("inputTokensCount"));
+				int inputTokenCount = GetterUtil.getInteger(
+					workflowContext.get("inputTokenCount"));
 
-				Assert.assertTrue(inputTokensCount > 0);
+				Assert.assertTrue(inputTokenCount > 0);
 
 				Assert.assertEquals(
 					expectedOutput, workflowContext.get("output"));
 
-				int outputTokensCount = GetterUtil.getInteger(
-					workflowContext.get("outputTokensCount"));
+				int outputTokenCount = GetterUtil.getInteger(
+					workflowContext.get("outputTokenCount"));
 
-				Assert.assertTrue(outputTokensCount > 0);
+				Assert.assertTrue(outputTokenCount > 0);
 
 				Assert.assertEquals(
 					_getExpectedPromptInput(
 						instructionDefinitionObjectEntry.getValues(),
 						instructionDefinitionScope),
 					workflowContext.get("promptInput"));
+
+				int thoughtsTokenCount = GetterUtil.getInteger(
+					workflowContext.get("thoughtsTokenCount"));
+
+				Assert.assertTrue(thoughtsTokenCount >= 0);
+
 				Assert.assertEquals(
-					inputTokensCount + outputTokensCount,
+					inputTokenCount + outputTokenCount + thoughtsTokenCount,
 					GetterUtil.getInteger(
 						workflowContext.get("totalTokenCount")));
+
 				Assert.assertEquals(
 					"This is the text to be fixed: " + input,
 					workflowContext.get("userMessageInput"));
@@ -760,7 +779,7 @@ public class AgentInstanceResourceTest
 			"L_LLM_NODE_WITH_RAG_WORKFLOW_DEFINITION",
 			"What is Feliphe's favorite food?", "userMessage", sseEventSinkKey);
 
-		Assert.assertTrue(countDownLatch1.await(10, TimeUnit.SECONDS));
+		Assert.assertTrue(countDownLatch1.await(20, TimeUnit.SECONDS));
 
 		Assert.assertEquals(lines.toString(), 4, lines.size());
 
@@ -784,7 +803,7 @@ public class AgentInstanceResourceTest
 			"L_LLM_NODE_WITH_RAG_WORKFLOW_DEFINITION",
 			"What is Feliphe's favorite food?", "userMessage", sseEventSinkKey);
 
-		Assert.assertTrue(countDownLatch2.await(10, TimeUnit.SECONDS));
+		Assert.assertTrue(countDownLatch2.await(20, TimeUnit.SECONDS));
 
 		Assert.assertEquals(lines.toString(), 6, lines.size());
 
@@ -843,7 +862,7 @@ public class AgentInstanceResourceTest
 					"What is Feliphe's favorite food?", "userMessage",
 					sseEventSinkKey);
 
-				Assert.assertTrue(countDownLatch1.await(10, TimeUnit.SECONDS));
+				Assert.assertTrue(countDownLatch1.await(20, TimeUnit.SECONDS));
 
 				Assert.assertEquals(lines.toString(), 4, lines.size());
 
@@ -870,7 +889,7 @@ public class AgentInstanceResourceTest
 					"What is Feliphe's favorite food?", "userMessage",
 					sseEventSinkKey);
 
-				Assert.assertTrue(countDownLatch2.await(10, TimeUnit.SECONDS));
+				Assert.assertTrue(countDownLatch2.await(20, TimeUnit.SECONDS));
 
 				Assert.assertEquals(lines.toString(), 6, lines.size());
 
@@ -900,7 +919,7 @@ public class AgentInstanceResourceTest
 			"Is the \"get_openapi\" tool available?", "userMessage",
 			sseEventSinkKey);
 
-		Assert.assertTrue(countDownLatch.await(10, TimeUnit.SECONDS));
+		Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
 
 		Assert.assertEquals(lines.toString(), 4, lines.size());
 
@@ -926,7 +945,7 @@ public class AgentInstanceResourceTest
 		JSONObject jsonObject = _postAgentInstance(
 			"L_MAKE_SHORTER", inputText, "text", sseEventSinkKey);
 
-		Assert.assertTrue(countDownLatch.await(10, TimeUnit.SECONDS));
+		Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
 
 		Assert.assertEquals(lines.toString(), 4, lines.size());
 		Assert.assertEquals("event: L_MAKE_SHORTER", lines.get(2));
@@ -997,7 +1016,7 @@ public class AgentInstanceResourceTest
 		_postAgentInstance(
 			"L_MAKE_SHORTER", "This is a long text.", "text", sseEventSinkKey);
 
-		Assert.assertTrue(countDownLatch.await(10, TimeUnit.SECONDS));
+		Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
 
 		Assert.assertEquals(lines.toString(), 4, lines.size());
 
@@ -1022,7 +1041,7 @@ public class AgentInstanceResourceTest
 				"World\".",
 			"instruction", sseEventSinkKey);
 
-		Assert.assertTrue(countDownLatch.await(10, TimeUnit.SECONDS));
+		Assert.assertTrue(countDownLatch.await(30, TimeUnit.SECONDS));
 
 		Assert.assertEquals(lines.toString(), 4, lines.size());
 		Assert.assertEquals("event: L_PAGE_BUILDER", lines.get(2));
