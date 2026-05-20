@@ -13,6 +13,7 @@ import React, {useCallback, useEffect} from 'react';
 
 import './ModelArmorTemplateForm.scss';
 import Toolbar from '../components/ToolBar';
+import {DEFAULT_MODEL_ARMOR_TEMPLATE} from './constants';
 import DetailsPanel from './DetailsPanel';
 import DetectionsPanel from './DetectionsPanel';
 import ResponsibleAIPanel from './ResponsibleAIPanel';
@@ -20,11 +21,7 @@ import {
 	getModelArmorTemplate,
 	putModelArmorTemplate,
 } from './services/ModelArmorTemplateService';
-import {
-	FilterLevel,
-	ModelArmorTemplate,
-	RAILevel,
-} from './types/ModelArmorTemplate';
+import {ModelArmorTemplate} from './types/ModelArmorTemplate';
 
 const FORM_ID = 'modelArmorTemplateForm';
 
@@ -37,28 +34,6 @@ export default function ModelArmorTemplateForm({
 	backURL: string;
 	externalReferenceCode: string;
 }) {
-	const getDefaults = useCallback(
-		(): ModelArmorTemplate => ({
-			active: true,
-			description: '',
-			externalReferenceCode: '',
-			guardrailType: 'input',
-			maliciousUriFilterEnabled: false,
-			multiLanguageDetectionEnabled: false,
-			piAndJailbreakConfidenceLevel: 'mediumAndAbove',
-			piAndJailbreakFilterEnabled: false,
-			r_accountToAIHubModelArmorTemplates_accountEntryERC:
-				accountEntryExternalReferenceCode,
-			raiDangerousLevel: 'none',
-			raiHarassmentLevel: 'none',
-			raiHateSpeechLevel: 'none',
-			raiSexuallyExplicitLevel: 'none',
-			sdpFilterEnabled: false,
-			title: '',
-		}),
-		[accountEntryExternalReferenceCode]
-	);
-
 	const {
 		errors,
 		handleChange,
@@ -68,7 +43,11 @@ export default function ModelArmorTemplateForm({
 		setValues,
 		values,
 	} = useFormik<ModelArmorTemplate>({
-		initialValues: getDefaults(),
+		initialValues: {
+			...DEFAULT_MODEL_ARMOR_TEMPLATE,
+			r_accountToAIHubModelArmorTemplates_accountEntryERC:
+				accountEntryExternalReferenceCode,
+		},
 		onSubmit: async (formValues) => {
 			try {
 				const response = await putModelArmorTemplate(formValues);
@@ -130,62 +109,17 @@ export default function ModelArmorTemplateForm({
 	);
 
 	useEffect(() => {
-		async function fetchFormData() {
-			if (!externalReferenceCode) {
-				return;
-			}
+		if (!externalReferenceCode) {
+			return;
+		}
 
+		async function fetchFormData() {
 			try {
-				const modelArmorTemplate = await getModelArmorTemplate(
+				const template = await getModelArmorTemplate(
 					externalReferenceCode
 				);
 
-				const pickKey = (value: any, fallback: string) =>
-					value?.key || value || fallback;
-
-				setValues({
-					active: modelArmorTemplate.active,
-					description: modelArmorTemplate.description || '',
-					externalReferenceCode:
-						modelArmorTemplate.externalReferenceCode,
-					guardrailType: pickKey(
-						modelArmorTemplate.guardrailType,
-						'input'
-					),
-					maliciousUriFilterEnabled:
-						modelArmorTemplate.maliciousUriFilterEnabled ?? false,
-					multiLanguageDetectionEnabled:
-						modelArmorTemplate.multiLanguageDetectionEnabled ??
-						false,
-					piAndJailbreakConfidenceLevel: pickKey(
-						modelArmorTemplate.piAndJailbreakConfidenceLevel,
-						'mediumAndAbove'
-					) as FilterLevel,
-					piAndJailbreakFilterEnabled:
-						modelArmorTemplate.piAndJailbreakFilterEnabled ?? false,
-					r_accountToAIHubModelArmorTemplates_accountEntryERC:
-						modelArmorTemplate.r_accountToAIHubModelArmorTemplates_accountEntryERC ||
-						accountEntryExternalReferenceCode,
-					raiDangerousLevel: pickKey(
-						modelArmorTemplate.raiDangerousLevel,
-						'none'
-					) as RAILevel,
-					raiHarassmentLevel: pickKey(
-						modelArmorTemplate.raiHarassmentLevel,
-						'none'
-					) as RAILevel,
-					raiHateSpeechLevel: pickKey(
-						modelArmorTemplate.raiHateSpeechLevel,
-						'none'
-					) as RAILevel,
-					raiSexuallyExplicitLevel: pickKey(
-						modelArmorTemplate.raiSexuallyExplicitLevel,
-						'none'
-					) as RAILevel,
-					sdpFilterEnabled:
-						modelArmorTemplate.sdpFilterEnabled ?? false,
-					title: modelArmorTemplate.title || '',
-				});
+				setValues(template);
 			}
 			catch (error) {
 				openToast({
@@ -198,7 +132,7 @@ export default function ModelArmorTemplateForm({
 		}
 
 		fetchFormData();
-	}, [accountEntryExternalReferenceCode, externalReferenceCode, setValues]);
+	}, [externalReferenceCode, setValues]);
 
 	return (
 		<>
