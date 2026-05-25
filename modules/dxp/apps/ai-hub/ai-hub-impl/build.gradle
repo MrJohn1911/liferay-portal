@@ -57,7 +57,6 @@ dependencies {
 	compileInclude group: "io.perfmark", name: "perfmark-api", version: "0.27.0"
 	compileInclude group: "org.apache.httpcomponents", name: "httpclient", version: "4.5.13"
 	compileInclude group: "org.apache.httpcomponents", name: "httpcore", version: "4.4.14"
-	compileInclude group: "org.apache.opennlp", name: "opennlp-tools", version: "2.5.4"
 	compileInclude group: "org.jetbrains", name: "annotations", version: "13.0"
 	compileInclude group: "org.jetbrains.kotlin", name: "kotlin-stdlib", version: "1.8.21"
 	compileInclude group: "org.jetbrains.kotlin", name: "kotlin-stdlib-common", version: "1.8.21"

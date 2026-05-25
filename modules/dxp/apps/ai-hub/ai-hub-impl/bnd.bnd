@@ -76,6 +76,8 @@ Import-Package:\
 	\
 	android.*;resolution:=optional,\
 	\
+	opennlp.*;resolution:=optional,\
+	\
 	*
 -dsannotations-options: inherit
 -fixupmessages:\
