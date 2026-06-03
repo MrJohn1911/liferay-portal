@@ -283,6 +283,68 @@ describe('useAgentDefinitionForm', () => {
 	});
 
 	describe('submit', () => {
+		it('posts and does not put when the externalReferenceCode prop is empty', async () => {
+			mockPostAgentDefinition.mockResolvedValueOnce({
+				externalReferenceCode: 'AGENT_X',
+				status: {label: 'approved'},
+			});
+
+			const {result} = renderAgentHook({externalReferenceCode: ''});
+
+			await fillRequiredFields(result);
+
+			await act(async () => {
+				result.current.handleSubmit();
+			});
+
+			await waitFor(() => {
+				expect(mockPostAgentDefinition).toHaveBeenCalledWith(
+					expect.objectContaining({externalReferenceCode: 'AGENT_X'})
+				);
+			});
+
+			expect(mockPutAgentDefinition).not.toHaveBeenCalled();
+		});
+
+		it('puts and does not post when the externalReferenceCode prop is set', async () => {
+			mockGetAgentDefinition.mockResolvedValueOnce({
+				agentDefinitionsToContentRetrievers: [],
+				aiHubAgentDefinitionsToAIHubMATemplates: [],
+				description: 'desc',
+				externalReferenceCode: 'AGENT_X',
+				inputVariables: 'a,b',
+				outputVariable: 'out',
+				title_i18n: {en_US: 'My Agent'},
+				workflowDefinitionName: 'wf-1',
+			});
+			mockPutAgentDefinition.mockResolvedValueOnce({
+				externalReferenceCode: 'AGENT_X',
+				status: {label: 'approved'},
+			});
+
+			const {result} = renderAgentHook({
+				externalReferenceCode: 'AGENT_X',
+			});
+
+			await waitFor(() => {
+				expect(result.current.values.externalReferenceCode).toBe(
+					'AGENT_X'
+				);
+			});
+
+			await act(async () => {
+				result.current.handleSubmit();
+			});
+
+			await waitFor(() => {
+				expect(mockPutAgentDefinition).toHaveBeenCalledWith(
+					expect.objectContaining({externalReferenceCode: 'AGENT_X'})
+				);
+			});
+
+			expect(mockPostAgentDefinition).not.toHaveBeenCalled();
+		});
+
 		it('issues DELETE requests for removed relationships', async () => {
 			mockGetAgentDefinition.mockResolvedValueOnce({
 				agentDefinitionsToContentRetrievers: [
