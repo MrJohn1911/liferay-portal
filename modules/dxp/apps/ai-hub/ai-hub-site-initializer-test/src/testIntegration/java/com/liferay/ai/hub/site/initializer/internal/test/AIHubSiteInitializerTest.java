@@ -140,6 +140,7 @@ public class AIHubSiteInitializerTest {
 			"L_AI_HUB_AGENT_DEFINITION", "L_AI_HUB_AGENT_ADMINISTRATOR",
 			"ADD_OBJECT_ENTRY");
 		_assertLayoutExists("/account-management");
+		_assertLayoutExists("/guardrails");
 		_assertLayoutUtilityPageEntryExists(
 			"L_AI_HUB_CREATE_ACCOUNT_UTILITY_PAGE",
 			LayoutUtilityPageEntryConstants.TYPE_CREATE_ACCOUNT);
