@@ -44,6 +44,9 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowInstanceManager;
+import com.liferay.portal.test.log.LogCapture;
+import com.liferay.portal.test.log.LogEntry;
+import com.liferay.portal.test.log.LoggerTestUtil;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.site.initializer.SiteInitializer;
@@ -145,8 +148,8 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 							"projectId", TestPropsValues.VERTEX_AI_PROJECT_ID
 						).build())) {
 
-			CountDownLatch countDownLatch1 = new CountDownLatch(4);
-			CountDownLatch countDownLatch2 = new CountDownLatch(6);
+			CountDownLatch countDownLatch1 = new CountDownLatch(6);
+			CountDownLatch countDownLatch2 = new CountDownLatch(8);
 			List<String> lines = new ArrayList<>();
 
 			String sseEventSinkKey = SseEventSourceTestUtil.open(
@@ -158,16 +161,14 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 			JSONObject jsonObject = _postChatByExternalReferenceCodeMessage(
 				"Expand the following text: " + text, sseEventSinkKey);
 
+			Assert.assertTrue(countDownLatch1.await(20, TimeUnit.SECONDS));
+
 			Assert.assertEquals(
 				"Expand the following text: " + text,
 				jsonObject.getString("text"));
-
-			Assert.assertEquals(lines.toString(), 2, lines.size());
-
-			Assert.assertTrue(countDownLatch1.await(10, TimeUnit.SECONDS));
-
-			Assert.assertEquals(lines.toString(), 4, lines.size());
-			Assert.assertEquals("event: Chat Message Sent", lines.get(2));
+			Assert.assertEquals(lines.toString(), 6, lines.size());
+			Assert.assertEquals("event: makeLonger", lines.get(2));
+			Assert.assertEquals("event: Chat Message Sent", lines.get(4));
 
 			String expandedText = lines.get(3);
 
@@ -181,92 +182,42 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 				"What was the first message that I sent in this chat?",
 				jsonObject.getString("text"));
 
-			Assert.assertEquals(lines.toString(), 4, lines.size());
+			Assert.assertEquals(lines.toString(), 6, lines.size());
 
 			Assert.assertTrue(countDownLatch2.await(10, TimeUnit.SECONDS));
 
-			Assert.assertEquals(lines.toString(), 6, lines.size());
-			Assert.assertEquals("event: Chat Message Sent", lines.get(2));
+			Assert.assertEquals(lines.toString(), 8, lines.size());
+			Assert.assertEquals("event: Chat Message Sent", lines.get(6));
 
-			String firstMessageSent = lines.get(5);
+			String firstMessageSent = lines.get(7);
 
-			Assert.assertTrue(
+			Assert.assertFalse(
 				firstMessageSent, firstMessageSent.contains(text));
 		}
 	}
 
 	@Ignore
 	@Test
-	public void testPostChatByExternalReferenceCodeMessageWithUnassociatedAgentDefinition()
+	public void testPostChatByExternalReferenceCodeMessageWithMultipleAgentDefinitions()
 		throws Exception {
-
-		ObjectDefinition chatbotObjectDefinition =
-			_objectDefinitionLocalService.
-				getObjectDefinitionByExternalReferenceCode(
-					"L_AI_HUB_CHATBOT", TestPropsValues.getCompanyId());
 
 		String chatbotExternalReferenceCode = RandomTestUtil.randomString();
 
-		ObjectEntry chatbotObjectEntry =
-			_objectEntryLocalService.addObjectEntry(
-				0, TestPropsValues.getUserId(),
-				chatbotObjectDefinition.getObjectDefinitionId(), 0,
-				LocaleUtil.toLanguageId(LocaleUtil.getDefault()),
-				HashMapBuilder.<String, Serializable>put(
-					"externalReferenceCode", chatbotExternalReferenceCode
-				).put(
-					"r_accountToAIHubChatbots_accountEntryId",
-					_accountEntry.getAccountEntryId()
-				).put(
-					"title_i18n",
-					(Serializable)HashMapBuilder.put(
-						LocaleUtil.toLanguageId(LocaleUtil.getDefault()),
-						RandomTestUtil.randomString()
-					).build()
-				).build(),
-				ServiceContextTestUtil.getServiceContext(
-					TestPropsValues.getGroupId(), TestPropsValues.getUserId()));
+		ObjectEntry chatbotObjectEntry = _addChatbotObjectEntry(
+			chatbotExternalReferenceCode);
 
-		ObjectDefinition agentDefinitionObjectDefinition =
-			_objectDefinitionLocalService.
-				getObjectDefinitionByExternalReferenceCode(
-					"L_AI_HUB_AGENT_DEFINITION",
-					TestPropsValues.getCompanyId());
+		_relateAgentDefinitionToChatbot("L_MAKE_SHORTER", chatbotObjectEntry);
+		_relateAgentDefinitionToChatbot("L_MAKE_LONGER", chatbotObjectEntry);
 
-		ObjectEntry agentDefinitionObjectEntry =
-			_objectEntryLocalService.getObjectEntry(
-				"L_MAKE_SHORTER", 0L,
-				agentDefinitionObjectDefinition.getObjectDefinitionId());
+		CountDownLatch countDownLatch = new CountDownLatch(6);
+		List<String> lines = new ArrayList<>();
 
-		ObjectRelationshipTestUtil.relateObjectEntries(
-			agentDefinitionObjectEntry.getObjectEntryId(),
-			chatbotObjectEntry.getObjectEntryId(),
-			_objectRelationshipLocalService.
-				fetchObjectRelationshipByExternalReferenceCode(
-					"L_AI_HUB_AGENT_DEFINITIONS_TO_L_AI_HUB_CHATBOTS",
-					agentDefinitionObjectDefinition.getObjectDefinitionId()),
-			TestPropsValues.getUserId());
+		String sseEventSinkKey = SseEventSourceTestUtil.open(
+			List.of(countDownLatch), lines, "chats/subscribe");
 
-		try (CompanyConfigurationTemporarySwapper
-				companyConfigurationTemporarySwapper =
-					new CompanyConfigurationTemporarySwapper(
-						TestPropsValues.getCompanyId(),
-						VertexAIConfiguration.class.getName(),
-						HashMapDictionaryBuilder.<String, Object>put(
-							"location", TestPropsValues.VERTEX_AI_LOCATION
-						).put(
-							"modelName", TestPropsValues.VERTEX_AI_MODEL_NAME
-						).put(
-							"projectId", TestPropsValues.VERTEX_AI_PROJECT_ID
-						).build())) {
-
-			CountDownLatch countDownLatch1 = new CountDownLatch(4);
-			CountDownLatch countDownLatch2 = new CountDownLatch(6);
-			List<String> lines = new ArrayList<>();
-
-			String sseEventSinkKey = SseEventSourceTestUtil.open(
-				List.of(countDownLatch1, countDownLatch2), lines,
-				"chats/subscribe");
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"dev.langchain4j.agentic.supervisor.SupervisorPlanner",
+				LoggerTestUtil.INFO)) {
 
 			_postChatByExternalReferenceCodeMessage(
 				chatbotExternalReferenceCode,
@@ -274,10 +225,62 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 					"shortened by the AI model for testing purposes.",
 				sseEventSinkKey);
 
-			Assert.assertTrue(countDownLatch1.await(10, TimeUnit.SECONDS));
+			Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
 
-			Assert.assertEquals(lines.toString(), 4, lines.size());
-			Assert.assertEquals("event: Chat Message Sent", lines.get(2));
+			Assert.assertEquals(lines.toString(), 6, lines.size());
+			Assert.assertEquals("event: makeShorter", lines.get(2));
+			Assert.assertEquals("event: Chat Message Sent", lines.get(4));
+
+			List<String> messages = logCapture.getMessages();
+
+			Assert.assertTrue(
+				messages.toString(),
+				messages.stream(
+				).anyMatch(
+					message -> message.contains(
+						"Agent Invocation: AgentInvocation{agentName=" +
+							"'L_MAKE_SHORTER'")
+				));
+		}
+
+		SseUtil.closeAll();
+	}
+
+	@Ignore
+	@Test
+	public void testPostChatByExternalReferenceCodeMessageWithUnassociatedAgentDefinition()
+		throws Exception {
+
+		String chatbotExternalReferenceCode = RandomTestUtil.randomString();
+
+		ObjectEntry chatbotObjectEntry = _addChatbotObjectEntry(
+			chatbotExternalReferenceCode);
+
+		_relateAgentDefinitionToChatbot("L_MAKE_SHORTER", chatbotObjectEntry);
+
+		CountDownLatch countDownLatch1 = new CountDownLatch(6);
+		CountDownLatch countDownLatch2 = new CountDownLatch(10);
+		List<String> lines = new ArrayList<>();
+
+		String sseEventSinkKey = SseEventSourceTestUtil.open(
+			List.of(countDownLatch1, countDownLatch2), lines,
+			"chats/subscribe");
+
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"dev.langchain4j.agentic.supervisor.SupervisorPlanner",
+				LoggerTestUtil.INFO)) {
+
+			_postChatByExternalReferenceCodeMessage(
+				chatbotExternalReferenceCode,
+				"This is a long and detailed sentence that should be " +
+					"shortened by the AI model for testing purposes.",
+				sseEventSinkKey);
+
+			Assert.assertTrue(countDownLatch1.await(20, TimeUnit.SECONDS));
+
+			Assert.assertEquals(lines.toString(), 6, lines.size());
+			Assert.assertEquals("event: makeShorter", lines.get(2));
+			Assert.assertEquals("event: Chat Message Sent", lines.get(4));
 
 			ObjectDefinition objectDefinition =
 				ObjectDefinitionTestUtil.publishObjectDefinition(
@@ -316,18 +319,51 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 				chatbotExternalReferenceCode,
 				"What is Feliphe's favorite food?", sseEventSinkKey);
 
-			Assert.assertTrue(countDownLatch2.await(10, TimeUnit.SECONDS));
+			Assert.assertTrue(countDownLatch2.await(20, TimeUnit.SECONDS));
 
-			Assert.assertEquals(lines.toString(), 6, lines.size());
-			Assert.assertEquals("event: Chat Message Sent", lines.get(4));
+			Assert.assertEquals(lines.toString(), 10, lines.size());
+			Assert.assertEquals("event: Chat Message Sent", lines.get(8));
 
-			String response = StringUtil.toLowerCase(lines.get(5));
+			String response = StringUtil.toLowerCase(lines.get(9));
 
 			Assert.assertFalse(
 				response, response.contains("brazilian barbecue"));
 
-			SseUtil.closeAll();
+			List<LogEntry> logEntries = logCapture.getLogEntries();
+
+			Assert.assertTrue(logEntries.toString(), logEntries.isEmpty());
 		}
+
+		SseUtil.closeAll();
+	}
+
+	private ObjectEntry _addChatbotObjectEntry(
+			String chatbotExternalReferenceCode)
+		throws Exception {
+
+		ObjectDefinition chatbotObjectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					"L_AI_HUB_CHATBOT", TestPropsValues.getCompanyId());
+
+		return _objectEntryLocalService.addObjectEntry(
+			0, TestPropsValues.getUserId(),
+			chatbotObjectDefinition.getObjectDefinitionId(), 0,
+			LocaleUtil.toLanguageId(LocaleUtil.getDefault()),
+			HashMapBuilder.<String, Serializable>put(
+				"externalReferenceCode", chatbotExternalReferenceCode
+			).put(
+				"r_accountToAIHubChatbots_accountEntryId",
+				_accountEntry.getAccountEntryId()
+			).put(
+				"title_i18n",
+				(Serializable)HashMapBuilder.put(
+					LocaleUtil.toLanguageId(LocaleUtil.getDefault()),
+					RandomTestUtil.randomString()
+				).build()
+			).build(),
+			ServiceContextTestUtil.getServiceContext(
+				TestPropsValues.getGroupId(), TestPropsValues.getUserId()));
 	}
 
 	private JSONObject _postChatByExternalReferenceCodeMessage(
@@ -361,6 +397,32 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 				tokenJSONObject.getString("userToken")
 			).build(),
 			Http.Method.POST);
+	}
+
+	private void _relateAgentDefinitionToChatbot(
+			String agentDefinitionExternalReferenceCode,
+			ObjectEntry chatbotObjectEntry)
+		throws Exception {
+
+		ObjectDefinition agentDefinitionObjectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					"L_AI_HUB_AGENT_DEFINITION",
+					TestPropsValues.getCompanyId());
+
+		ObjectEntry agentDefinitionObjectEntry =
+			_objectEntryLocalService.getObjectEntry(
+				agentDefinitionExternalReferenceCode, 0L,
+				agentDefinitionObjectDefinition.getObjectDefinitionId());
+
+		ObjectRelationshipTestUtil.relateObjectEntries(
+			agentDefinitionObjectEntry.getObjectEntryId(),
+			chatbotObjectEntry.getObjectEntryId(),
+			_objectRelationshipLocalService.
+				fetchObjectRelationshipByExternalReferenceCode(
+					"L_AI_HUB_AGENT_DEFINITIONS_TO_L_AI_HUB_CHATBOTS",
+					agentDefinitionObjectDefinition.getObjectDefinitionId()),
+			TestPropsValues.getUserId());
 	}
 
 	private static AccountEntry _accountEntry;
