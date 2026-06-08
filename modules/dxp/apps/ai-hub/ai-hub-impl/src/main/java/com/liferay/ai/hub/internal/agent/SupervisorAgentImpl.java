@@ -38,7 +38,9 @@ import com.liferay.portal.vulcan.pagination.Pagination;
 import com.liferay.portal.workflow.manager.WorkflowDefinitionManager;
 
 import dev.langchain4j.agentic.AgenticServices;
+import dev.langchain4j.agentic.UntypedAgent;
 import dev.langchain4j.agentic.internal.InternalAgent;
+import dev.langchain4j.agentic.planner.AgentArgument;
 import dev.langchain4j.agentic.scope.AgentInvocation;
 import dev.langchain4j.agentic.scope.AgenticScope;
 import dev.langchain4j.agentic.scope.ResultWithAgenticScope;
@@ -48,7 +50,9 @@ import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiChatModel;
 
 import java.lang.reflect.InvocationTargetException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -245,39 +249,62 @@ public class SupervisorAgentImpl implements SupervisorAgent {
 
 		String[] agentDefinitionExternalReferenceCodes = null;
 
-		dev.langchain4j.agentic.supervisor.SupervisorAgent supervisorAgent =
-			AgenticServices.supervisorBuilder(
-			).chatMemoryProvider(
-				memoryId -> ChatMemoryProviderUtil.provide(
-					agentContext.getSseEventSinkKey())
-			).chatModel(
-				vertexAiGeminiChatModel
-			).contextGenerationStrategy(
-				SupervisorContextStrategy.CHAT_MEMORY_AND_SUMMARIZATION
-			).maxAgentsInvocations(
-				5
-			).subAgents(
-				(Object[])internalAgents
-			).responseStrategy(
-				SupervisorResponseStrategy.SCORED
-			).build();
+		String data = null;
 
-		ResultWithAgenticScope<String> resultWithAgenticScope =
-			supervisorAgent.invokeWithAgenticScope(
-				MapUtil.getString(agentContext.getInput(), "message"));
+		if (internalAgents.length == 1) {
+			InternalAgent internalAgent = internalAgents[0];
 
-		AgenticScope agenticScope = resultWithAgenticScope.agenticScope();
+			agentDefinitionExternalReferenceCodes = new String[] {
+				internalAgent.name()
+			};
 
-		if ((agenticScope != null) &&
-			(agenticScope.agentInvocations() != null)) {
+			Map<String, Object> input = new HashMap<>();
 
-			agentDefinitionExternalReferenceCodes = ArrayUtil.distinct(
-				TransformUtil.transformToArray(
-					agenticScope.agentInvocations(), AgentInvocation::agentName,
-					String.class));
+			for (AgentArgument agentArgument : internalAgent.arguments()) {
+				input.put(
+					agentArgument.name(),
+					MapUtil.getString(agentContext.getInput(), "message"));
+			}
+
+			UntypedAgent untypedAgent = (UntypedAgent)internalAgent;
+
+			data = (String)untypedAgent.invoke(input);
 		}
+		else {
+			dev.langchain4j.agentic.supervisor.SupervisorAgent supervisorAgent =
+				AgenticServices.supervisorBuilder(
+				).chatMemoryProvider(
+					memoryId -> ChatMemoryProviderUtil.provide(
+						agentContext.getSseEventSinkKey())
+				).chatModel(
+					vertexAiGeminiChatModel
+				).contextGenerationStrategy(
+					SupervisorContextStrategy.CHAT_MEMORY_AND_SUMMARIZATION
+				).maxAgentsInvocations(
+					5
+				).subAgents(
+					(Object[])internalAgents
+				).responseStrategy(
+					SupervisorResponseStrategy.SCORED
+				).build();
 
-		String data = resultWithAgenticScope.result();
+			ResultWithAgenticScope<String> resultWithAgenticScope =
+				supervisorAgent.invokeWithAgenticScope(
+					MapUtil.getString(agentContext.getInput(), "message"));
+
+			AgenticScope agenticScope = resultWithAgenticScope.agenticScope();
+
+			if ((agenticScope != null) &&
+				(agenticScope.agentInvocations() != null)) {
+
+				agentDefinitionExternalReferenceCodes = ArrayUtil.distinct(
+					TransformUtil.transformToArray(
+						agenticScope.agentInvocations(),
+						AgentInvocation::agentName, String.class));
+			}
+
+			data = resultWithAgenticScope.result();
+		}
 
 		if (Validator.isBlank(data)) {
 			DTOConverterContext dtoConverterContext =
