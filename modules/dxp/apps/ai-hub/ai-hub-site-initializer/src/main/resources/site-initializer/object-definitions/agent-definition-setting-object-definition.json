@@ -1,0 +1,70 @@
+{
+	"accountEntryRestricted": false,
+	"className": "com.liferay.object.model.ObjectDefinition#A5D7",
+	"enableFormContainer": false,
+	"enableIndexSearch": true,
+	"enableObjectEntryHistory": true,
+	"externalReferenceCode": "L_AI_HUB_AGENT_DEFINITION_SETTING",
+	"friendlyURLSeparator": "l",
+	"label": {
+		"en_US": "AI Hub Agent Definition Setting"
+	},
+	"modifiable": true,
+	"name": "AIHubAgentDefinitionSetting",
+	"objectFields": [
+		{
+			"DBType": "Boolean",
+			"businessType": "Boolean",
+			"defaultValue": true,
+			"externalReferenceCode": "ACTIVE",
+			"indexed": true,
+			"label": {
+				"en_US": "Active"
+			},
+			"name": "active",
+			"system": true,
+			"type": "Boolean"
+		},
+		{
+			"DBType": "String",
+			"businessType": "Text",
+			"defaultValue": "null",
+			"externalReferenceCode": "ITEM_EXTERNAL_REFERENCE_CODE",
+			"indexed": true,
+			"indexedLanguageId": "en_US",
+			"label": {
+				"en_US": "Item External Reference Code"
+			},
+			"name": "itemExternalReferenceCode",
+			"readOnly": false,
+			"required": true,
+			"system": true,
+			"type": "String"
+		},
+		{
+			"DBType": "String",
+			"businessType": "Text",
+			"defaultValue": "null",
+			"externalReferenceCode": "NAME",
+			"indexed": true,
+			"indexedLanguageId": "en_US",
+			"label": {
+				"en_US": "Name"
+			},
+			"name": "name",
+			"readOnly": false,
+			"required": true,
+			"system": true,
+			"type": "String"
+		}
+	],
+	"objectFolderExternalReferenceCode": "default",
+	"panelCategoryKey": "control_panel.object",
+	"pluralLabel": {
+		"en_US": "AI Hub Agent Definition Settings"
+	},
+	"portlet": true,
+	"scope": "company",
+	"system": true,
+	"titleObjectFieldName": "name"
+}
