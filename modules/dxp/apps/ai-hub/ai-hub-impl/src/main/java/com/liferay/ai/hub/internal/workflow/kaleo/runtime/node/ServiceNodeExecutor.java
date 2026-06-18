@@ -145,22 +145,31 @@ public class ServiceNodeExecutor extends BaseNodeExecutor {
 
 			throw new PortalException(exception);
 		}
+	}
 
-		KaleoTransition kaleoTransition =
-			currentKaleoNode.getDefaultKaleoTransition();
+	@Override
+	protected void doExit(
+			KaleoNode currentKaleoNode, ExecutionContext executionContext,
+			List<PathElement> remainingPathElements)
+		throws PortalException {
+
+		KaleoTransition kaleoTransition = null;
+
+		if (Validator.isNull(executionContext.getTransitionName())) {
+			kaleoTransition = currentKaleoNode.getDefaultKaleoTransition();
+		}
+		else {
+			kaleoTransition = currentKaleoNode.getKaleoTransition(
+				executionContext.getTransitionName());
+		}
 
 		remainingPathElements.add(
 			new PathElement(
 				currentKaleoNode, kaleoTransition.getTargetKaleoNode(),
 				new ExecutionContext(
-					executionContext.getKaleoInstanceToken(), workflowContext,
+					executionContext.getKaleoInstanceToken(),
+					executionContext.getWorkflowContext(),
 					executionContext.getServiceContext())));
-	}
-
-	@Override
-	protected void doExit(
-		KaleoNode currentKaleoNode, ExecutionContext executionContext,
-		List<PathElement> remainingPathElements) {
 	}
 
 	private Map<String, String> _getInputVariables(
