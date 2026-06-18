@@ -240,6 +240,36 @@
 					"type": "String"
 				},
 				{
+					"DBType": "String",
+					"businessType": "Aggregation",
+					"externalReferenceCode": "ITEM_COUNT",
+					"indexed": false,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Item Count"
+					},
+					"name": "itemCount",
+					"objectFieldSettings": [
+						{
+							"name": "objectRelationshipName",
+							"value": "items"
+						},
+						{
+							"name": "function",
+							"value": "SUM"
+						},
+						{
+							"name": "objectFieldName",
+							"value": "itemCount"
+						}
+					],
+					"readOnly": "true",
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "String"
+				},
+				{
 					"DBType": "Clob",
 					"businessType": "LongText",
 					"externalReferenceCode": "PROMPT",
@@ -282,36 +312,6 @@
 					},
 					"name": "title",
 					"required": true,
-					"state": false,
-					"system": true,
-					"type": "String"
-				},
-				{
-					"DBType": "String",
-					"businessType": "Aggregation",
-					"externalReferenceCode": "ITEM_COUNT",
-					"indexed": false,
-					"indexedAsKeyword": false,
-					"label": {
-						"en_US": "Item Count"
-					},
-					"name": "itemCount",
-					"objectFieldSettings": [
-						{
-							"name": "objectRelationshipName",
-							"value": "items"
-						},
-						{
-							"name": "function",
-							"value": "SUM"
-						},
-						{
-							"name": "objectFieldName",
-							"value": "itemCount"
-						}
-					],
-					"readOnly": "true",
-					"required": false,
 					"state": false,
 					"system": true,
 					"type": "String"
