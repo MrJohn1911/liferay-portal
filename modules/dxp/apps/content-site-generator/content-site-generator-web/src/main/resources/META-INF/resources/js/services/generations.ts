@@ -20,11 +20,12 @@ interface CreateGenerationInput {
 
 async function call<T>(url: string, init?: RequestInit): Promise<T> {
 	const response = await liferayFetch(url, {
+		...init,
 		headers: {
 			'Accept': 'application/json',
 			'Content-Type': 'application/json',
+			...init?.headers,
 		},
-		...init,
 	});
 
 	if (!response.ok) {

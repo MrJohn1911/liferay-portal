@@ -43,6 +43,8 @@ export default function RefineStep({
 		generation.generationStatus.key === 'generating' ||
 		generation.generationStatus.key === 'refining';
 
+	const failed = generation.generationStatus.key === 'failed';
+
 	const detectedConfig = buildDetectedConfig(generation, items);
 	const summary = buildSummary(generation, items);
 	const templates = buildTemplates(items);
@@ -62,11 +64,21 @@ export default function RefineStep({
 
 	return (
 		<div className="content-site-generator__refine">
+			{failed && (
+				<ClayAlert
+					displayType="danger"
+					title={Liferay.Language.get('error')}
+				>
+					{generation.failureReason ||
+						Liferay.Language.get('an-unexpected-error-occurred')}
+				</ClayAlert>
+			)}
+
 			{generating && (
 				<GenerateProgress generation={generation} items={items} />
 			)}
 
-			{!generating && (
+			{!generating && !failed && (
 				<>
 					<div className="content-site-generator__refine-header">
 						<h3>
@@ -118,7 +130,7 @@ export default function RefineStep({
 				</>
 			)}
 
-			{!generating && !templates.length && (
+			{!generating && !failed && !templates.length && (
 				<>
 					<h4 className="content-site-generator__section-title">
 						{Liferay.Language.get('content-by-template-type')}
@@ -132,7 +144,7 @@ export default function RefineStep({
 				</>
 			)}
 
-			{!generating && !!templates.length && (
+			{!generating && !failed && !!templates.length && (
 				<>
 					<h4 className="content-site-generator__section-title">
 						{Liferay.Language.get('content-by-template-type')}
@@ -267,7 +279,7 @@ export default function RefineStep({
 				</>
 			)}
 
-			{!generating && tipVisible && (
+			{!generating && !failed && tipVisible && (
 				<ClayAlert
 					displayType="info"
 					onClose={() => setTipVisible(false)}

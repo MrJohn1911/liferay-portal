@@ -91,8 +91,14 @@ export default function ContentSiteGeneratorWizard({
 			return;
 		}
 
+		let cancelled = false;
+
 		refresh(generationId)
 			.then((newGeneration) => {
+				if (cancelled) {
+					return;
+				}
+
 				const statusKey = newGeneration.generationStatus.key;
 
 				setActiveStep(
@@ -101,29 +107,44 @@ export default function ContentSiteGeneratorWizard({
 						: STEP_REFINE
 				);
 			})
-			.catch((newError: Error) => setError(newError.message))
-			.finally(() => setLoading(false));
+			.catch((newError: Error) => {
+				if (!cancelled) {
+					setError(newError.message);
+				}
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setLoading(false);
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
 	}, [generationId, refresh]);
+
+	const generationStatusKey = generation?.generationStatus.key;
+	const currentGenerationId = generation?.id;
 
 	useEffect(() => {
 		if (
-			!generation ||
-			(generation.generationStatus.key !== 'generating' &&
-				generation.generationStatus.key !== 'refining')
+			!currentGenerationId ||
+			(generationStatusKey !== 'generating' &&
+				generationStatusKey !== 'refining')
 		) {
 			return;
 		}
 
 		const intervalId = setInterval(
 			() =>
-				refresh(generation.id).catch(() => {
+				refresh(currentGenerationId).catch(() => {
 					clearInterval(intervalId);
 				}),
 			POLL_INTERVAL
 		);
 
 		return () => clearInterval(intervalId);
-	}, [generation, refresh]);
+	}, [currentGenerationId, generationStatusKey, refresh]);
 
 	const handleAnalyze = async (prompt: string) => {
 		setError(undefined);
