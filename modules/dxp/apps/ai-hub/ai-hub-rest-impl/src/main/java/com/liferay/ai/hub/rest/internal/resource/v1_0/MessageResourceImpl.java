@@ -49,9 +49,6 @@ public class MessageResourceImpl extends BaseMessageResourceImpl {
 			message.getChatbotExternalReferenceCode(),
 			contextCompany.getCompanyId(), contextUser);
 
-		String messageText = MessageUtil.appendContext(
-			message.getText(), message.getContext());
-
 		_supervisorAgent.invoke(
 			AgentContext.builder(
 			).chatbotExternalReferenceCode(
@@ -67,7 +64,10 @@ public class MessageResourceImpl extends BaseMessageResourceImpl {
 			).groupId(
 				AccountEntryUtil.getUserAccountEntryGroupId(user.getUserId())
 			).input(
-				Map.of("message", messageText)
+				Map.of(
+					"message",
+					MessageUtil.appendContext(
+						message.getText(), message.getContext()))
 			).instructionDefinitionScope(
 				message.getInstructionDefinitionScopeAsString()
 			).oAuth2ApplicationId(
