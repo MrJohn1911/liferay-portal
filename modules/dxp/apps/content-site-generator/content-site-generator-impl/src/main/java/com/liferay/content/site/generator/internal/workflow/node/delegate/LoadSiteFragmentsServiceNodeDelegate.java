@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.ai.hub.internal.workflow.node.delegate;
+package com.liferay.content.site.generator.internal.workflow.node.delegate;
 
 import com.liferay.ai.hub.workflow.node.ServiceNodeDelegate;
 import com.liferay.fragment.model.FragmentCollection;
@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Iliyan Peychev
  */
 @Component(
-	property = "java.delegate=com.liferay.ai.hub.internal.workflow.node.delegate.LoadSiteFragmentsServiceNodeDelegate#execute",
+	property = "java.delegate=com.liferay.content.site.generator.internal.workflow.node.delegate.LoadSiteFragmentsServiceNodeDelegate#execute",
 	service = ServiceNodeDelegate.class
 )
 public class LoadSiteFragmentsServiceNodeDelegate

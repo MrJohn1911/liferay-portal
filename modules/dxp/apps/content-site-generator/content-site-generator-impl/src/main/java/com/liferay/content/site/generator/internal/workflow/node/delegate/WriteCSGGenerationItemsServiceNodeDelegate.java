@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.ai.hub.internal.workflow.node.delegate;
+package com.liferay.content.site.generator.internal.workflow.node.delegate;
 
-import com.liferay.ai.hub.internal.workflow.node.delegate.util.SitePlanBatchFileBuilder;
 import com.liferay.ai.hub.rest.resource.v1_0.util.SseUtil;
 import com.liferay.ai.hub.workflow.node.ServiceNodeDelegate;
+import com.liferay.content.site.generator.internal.workflow.node.delegate.util.SitePlanBatchFileBuilder;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;

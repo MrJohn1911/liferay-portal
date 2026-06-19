@@ -6,10 +6,10 @@
 package com.liferay.ai.hub.internal.langchain4j.agentic.internal;
 
 import com.liferay.ai.hub.agent.AgentContext;
-import com.liferay.ai.hub.internal.agent.util.AgentUtil;
 import com.liferay.ai.hub.internal.audit.constants.AIHubEventTypes;
 import com.liferay.ai.hub.internal.constants.AIHubDestinationNames;
 import com.liferay.ai.hub.quota.QuotaManager;
+import com.liferay.ai.hub.util.AgentUtil;
 import com.liferay.portal.kernel.encryptor.EncryptorUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.messaging.Message;

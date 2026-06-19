@@ -5,9 +5,9 @@
 
 package com.liferay.ai.hub.internal.messaging;
 
-import com.liferay.ai.hub.internal.agent.util.AgentUtil;
 import com.liferay.ai.hub.internal.audit.constants.AIHubEventTypes;
 import com.liferay.ai.hub.internal.constants.AIHubDestinationNames;
+import com.liferay.ai.hub.util.AgentUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.messaging.BaseMessageListener;
 import com.liferay.portal.kernel.messaging.Destination;

@@ -482,7 +482,7 @@ Output:
 		<input-variables>
 			<![CDATA[[{"name": "sitePlan"}]]]>
 		</input-variables>
-		<java-delegate>com.liferay.ai.hub.internal.workflow.node.delegate.JSONRepairServiceNodeDelegate#execute</java-delegate>
+		<java-delegate>com.liferay.content.site.generator.internal.workflow.node.delegate.JSONRepairServiceNodeDelegate#execute</java-delegate>
 		<output-variables>
 			<![CDATA[[{"name": "sitePlan"}]]]>
 		</output-variables>
@@ -500,7 +500,7 @@ Output:
 				Acknowledge Agent
 			</label>
 		</labels>
-		<java-delegate>com.liferay.ai.hub.internal.workflow.node.delegate.AcknowledgeAgentServiceNodeDelegate#execute</java-delegate>
+		<java-delegate>com.liferay.content.site.generator.internal.workflow.node.delegate.AcknowledgeAgentServiceNodeDelegate#execute</java-delegate>
 		<output-variables>
 			<![CDATA[[{"name": "output"}]]]>
 		</output-variables>
@@ -521,7 +521,7 @@ Output:
 		<input-variables>
 			<![CDATA[[{"name": "response"}]]]>
 		</input-variables>
-		<java-delegate>com.liferay.ai.hub.internal.workflow.node.delegate.JSONRepairServiceNodeDelegate#execute</java-delegate>
+		<java-delegate>com.liferay.content.site.generator.internal.workflow.node.delegate.JSONRepairServiceNodeDelegate#execute</java-delegate>
 		<output-variables>
 			<![CDATA[[{"name": "enrichedSitePlan"}]]]>
 		</output-variables>
