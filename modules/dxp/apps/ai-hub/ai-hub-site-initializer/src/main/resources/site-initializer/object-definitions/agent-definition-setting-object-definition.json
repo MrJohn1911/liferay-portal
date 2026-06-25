@@ -26,7 +26,7 @@
 			"name": "agentDefinitionExternalReferenceCode",
 			"readOnly": false,
 			"required": true,
-			"system": true,
+			"system": false,
 			"type": "String"
 		},
 		{
@@ -42,7 +42,7 @@
 			"name": "name",
 			"readOnly": false,
 			"required": true,
-			"system": true,
+			"system": false,
 			"type": "String"
 		},
 		{
@@ -87,7 +87,7 @@
 			"readOnly": false,
 			"relationshipType": "oneToMany",
 			"required": true,
-			"system": true,
+			"system": false,
 			"type": "Long"
 		}
 	],
