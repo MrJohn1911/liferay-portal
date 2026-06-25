@@ -17,6 +17,7 @@ import com.liferay.ai.hub.rest.resource.v1_0.util.SseUtil;
 import com.liferay.ai.hub.util.AccountEntryUtil;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 
@@ -87,6 +88,8 @@ public class AgentInstanceResourceImpl extends BaseAgentInstanceResourceImpl {
 			).oAuth2ApplicationId(
 				OAuth2ApplicationIdResolverUtil.resolve(
 					contextHttpServletRequest)
+			).portalURL(
+				_portal.getPortalURL(contextHttpServletRequest)
 			).serviceContext(
 				ServiceContextFactory.getInstance(contextHttpServletRequest)
 			).sseEventSinkKey(
@@ -118,6 +121,9 @@ public class AgentInstanceResourceImpl extends BaseAgentInstanceResourceImpl {
 
 	@Reference
 	private DTOConverterRegistry _dtoConverterRegistry;
+
+	@Reference
+	private Portal _portal;
 
 	@Context
 	private Sse _sse;

@@ -31,6 +31,7 @@ public class AgentContext {
 		_inputVariableNames = builder._inputVariableNames;
 		_instructionDefinitionScope = builder._instructionDefinitionScope;
 		_oAuth2ApplicationId = builder._oAuth2ApplicationId;
+		_portalURL = builder._portalURL;
 		_serviceContext = builder._serviceContext;
 		_sseEventSinkKey = builder._sseEventSinkKey;
 		_userId = builder._userId;
@@ -72,6 +73,10 @@ public class AgentContext {
 
 	public long getOAuth2ApplicationId() {
 		return _oAuth2ApplicationId;
+	}
+
+	public String getPortalURL() {
+		return _portalURL;
 	}
 
 	public ServiceContext getServiceContext() {
@@ -163,6 +168,12 @@ public class AgentContext {
 			return this;
 		}
 
+		public Builder portalURL(String portalURL) {
+			_portalURL = portalURL;
+
+			return this;
+		}
+
 		public Builder serviceContext(ServiceContext serviceContext) {
 			_serviceContext = serviceContext;
 
@@ -202,6 +213,7 @@ public class AgentContext {
 		private List<String> _inputVariableNames;
 		private String _instructionDefinitionScope;
 		private long _oAuth2ApplicationId;
+		private String _portalURL;
 		private ServiceContext _serviceContext;
 		private String _sseEventSinkKey;
 		private long _userId;
@@ -219,6 +231,7 @@ public class AgentContext {
 	private final List<String> _inputVariableNames;
 	private final String _instructionDefinitionScope;
 	private final long _oAuth2ApplicationId;
+	private final String _portalURL;
 	private final ServiceContext _serviceContext;
 	private final String _sseEventSinkKey;
 	private final long _userId;

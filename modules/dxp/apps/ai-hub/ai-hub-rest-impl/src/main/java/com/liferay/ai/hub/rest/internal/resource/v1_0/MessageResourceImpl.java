@@ -16,6 +16,7 @@ import com.liferay.ai.hub.util.AccountEntryUtil;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 
@@ -73,6 +74,8 @@ public class MessageResourceImpl extends BaseMessageResourceImpl {
 			).oAuth2ApplicationId(
 				OAuth2ApplicationIdResolverUtil.resolve(
 					contextHttpServletRequest)
+			).portalURL(
+				_portal.getPortalURL(contextHttpServletRequest)
 			).serviceContext(
 				ServiceContextFactory.getInstance(contextHttpServletRequest)
 			).sseEventSinkKey(
@@ -89,6 +92,9 @@ public class MessageResourceImpl extends BaseMessageResourceImpl {
 
 	@Reference
 	private DTOConverterRegistry _dtoConverterRegistry;
+
+	@Reference
+	private Portal _portal;
 
 	@Reference
 	private SupervisorAgent _supervisorAgent;

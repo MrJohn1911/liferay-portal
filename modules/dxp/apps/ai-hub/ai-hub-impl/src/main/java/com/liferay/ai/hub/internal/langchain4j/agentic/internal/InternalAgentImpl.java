@@ -111,6 +111,8 @@ public class InternalAgentImpl implements InternalAgent, InvocationHandler {
 				).put(
 					"outBoundEventName", () -> _outBoundEventName
 				).put(
+					"portalURL", _agentContext.getPortalURL()
+				).put(
 					"sseEventSinkKey", _agentContext.getSseEventSinkKey()
 				).put(
 					"userToken",

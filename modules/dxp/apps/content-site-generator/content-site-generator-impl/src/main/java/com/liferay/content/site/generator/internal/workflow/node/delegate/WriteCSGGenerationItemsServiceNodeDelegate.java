@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
@@ -32,8 +33,10 @@ import java.io.Serializable;
 
 import java.nio.charset.StandardCharsets;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -104,17 +107,27 @@ public class WriteCSGGenerationItemsServiceNodeDelegate
 
 			Company company = _companyLocalService.getCompany(companyId);
 
+			Set<String> targetLanguages = new LinkedHashSet<>();
+
 			int loadOrder = 0;
 
 			for (SitePlanBatchFileBuilder.BatchFile batchFile : batchFiles) {
 				loadOrder++;
 
-				_writeGenerationItem(
+				String languages = _writeGenerationItem(
 					batchFile, company.getGroupId(),
 					generationExternalReferenceCode,
 					csgGenerationItemObjectDefinition.getObjectDefinitionId(),
 					csgGenerationObjectEntry.getObjectEntryId(), loadOrder,
 					userId);
+
+				for (String language : StringUtil.split(languages, ',')) {
+					String trimmedLanguage = StringUtil.trim(language);
+
+					if (Validator.isNotNull(trimmedLanguage)) {
+						targetLanguages.add(trimmedLanguage);
+					}
+				}
 
 				if (Validator.isNotNull(sseEventSinkKey)) {
 					SseUtil.send(
@@ -122,6 +135,14 @@ public class WriteCSGGenerationItemsServiceNodeDelegate
 						sseEventSinkKey);
 				}
 			}
+
+			_objectEntryLocalService.partialUpdateObjectEntry(
+				userId, csgGenerationObjectEntry.getObjectEntryId(),
+				csgGenerationObjectEntry.getObjectEntryFolderId(),
+				HashMapBuilder.<String, Serializable>put(
+					"targetLanguages", StringUtil.merge(targetLanguages, ",")
+				).build(),
+				new ServiceContext());
 
 			return StringBundler.concat(
 				"Wrote ", batchFiles.size(), " generation items.");
@@ -214,7 +235,7 @@ public class WriteCSGGenerationItemsServiceNodeDelegate
 		return trimmedBlogEntries;
 	}
 
-	private void _writeGenerationItem(
+	private String _writeGenerationItem(
 			SitePlanBatchFileBuilder.BatchFile batchFile, long groupId,
 			String generationExternalReferenceCode, long objectDefinitionId,
 			long csgGenerationId, int loadOrder, long userId)
@@ -261,6 +282,8 @@ public class WriteCSGGenerationItemsServiceNodeDelegate
 				"r_items_l_csgGenerationId", csgGenerationId
 			).build(),
 			new ServiceContext());
+
+		return languages;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

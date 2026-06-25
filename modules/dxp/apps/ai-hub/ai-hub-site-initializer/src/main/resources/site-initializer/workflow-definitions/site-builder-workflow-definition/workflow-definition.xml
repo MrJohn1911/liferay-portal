@@ -7,6 +7,36 @@
 >
 	<name>Site Builder</name>
 	<version>1</version>
+	<http-request>
+		<name>markGenerationReady</name>
+		<labels>
+			<label language-id="en_US">
+				Mark Generation Ready
+			</label>
+		</labels>
+		<http-method>PATCH</http-method>
+		<input-variables>
+			<![CDATA[[{"name": "portalURL"}, {"name": "generationExternalReferenceCode"}]]]>
+		</input-variables>
+		<output-variables>
+			<![CDATA[[{"name": "output"}]]]>
+		</output-variables>
+		<request-body>
+			<![CDATA[
+				{
+					"generationStatus": "ready"
+				}
+			]]>
+		</request-body>
+		<timeout>10000</timeout>
+		<transitions>
+			<transition>
+				<name>end</name>
+				<target>end</target>
+			</transition>
+		</transitions>
+		<url>{{portalURL}}/o/content-site-generator/generations/by-external-reference-code/{{generationExternalReferenceCode}}</url>
+	</http-request>
 	<llm>
 		<name>siteAnalyzer</name>
 		<metadata>
@@ -550,27 +580,6 @@ Output:
 			<transition>
 				<name>markGenerationReady</name>
 				<target>markGenerationReady</target>
-			</transition>
-		</transitions>
-	</service>
-	<service>
-		<name>markGenerationReady</name>
-		<labels>
-			<label language-id="en_US">
-				Mark Generation Ready
-			</label>
-		</labels>
-		<input-variables>
-			<![CDATA[[{"name": "generationExternalReferenceCode"}]]]>
-		</input-variables>
-		<java-delegate>javaDelegate#markCSGGenerationReady</java-delegate>
-		<output-variables>
-			<![CDATA[[{"name": "output"}]]]>
-		</output-variables>
-		<transitions>
-			<transition>
-				<name>end</name>
-				<target>end</target>
 			</transition>
 		</transitions>
 	</service>

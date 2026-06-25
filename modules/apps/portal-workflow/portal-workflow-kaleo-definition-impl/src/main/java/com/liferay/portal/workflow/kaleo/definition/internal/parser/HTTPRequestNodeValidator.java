@@ -84,11 +84,13 @@ public class HTTPRequestNodeValidator
 			}
 		}
 		catch (MalformedURLException | UnknownHostException exception) {
-			throw new KaleoDefinitionValidationException(
-				StringBundler.concat(
-					"The ", httpRequestNode.getDefaultLabel(),
-					" node has an invalid URL: ", url),
-				exception);
+			if (!url.contains("{{")) {
+				throw new KaleoDefinitionValidationException(
+					StringBundler.concat(
+						"The ", httpRequestNode.getDefaultLabel(),
+						" node has an invalid URL: ", url),
+					exception);
+			}
 		}
 
 		if (httpRequestNode.getOutgoingTransitionsCount() == 0) {
