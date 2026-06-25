@@ -620,14 +620,14 @@ public class AgentDefinitionResourceTest
 
 		Page<AgentDefinition> page =
 			agentDefinitionResource.getAgentDefinitionsPage(
-				null, "(active eq false)", Pagination.of(1, 10), null);
+				null, "(active eq 'false')", Pagination.of(1, 10), null);
 
 		assertEquals(List.of(), (List<AgentDefinition>)page.getItems());
 
 		// Active as true
 
 		page = agentDefinitionResource.getAgentDefinitionsPage(
-			null, "(active eq true)", Pagination.of(1, 10), null);
+			null, "(active eq 'true')", Pagination.of(1, 10), null);
 
 		assertEquals(
 			_systemAgentDefinitions, (List<AgentDefinition>)page.getItems());

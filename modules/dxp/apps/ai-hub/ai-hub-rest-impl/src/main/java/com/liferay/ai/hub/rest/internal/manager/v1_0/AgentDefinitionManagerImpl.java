@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -47,9 +48,13 @@ import com.liferay.portal.workflow.constants.WorkflowDefinitionConstants;
 import com.liferay.portal.workflow.kaleo.model.KaleoDefinition;
 import com.liferay.portal.workflow.manager.WorkflowDefinitionManager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -133,24 +138,57 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 			).build();
 		}
 
-		Page<ObjectEntry> page = _objectEntryManager.getObjectEntries(
-			companyId, _getObjectDefinition(companyId), null, null,
-			dtoConverterContext, _getFilterString(filterString), pagination,
-			search, sorts);
-
 		Map<String, Boolean> activeByAgentExternalReferenceCode =
 			_agentActiveStateResolver.getActiveByAgentExternalReferenceCode(
 				companyId, dtoConverterContext);
 
+		Boolean active = _getActiveFilter(filterString);
+
+		if (active == null) {
+			Page<ObjectEntry> objectEntriesPage =
+				_objectEntryManager.getObjectEntries(
+					companyId, _getObjectDefinition(companyId), null, null,
+					dtoConverterContext, _getFilterString(filterString),
+					pagination, search, sorts);
+
+			return Page.of(
+				actions,
+				TransformUtil.transform(
+					objectEntriesPage.getItems(),
+					objectEntry -> _toAgentDefinition(
+						companyId, dtoConverterContext,
+						_isActive(
+							activeByAgentExternalReferenceCode, objectEntry),
+						objectEntry)),
+				pagination, objectEntriesPage.getTotalCount());
+		}
+
+		Page<ObjectEntry> objectEntriesPage =
+			_objectEntryManager.getObjectEntries(
+				companyId, _getObjectDefinition(companyId), null, null,
+				dtoConverterContext, _getFilterString(null),
+				Pagination.of(1, 10000), search, sorts);
+
+		List<AgentDefinition> agentDefinitions = new ArrayList<>();
+
+		for (ObjectEntry objectEntry : objectEntriesPage.getItems()) {
+			boolean agentActive = _isActive(
+				activeByAgentExternalReferenceCode, objectEntry);
+
+			if (agentActive == active) {
+				agentDefinitions.add(
+					_toAgentDefinition(
+						companyId, dtoConverterContext, agentActive,
+						objectEntry));
+			}
+		}
+
 		return Page.of(
 			actions,
-			TransformUtil.transform(
-				page.getItems(),
-				objectEntry -> _toAgentDefinition(
-					companyId, dtoConverterContext,
-					_isActive(activeByAgentExternalReferenceCode, objectEntry),
-					objectEntry)),
-			pagination, page.getTotalCount());
+			ListUtil.subList(
+				agentDefinitions, pagination.getStartPosition(),
+				pagination.getEndPosition()),
+			pagination, agentDefinitions.size());
 	}
 
 	@Override
@@ -314,6 +352,20 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 				companyId, dtoConverterContext,
 				objectEntry.getExternalReferenceCode(), objectDefinition, null);
 		}
+	}
+
+	private Boolean _getActiveFilter(String filterString) {
+		if (Validator.isNull(filterString)) {
+			return null;
+		}
+
+		Matcher matcher = _activeFilterPattern.matcher(filterString.trim());
+
+		if (!matcher.matches()) {
+			return null;
+		}
+
+		return GetterUtil.getBoolean(matcher.group(1));
 	}
 
 	private ObjectDefinition _getAgentDefinitionSettingObjectDefinition(
@@ -567,6 +619,10 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 			},
 			null);
 	}
+
+	private static final Pattern _activeFilterPattern = Pattern.compile(
+		"\\(?\\s*active\\s+eq\\s+'?(true|false)'?\\s*\\)?",
+		Pattern.CASE_INSENSITIVE);
 
 	@Reference
 	private AgentActiveStateResolver _agentActiveStateResolver;
