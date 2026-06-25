@@ -6,6 +6,7 @@
 package com.liferay.ai.hub.rest.internal.manager.v1_0;
 
 import com.liferay.account.model.AccountEntry;
+import com.liferay.ai.hub.agent.AgentActiveStateResolver;
 import com.liferay.ai.hub.configuration.VertexAIConfiguration;
 import com.liferay.ai.hub.rest.dto.v1_0.AgentDefinition;
 import com.liferay.ai.hub.rest.dto.v1_0.Model;
@@ -89,6 +90,9 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 		_workflowDefinitionManager.undeployWorkflowDefinition(
 			workflowDefinition.getCompanyId(), workflowDefinition.getName(),
 			dtoConverterContext.getUserId(), workflowDefinition.getVersion());
+
+		_deleteAgentDefinitionSettings(
+			companyId, dtoConverterContext, externalReferenceCode);
 	}
 
 	@Override
@@ -97,11 +101,16 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 			String externalReferenceCode)
 		throws Exception {
 
+		ObjectEntry objectEntry = _objectEntryManager.getObjectEntry(
+			companyId, dtoConverterContext, externalReferenceCode,
+			_getObjectDefinition(companyId), null);
+
 		return _toAgentDefinition(
 			companyId, dtoConverterContext,
-			_objectEntryManager.getObjectEntry(
+			_agentActiveStateResolver.isActive(
 				companyId, dtoConverterContext, externalReferenceCode,
-				_getObjectDefinition(companyId), null));
+				GetterUtil.getBoolean(objectEntry.getPropertyValue("active"))),
+			objectEntry);
 	}
 
 	@Override
@@ -129,12 +138,18 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 			dtoConverterContext, _getFilterString(filterString), pagination,
 			search, sorts);
 
+		Map<String, Boolean> activeByAgentExternalReferenceCode =
+			_agentActiveStateResolver.getActiveByAgentExternalReferenceCode(
+				companyId, dtoConverterContext);
+
 		return Page.of(
 			actions,
 			TransformUtil.transform(
 				page.getItems(),
 				objectEntry -> _toAgentDefinition(
-					companyId, dtoConverterContext, objectEntry)),
+					companyId, dtoConverterContext,
+					_isActive(activeByAgentExternalReferenceCode, objectEntry),
+					objectEntry)),
 			pagination, page.getTotalCount());
 	}
 
@@ -145,27 +160,15 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 			String externalReferenceCode)
 		throws Exception {
 
-		ObjectEntry objectEntry = _objectEntryManager.partialUpdateObjectEntry(
+		ObjectEntry objectEntry = _objectEntryManager.getObjectEntry(
 			companyId, dtoConverterContext, externalReferenceCode,
-			_getObjectDefinition(companyId),
-			new ObjectEntry() {
-				{
-					setProperties(() -> Map.of("active", active));
-				}
-			},
-			null);
+			_getObjectDefinition(companyId), null);
 
-		WorkflowDefinition workflowDefinition =
-			_workflowDefinitionManager.getLatestWorkflowDefinition(
-				companyId,
-				GetterUtil.getString(
-					objectEntry.getPropertyValue("workflowDefinitionName")));
+		_updateAgentDefinitionSettingActive(
+			active, companyId, dtoConverterContext, externalReferenceCode);
 
-		_workflowDefinitionManager.updateActive(
-			active, companyId, workflowDefinition.getName(),
-			dtoConverterContext.getUserId(), workflowDefinition.getVersion());
-
-		return _toAgentDefinition(companyId, dtoConverterContext, objectEntry);
+		return _toAgentDefinition(
+			companyId, dtoConverterContext, active, objectEntry);
 	}
 
 	@Override
@@ -262,7 +265,9 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 		}
 
 		return _toAgentDefinition(
-			companyId, dtoConverterContext, copiedObjectEntry);
+			companyId, dtoConverterContext,
+			GetterUtil.getBoolean(copiedObjectEntry.getPropertyValue("active")),
+			copiedObjectEntry);
 	}
 
 	private Map<String, String> _addAction(
@@ -270,7 +275,11 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 		WorkflowDefinition workflowDefinition) {
 
 		if (Objects.equals(
-				methodName, "postAgentDefinitionByExternalReferenceCodeCopy")) {
+				methodName, "postAgentDefinitionByExternalReferenceCodeCopy") ||
+			(workflowDefinition.isSystem() &&
+			 Objects.equals(
+				 methodName,
+				 "patchAgentDefinitionByExternalReferenceCodeUpdateActive"))) {
 
 			return ActionUtil.addAction(
 				ActionKeys.VIEW, AgentDefinitionResourceImpl.class,
@@ -279,15 +288,40 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 				dtoConverterContext.getUriInfo());
 		}
 
-		if (workflowDefinition.isSystem()) {
-			return null;
-		}
-
 		return ActionUtil.addAction(
 			ActionKeys.ADD_DEFINITION, AgentDefinitionResourceImpl.class,
 			workflowDefinition.getWorkflowDefinitionId(), methodName,
 			_kaleoDefinitionModelResourcePermission, (Long)null,
 			dtoConverterContext.getUriInfo());
+	}
+
+	private void _deleteAgentDefinitionSettings(
+			long companyId, DTOConverterContext dtoConverterContext,
+			String agentExternalReferenceCode)
+		throws Exception {
+
+		ObjectDefinition objectDefinition =
+			_getAgentDefinitionSettingObjectDefinition(companyId);
+
+		Page<ObjectEntry> page = _objectEntryManager.getObjectEntries(
+			companyId, objectDefinition, null, null, dtoConverterContext,
+			"agentDefinitionExternalReferenceCode eq '" +
+				agentExternalReferenceCode + "'",
+			Pagination.of(1, 10000), null, null);
+
+		for (ObjectEntry objectEntry : page.getItems()) {
+			_objectEntryManager.deleteObjectEntry(
+				companyId, dtoConverterContext,
+				objectEntry.getExternalReferenceCode(), objectDefinition, null);
+		}
+	}
+
+	private ObjectDefinition _getAgentDefinitionSettingObjectDefinition(
+			long companyId)
+		throws Exception {
+
+		return _objectDefinitionLocalService.getObjectDefinition(
+			companyId, "AIHubAgentDefinitionSetting");
 	}
 
 	private String _getFilterString(String filterString) {
@@ -307,8 +341,7 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 	}
 
 	private Status _getStatus(
-		DTOConverterContext dtoConverterContext,
-		WorkflowDefinition workflowDefinition) {
+		boolean active, DTOConverterContext dtoConverterContext) {
 
 		if (dtoConverterContext == null) {
 			return null;
@@ -316,16 +349,26 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 
 		Locale locale = dtoConverterContext.getLocale();
 
-		if (workflowDefinition.isActive()) {
+		if (active) {
 			return _toStatus("active", locale);
 		}
 
 		return _toStatus("inactive", locale);
 	}
 
+	private boolean _isActive(
+		Map<String, Boolean> activeByAgentExternalReferenceCode,
+		ObjectEntry objectEntry) {
+
+		return activeByAgentExternalReferenceCode.getOrDefault(
+			GetterUtil.getString(
+				objectEntry.getPropertyValue("externalReferenceCode")),
+			GetterUtil.getBoolean(objectEntry.getPropertyValue("active")));
+	}
+
 	private AgentDefinition _toAgentDefinition(
 			long companyId, DTOConverterContext dtoConverterContext,
-			ObjectEntry objectEntry)
+			boolean agentActive, ObjectEntry objectEntry)
 		throws PortalException {
 
 		WorkflowDefinition workflowDefinition =
@@ -345,7 +388,7 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 						return HashMapBuilder.put(
 							"activate",
 							() -> {
-								if (workflowDefinition.isActive()) {
+								if (agentActive) {
 									return null;
 								}
 
@@ -365,7 +408,7 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 						).put(
 							"deactivate",
 							() -> {
-								if (!workflowDefinition.isActive()) {
+								if (!agentActive) {
 									return null;
 								}
 
@@ -395,9 +438,7 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 							}
 						).build();
 					});
-				setActive(
-					() -> GetterUtil.getBoolean(
-						objectEntry.getPropertyValue("active")));
+				setActive(() -> agentActive);
 				setDescription(
 					() -> GetterUtil.getString(
 						objectEntry.getPropertyValue("description")));
@@ -420,8 +461,7 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 					() -> _toVariable(
 						GetterUtil.getString(
 							objectEntry.getPropertyValue("outputVariable"))));
-				setStatus(
-					() -> _getStatus(dtoConverterContext, workflowDefinition));
+				setStatus(() -> _getStatus(agentActive, dtoConverterContext));
 				setSystem(
 					() -> GetterUtil.getBoolean(
 						objectEntry.getPropertyValue("system")));
@@ -473,6 +513,63 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 			}
 		};
 	}
+
+	private void _updateAgentDefinitionSettingActive(
+			boolean active, long companyId,
+			DTOConverterContext dtoConverterContext,
+			String agentExternalReferenceCode)
+		throws Exception {
+
+		AccountEntry accountEntry = AccountEntryUtil.getUserAccountEntry(
+			dtoConverterContext.getUserId());
+
+		if (accountEntry == null) {
+			return;
+		}
+
+		ObjectDefinition objectDefinition =
+			_getAgentDefinitionSettingObjectDefinition(companyId);
+
+		Page<ObjectEntry> page = _objectEntryManager.getObjectEntries(
+			companyId, objectDefinition, null, null, dtoConverterContext,
+			"agentDefinitionExternalReferenceCode eq '" +
+				agentExternalReferenceCode + "' and name eq 'active'",
+			Pagination.of(1, 1), null, null);
+
+		for (ObjectEntry objectEntry : page.getItems()) {
+			_objectEntryManager.partialUpdateObjectEntry(
+				companyId, dtoConverterContext,
+				objectEntry.getExternalReferenceCode(), objectDefinition,
+				new ObjectEntry() {
+					{
+						setProperties(
+							() -> Map.of("value", String.valueOf(active)));
+					}
+				},
+				null);
+
+			return;
+		}
+
+		_objectEntryManager.addObjectEntry(
+			dtoConverterContext, objectDefinition,
+			new ObjectEntry() {
+				{
+					setProperties(
+						() -> Map.of(
+							"agentDefinitionExternalReferenceCode",
+							agentExternalReferenceCode, "name", "active",
+							"r_accountToAIHubAgentDefinitionSettings_" +
+								"accountEntryId",
+							accountEntry.getAccountEntryId(), "value",
+							String.valueOf(active)));
+				}
+			},
+			null);
+	}
+
+	@Reference
+	private AgentActiveStateResolver _agentActiveStateResolver;
 
 	@Reference
 	private ConfigurationProvider _configurationProvider;

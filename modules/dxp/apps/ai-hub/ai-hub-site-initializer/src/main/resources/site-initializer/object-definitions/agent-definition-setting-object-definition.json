@@ -1,5 +1,6 @@
 {
-	"accountEntryRestricted": false,
+	"accountEntryRestricted": true,
+	"accountEntryRestrictedObjectFieldName": "r_accountToAIHubAgentDefinitionSettings_accountEntryId",
 	"className": "com.liferay.object.model.ObjectDefinition#A5D7",
 	"enableFormContainer": false,
 	"enableIndexSearch": true,
@@ -13,29 +14,16 @@
 	"name": "AIHubAgentDefinitionSetting",
 	"objectFields": [
 		{
-			"DBType": "Boolean",
-			"businessType": "Boolean",
-			"defaultValue": true,
-			"externalReferenceCode": "ACTIVE",
-			"indexed": true,
-			"label": {
-				"en_US": "Active"
-			},
-			"name": "active",
-			"system": true,
-			"type": "Boolean"
-		},
-		{
 			"DBType": "String",
 			"businessType": "Text",
 			"defaultValue": "null",
-			"externalReferenceCode": "ITEM_EXTERNAL_REFERENCE_CODE",
+			"externalReferenceCode": "AGENT_DEFINITION_EXTERNAL_REFERENCE_CODE",
 			"indexed": true,
 			"indexedLanguageId": "en_US",
 			"label": {
-				"en_US": "Item External Reference Code"
+				"en_US": "Agent Definition External Reference Code"
 			},
-			"name": "itemExternalReferenceCode",
+			"name": "agentDefinitionExternalReferenceCode",
 			"readOnly": false,
 			"required": true,
 			"system": true,
@@ -56,9 +44,84 @@
 			"required": true,
 			"system": true,
 			"type": "String"
+		},
+		{
+			"DBType": "String",
+			"businessType": "Text",
+			"defaultValue": "null",
+			"externalReferenceCode": "VALUE",
+			"indexed": true,
+			"indexedLanguageId": "en_US",
+			"label": {
+				"en_US": "Value"
+			},
+			"name": "value",
+			"readOnly": false,
+			"required": true,
+			"system": true,
+			"type": "String"
+		},
+		{
+			"DBType": "Long",
+			"businessType": "Relationship",
+			"defaultValue": "null",
+			"externalReferenceCode": "ACCOUNT_TO_AI_HUB_AGENT_DEFINITION_SETTINGS",
+			"indexed": true,
+			"indexedLanguageId": "en_US",
+			"label": {
+				"en_US": "Account to AI Hub Agent Definition Settings"
+			},
+			"name": "r_accountToAIHubAgentDefinitionSettings_accountEntryId",
+			"objectDefinitionExternalReferenceCode1": "L_ACCOUNT",
+			"objectFieldSettings": [
+				{
+					"name": "objectDefinition1ShortName",
+					"value": "AccountEntry"
+				},
+				{
+					"name": "objectRelationshipERCObjectFieldName",
+					"value": "r_accountToAIHubAgentDefinitionSettings_accountEntryERC"
+				}
+			],
+			"objectRelationshipExternalReferenceCode": "L_ACCOUNT_TO_L_AI_HUB_AGENT_DEFINITION_SETTINGS",
+			"readOnly": false,
+			"relationshipType": "oneToMany",
+			"required": true,
+			"system": true,
+			"type": "Long"
 		}
 	],
 	"objectFolderExternalReferenceCode": "default",
+	"objectValidationRules": [
+		{
+			"active": true,
+			"engine": "compositeKey",
+			"engineLabel": "Composite Key",
+			"errorLabel": {
+				"en_US": "A setting with this name already exists for this account and agent."
+			},
+			"name": {
+				"en_US": "Unique Account Agent And Setting Name"
+			},
+			"objectValidationRuleSettings": [
+				{
+					"name": "compositeKeyObjectFieldExternalReferenceCode",
+					"value": "ACCOUNT_TO_AI_HUB_AGENT_DEFINITION_SETTINGS"
+				},
+				{
+					"name": "compositeKeyObjectFieldExternalReferenceCode",
+					"value": "AGENT_DEFINITION_EXTERNAL_REFERENCE_CODE"
+				},
+				{
+					"name": "compositeKeyObjectFieldExternalReferenceCode",
+					"value": "NAME"
+				}
+			],
+			"outputType": "fullValidation",
+			"script": "",
+			"system": true
+		}
+	],
 	"panelCategoryKey": "control_panel.object",
 	"pluralLabel": {
 		"en_US": "AI Hub Agent Definition Settings"
