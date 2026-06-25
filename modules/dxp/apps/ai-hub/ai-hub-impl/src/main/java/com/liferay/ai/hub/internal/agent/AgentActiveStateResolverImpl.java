@@ -5,7 +5,9 @@
 
 package com.liferay.ai.hub.internal.agent;
 
+import com.liferay.account.model.AccountEntry;
 import com.liferay.ai.hub.agent.AgentActiveStateResolver;
+import com.liferay.ai.hub.util.AccountEntryUtil;
 import com.liferay.object.rest.dto.v1_0.ObjectEntry;
 import com.liferay.object.rest.manager.v1_0.ObjectEntryManager;
 import com.liferay.object.service.ObjectDefinitionLocalService;
@@ -36,6 +38,13 @@ public class AgentActiveStateResolverImpl implements AgentActiveStateResolver {
 			return Collections.emptyMap();
 		}
 
+		AccountEntry accountEntry = AccountEntryUtil.getUserAccountEntry(
+			dtoConverterContext.getUserId());
+
+		if (accountEntry == null) {
+			return Collections.emptyMap();
+		}
+
 		Page<ObjectEntry> page = _objectEntryManager.getObjectEntries(
 			companyId,
 			_objectDefinitionLocalService.getObjectDefinition(
@@ -47,6 +56,14 @@ public class AgentActiveStateResolverImpl implements AgentActiveStateResolver {
 			new HashMap<>();
 
 		for (ObjectEntry objectEntry : page.getItems()) {
+			if (accountEntry.getAccountEntryId() != GetterUtil.getLong(
+					objectEntry.getPropertyValue(
+						"r_accountToAIHubAgentDefinitionSettings_" +
+							"accountEntryId"))) {
+
+				continue;
+			}
+
 			activeByAgentExternalReferenceCode.put(
 				GetterUtil.getString(
 					objectEntry.getPropertyValue(
