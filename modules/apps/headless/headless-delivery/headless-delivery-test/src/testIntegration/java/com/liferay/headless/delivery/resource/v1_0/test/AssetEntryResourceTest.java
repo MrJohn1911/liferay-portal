@@ -41,7 +41,9 @@ public class AssetEntryResourceTest extends BaseAssetEntryResourceTestCase {
 	public void testGetAssetEntriesPage() throws Exception {
 		super.testGetAssetEntriesPage();
 
+		_testGetAssetEntriesPageAssetEntryFields();
 		_testGetAssetEntriesPageWithClassNameIdFilter();
+		_testGetAssetEntriesPageWithClassPKFilter();
 		_testGetAssetEntriesPageWithClassTypeIdFilter();
 		_testGetAssetEntriesPageWithMultipleClassNameIdsFilter();
 		_testGetAssetEntriesPageWithMultipleGroupIds();
@@ -89,6 +91,36 @@ public class AssetEntryResourceTest extends BaseAssetEntryResourceTestCase {
 		return false;
 	}
 
+	private void _testGetAssetEntriesPageAssetEntryFields() throws Exception {
+		Long groupId = testGroup.getGroupId();
+
+		BlogsEntry blogsEntry = _addBlogsEntry(groupId);
+
+		Page<AssetEntry> page = assetEntryResource.getAssetEntriesPage(
+			new Long[] {groupId}, null, null,
+			"classNameId eq " +
+				PortalUtil.getClassNameId(BlogsEntry.class.getName()),
+			Pagination.of(1, 20), null);
+
+		AssetEntry assetEntry = null;
+
+		for (AssetEntry curAssetEntry : (List<AssetEntry>)page.getItems()) {
+			Long classPK = curAssetEntry.getClassPK();
+
+			if ((classPK != null) && (classPK == blogsEntry.getEntryId())) {
+				assetEntry = curAssetEntry;
+
+				break;
+			}
+		}
+
+		Assert.assertNotNull(assetEntry.getCreator());
+		Assert.assertNotNull(assetEntry.getDateModified());
+		Assert.assertEquals(
+			Integer.valueOf(WorkflowConstants.STATUS_APPROVED),
+			assetEntry.getStatus());
+	}
+
 	private void _testGetAssetEntriesPageWithClassNameIdFilter()
 		throws Exception {
 
@@ -110,6 +142,23 @@ public class AssetEntryResourceTest extends BaseAssetEntryResourceTestCase {
 		Assert.assertTrue(_hasClassPK(assetEntries, blogsEntry.getEntryId()));
 		Assert.assertFalse(
 			_hasClassPK(assetEntries, journalArticle.getResourcePrimKey()));
+	}
+
+	private void _testGetAssetEntriesPageWithClassPKFilter() throws Exception {
+		Long groupId = testGroup.getGroupId();
+
+		BlogsEntry blogsEntry1 = _addBlogsEntry(groupId);
+		BlogsEntry blogsEntry2 = _addBlogsEntry(groupId);
+
+		Page<AssetEntry> page = assetEntryResource.getAssetEntriesPage(
+			new Long[] {groupId}, null, null,
+			"classPK eq " + blogsEntry1.getEntryId(), Pagination.of(1, 20),
+			null);
+
+		List<AssetEntry> assetEntries = (List<AssetEntry>)page.getItems();
+
+		Assert.assertTrue(_hasClassPK(assetEntries, blogsEntry1.getEntryId()));
+		Assert.assertFalse(_hasClassPK(assetEntries, blogsEntry2.getEntryId()));
 	}
 
 	private void _testGetAssetEntriesPageWithClassTypeIdFilter()

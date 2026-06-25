@@ -731,11 +731,8 @@ public class BatchEngineImportTaskPersistenceImpl
 				session.save(batchEngineImportTask);
 			}
 			else {
-				session.evict(
-					BatchEngineImportTaskImpl.class,
-					batchEngineImportTask.getPrimaryKeyObj());
-
-				session.saveOrUpdate(batchEngineImportTask);
+				batchEngineImportTask = (BatchEngineImportTask)session.merge(
+					batchEngineImportTask);
 			}
 
 			session.flush();
@@ -836,7 +833,7 @@ public class BatchEngineImportTaskPersistenceImpl
 			_SQL_SELECT_BATCHENGINEIMPORTTASK_WHERE,
 			_SQL_COUNT_BATCHENGINEIMPORTTASK_WHERE,
 			BatchEngineImportTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
-			"",
+			"", "",
 			new FinderColumn<>(
 				"batchEngineImportTask.", "uuid", "uuid_",
 				FinderColumn.Type.STRING, "=", true, true,
@@ -864,7 +861,7 @@ public class BatchEngineImportTaskPersistenceImpl
 				_SQL_SELECT_BATCHENGINEIMPORTTASK_WHERE,
 				_SQL_COUNT_BATCHENGINEIMPORTTASK_WHERE,
 				BatchEngineImportTaskModelImpl.ORDER_BY_JPQL,
-				_ENTITY_ALIAS_PREFIX, "",
+				_ENTITY_ALIAS_PREFIX, "", "",
 				new FinderColumn<>(
 					"batchEngineImportTask.", "uuid", "uuid_",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -896,7 +893,7 @@ public class BatchEngineImportTaskPersistenceImpl
 				_SQL_SELECT_BATCHENGINEIMPORTTASK_WHERE,
 				_SQL_COUNT_BATCHENGINEIMPORTTASK_WHERE,
 				BatchEngineImportTaskModelImpl.ORDER_BY_JPQL,
-				_ENTITY_ALIAS_PREFIX, "",
+				_ENTITY_ALIAS_PREFIX, "", "",
 				new FinderColumn<>(
 					"batchEngineImportTask.", "companyId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -927,7 +924,7 @@ public class BatchEngineImportTaskPersistenceImpl
 				_SQL_SELECT_BATCHENGINEIMPORTTASK_WHERE,
 				_SQL_COUNT_BATCHENGINEIMPORTTASK_WHERE,
 				BatchEngineImportTaskModelImpl.ORDER_BY_JPQL,
-				_ENTITY_ALIAS_PREFIX, "",
+				_ENTITY_ALIAS_PREFIX, "", "",
 				new FinderColumn<>(
 					"batchEngineImportTask.", "executeStatus",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -1021,4 +1018,4 @@ public class BatchEngineImportTaskPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1843698253
+// LIFERAY-SERVICE-BUILDER-HASH:-1723602086

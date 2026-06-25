@@ -179,9 +179,11 @@ public class LayoutPageTemplateStructureRelElementVariationPersistenceTest {
 		newLayoutPageTemplateStructureRelElementVariation.setTargetElement(
 			RandomTestUtil.randomString());
 
+		newLayoutPageTemplateStructureRelElementVariation = _persistence.update(
+			newLayoutPageTemplateStructureRelElementVariation);
+
 		_layoutPageTemplateStructureRelElementVariations.add(
-			_persistence.update(
-				newLayoutPageTemplateStructureRelElementVariation));
+			newLayoutPageTemplateStructureRelElementVariation);
 
 		LayoutPageTemplateStructureRelElementVariation
 			existingLayoutPageTemplateStructureRelElementVariation =
@@ -391,8 +393,8 @@ public class LayoutPageTemplateStructureRelElementVariationPersistenceTest {
 		getOrderByComparator() {
 
 		return OrderByComparatorFactoryUtil.create(
-			"LPTStructureElementVariation", "mvccVersion", true,
-			"ctCollectionId", true, "uuid", true, "externalReferenceCode", true,
+			"LPTSRelElementVariation", "mvccVersion", true, "ctCollectionId",
+			true, "uuid", true, "externalReferenceCode", true,
 			"layoutPageTemplateStructureRelElementVariationId", true, "groupId",
 			true, "companyId", true, "userId", true, "userName", true,
 			"createDate", true, "modifiedDate", true, "audienceEntryERC", true,
@@ -854,4 +856,4 @@ public class LayoutPageTemplateStructureRelElementVariationPersistenceTest {
 	private ClassLoader _dynamicQueryClassLoader;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:116599080
+// LIFERAY-SERVICE-BUILDER-HASH:1335631027

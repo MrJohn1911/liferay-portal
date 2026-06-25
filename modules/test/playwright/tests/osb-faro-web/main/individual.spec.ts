@@ -4,12 +4,14 @@
  */
 
 import {expect, mergeTests} from '@playwright/test';
+import {createHash} from 'crypto';
 
 import {apiHelpersTest} from '../../../fixtures/apiHelpersTest';
 import {featureFlagsTest} from '../../../fixtures/featureFlagsTest';
 import {isolatedDXPSyncedChannelTest} from '../../../fixtures/isolatedDXPSyncedChannelTest';
 import {loginAnalyticsCloudTest} from '../../../fixtures/loginAnalyticsCloudTest';
 import {loginTest} from '../../../fixtures/loginTest';
+import {clickAndExpectToBeVisible} from '../../../utils/clickAndExpectToBeVisible';
 import getRandomString from '../../../utils/getRandomString';
 import {syncAnalyticsCloudViaAPI} from '../../analytics-settings-web/main/utils/analytics-settings';
 import getFragmentDefinition from '../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
@@ -20,9 +22,20 @@ import {
 	viewBreakdownRechartsData,
 } from './utils/distribution';
 import {createIndividuals, generateIndividual} from './utils/individuals';
-import {ACPage, navigateToACPageViaURL} from './utils/navigation';
+import {waitForLoading} from './utils/loading';
+import {Nanites, runNanites} from './utils/nanites';
+import {
+	ACPage,
+	navigateToACPageViaURL,
+	openIndividualProfileViaURL,
+} from './utils/navigation';
 import {changeTimeFilter} from './utils/time-filter';
-import {viewPaginationResults} from './utils/utils';
+import {
+	selectPaginationItemsPerPage,
+	selectPaginationPageNumber,
+	viewNameListInOrder,
+	viewPaginationResults,
+} from './utils/utils';
 
 export const test = mergeTests(
 	apiHelpersTest,
@@ -327,6 +340,407 @@ test(
 );
 
 test(
+	'Individual events card shows the empty state when no events match the active time filter',
+	{
+		tag: '@LRAC-10513',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const individual = {
+			...generateIndividual({name: 'empty' + getRandomString()}),
+			dataSourceId,
+		};
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		// Create an old event outside the Last 24 hours window so the user appears in the list but the events card is empty under that filter
+
+		const oldDate = new Date();
+
+		oldDate.setDate(oldDate.getDate() - 10);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents([
+			{
+				applicationId: 'Page',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				emailAddressHashed: createHash('sha256')
+					.update(`${individual.name}@liferay.com`)
+					.digest('hex'),
+				eventDate: oldDate.toISOString(),
+				eventId: 'pageViewed',
+				sessionId: individual.id,
+				title: 'My Page',
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: oldDate.toISOString(),
+				sessionStart: oldDate.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createIdentityActivitiesSummary(
+			[
+				{
+					activitiesCount: 1,
+					channelId: channel.id,
+					dataSourceId,
+					eventId: 'pageViewed',
+					firstActivityDate: oldDate.toISOString(),
+					identityId: individual.id,
+					individualId: individual.id,
+					lastActivityDate: oldDate.toISOString(),
+				},
+			]
+		);
+
+		await openIndividualProfileViaURL({
+			channelID: channel.id,
+			individualId: individual.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		await expect(
+			page.getByRole('button', {name: 'pageViewed'})
+		).toBeVisible();
+
+		// Switch the Individual Events card time filter to Last 24 hours to exclude the seeded event
+
+		await changeTimeFilter({page, timeFilterPeriod: 'Last 24 hours'});
+
+		await expect(
+			page.getByText('There are no events found.').first()
+		).toBeVisible();
+	}
+);
+
+test(
+	'Individual activities feed shows only that individuals own events',
+	{
+		tag: '@LRAC-10509',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const runId = getRandomString();
+
+		const individualA = {
+			...generateIndividual({name: 'userA' + runId}),
+			dataSourceId,
+		};
+		const individualB = {
+			...generateIndividual({name: 'userB' + runId}),
+			dataSourceId,
+		};
+
+		await createIndividuals({
+			apiHelpers,
+			individuals: [individualA, individualB],
+		});
+
+		const customEventA = 'customEventA-' + runId;
+		const customEventB = 'customEventB-' + runId;
+
+		const date = new Date();
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents([
+			{
+				applicationId: 'Custom',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				eventDate: date.toISOString(),
+				eventId: customEventA,
+				title: customEventA,
+				userId: individualA.id,
+			},
+			{
+				applicationId: 'Custom',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				eventDate: date.toISOString(),
+				eventId: customEventB,
+				title: customEventB,
+				userId: individualB.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individualA.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individualA.id,
+			},
+			{
+				channelId: channel.id,
+				id: individualB.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individualB.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEventDefinition([
+			{
+				applicationId: 'Custom',
+				displayName: customEventA,
+				name: customEventA,
+				type: 'CUSTOM',
+			},
+			{
+				applicationId: 'Custom',
+				displayName: customEventB,
+				name: customEventB,
+				type: 'CUSTOM',
+			},
+		]);
+
+		await test.step('Open user A and assert only their custom event is listed', async () => {
+			await openIndividualProfileViaURL({
+				channelID: channel.id,
+				individualId: individualA.id,
+				page,
+				projectID: project.groupId,
+			});
+
+			// Switch the individual activities chart to the Last 24 hours view
+
+			await changeTimeFilter({page, timeFilterPeriod: 'Last 24 hours'});
+
+			await expect(page.getByText(customEventA).first()).toBeVisible();
+
+			await expect(page.getByText(customEventB)).not.toBeVisible();
+		});
+
+		await test.step('Open user B and assert only their custom event is listed', async () => {
+			await openIndividualProfileViaURL({
+				channelID: channel.id,
+				individualId: individualB.id,
+				page,
+				projectID: project.groupId,
+			});
+
+			// Switch the individual activities chart to the Last 24 hours view
+
+			await changeTimeFilter({page, timeFilterPeriod: 'Last 24 hours'});
+
+			await expect(page.getByText(customEventB).first()).toBeVisible();
+
+			await expect(page.getByText(customEventA)).not.toBeVisible();
+		});
+	}
+);
+
+test(
+	'Individual activities list shows todays activities when switched to the 24 hour view',
+	{
+		tag: '@LRAC-8151',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const individual = {
+			...generateIndividual({name: 'activities' + getRandomString()}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		// Seed several activities for today so they fall inside the Last 24
+		// hours window
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents(
+			['a', 'b', 'c'].map((suffix) => ({
+				applicationId: 'Document',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				emailAddressHashed: createHash('sha256')
+					.update(`${individual.name}@liferay.com`)
+					.digest('hex'),
+				eventDate: date.toISOString(),
+				eventId: 'documentPreviewed',
+				sessionId: individual.id,
+				title: `documentPreviewed-${suffix}`,
+				userId: individual.id,
+			}))
+		);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createIdentityActivitiesSummary(
+			[
+				{
+					activitiesCount: 3,
+					channelId: channel.id,
+					dataSourceId,
+					eventId: 'documentPreviewed',
+					firstActivityDate: date.toISOString(),
+					identityId: individual.id,
+					individualId: individual.id,
+					lastActivityDate: date.toISOString(),
+				},
+			]
+		);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEventDefinition([
+			{
+				applicationId: 'Document',
+				displayName: 'documentPreviewed',
+				name: 'documentPreviewed',
+				type: 'DEFAULT',
+			},
+		]);
+
+		await openIndividualProfileViaURL({
+			channelID: channel.id,
+			individualId: individual.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		// Switch the individual activities chart to the Last 24 hours view
+
+		await changeTimeFilter({page, timeFilterPeriod: 'Last 24 hours'});
+
+		// The seeded events show up in the individual activities feed
+
+		await expect(
+			page.getByRole('button', {name: 'documentPreviewed'})
+		).toHaveCount(3);
+
+		// The activities chart still renders bars for todays seeded events
+
+		await expect(
+			page
+				.locator(
+					'.individuals-activities-chart .recharts-bar-rectangle'
+				)
+				.first()
+		).toBeAttached();
+	}
+);
+
+test(
+	'Total Individuals count reflects a newly ingested known individual',
+	{
+		tag: '@LRAC-8832',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const totalIndividuals = page
+			.locator('.trend-item-root')
+			.filter({hasText: 'Total Individuals'})
+			.locator('.total');
+
+		await navigateToACPageViaURL({
+			acPage: ACPage.individualPage,
+			channelID: channel.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		// The freshly synced channel has no ingested individuals yet
+
+		await expect(totalIndividuals).toHaveText('0');
+
+		// Ingest a single known individual with activity
+
+		const individual = {
+			...generateIndividual({name: 'total' + getRandomString()}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents([
+			{
+				applicationId: 'Page',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				eventDate: date.toISOString(),
+				eventId: 'pageViewed',
+				title: 'My Page',
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		// Close sessions so the individual's activity is processed into the count
+
+		await apiHelpers.jsonWebServicesOSBAsah.closeSessions();
+
+		// The Total Individuals trend counts the individual once the closed
+		// session is processed
+
+		await expect(async () => {
+			await page.reload();
+
+			await expect(totalIndividuals).toHaveText('1', {timeout: 5000});
+		}).toPass({timeout: 60000});
+	}
+);
+
+test(
 	'The Individuals dashboard overview shows all of its summary cards',
 	{
 		tag: '@LRAC-8903',
@@ -508,3 +922,817 @@ test('Active Individuals card is empty for a custom range with no activity', asy
 		page.getByText('There is no data for active individuals.')
 	).toBeVisible();
 });
+
+test(
+	'Individual profile Overview tab shows all of its summary cards',
+	{
+		tag: '@LRAC-8902',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const individual = {
+			...generateIndividual({name: 'cards' + getRandomString()}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents([
+			{
+				applicationId: 'Page',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				eventDate: date.toISOString(),
+				eventId: 'pageViewed',
+				title: 'My Page',
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		// Open the individual profile from the Known Individuals list
+
+		await openIndividualProfileViaURL({
+			channelID: channel.id,
+			individualId: individual.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		// The Overview tab lists the individual summary cards
+
+		for (const cardTitle of [
+			'Individual Events',
+			'Current Interests',
+			'Associated Segments',
+		]) {
+			await expect(page.getByText(cardTitle).first()).toBeVisible();
+		}
+	}
+);
+
+test(
+	'Individual associated segments list paginates',
+	{
+		tag: '@LRAC-9003',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const runId = getRandomString();
+
+		const individual = {
+			...generateIndividual({name: 'seg' + runId}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		// The individual belongs to six dynamic segments matching its given name
+
+		const segmentIds = [];
+
+		for (let i = 1; i <= 6; i++) {
+			const segment =
+				await apiHelpers.jsonWebServicesOSBFaro.createIndividualSegment(
+					{
+						channelId: channel.id,
+						filter: `(firstName eq '${individual.name}')`,
+						groupId: project.groupId,
+						name: `Segment ${i} ${runId}`,
+					}
+				);
+
+			segmentIds.push(segment.id);
+		}
+
+		try {
+			await runNanites({
+				apiHelpers,
+				naniteNames: [Nanites.UpdateMembershipsNanite],
+				page,
+			});
+
+			// Open the individual profile Segments tab
+
+			await openIndividualProfileViaURL({
+				channelID: channel.id,
+				individualId: individual.id,
+				page,
+				projectID: project.groupId,
+			});
+
+			await page.getByRole('link', {name: 'Segments'}).click();
+
+			// All six segments fit on the default page
+
+			await viewPaginationResults({
+				page,
+				paginationResults: 'Showing 1 to 6 of 6 entries.',
+			});
+
+			// Four per page splits the six segments across two pages
+
+			await selectPaginationItemsPerPage({itemsPerPage: '4', page});
+
+			await viewPaginationResults({
+				page,
+				paginationResults: 'Showing 1 to 4 of 6 entries.',
+			});
+
+			await selectPaginationPageNumber({page, paginationPageNumber: '2'});
+
+			await viewPaginationResults({
+				page,
+				paginationResults: 'Showing 5 to 6 of 6 entries.',
+			});
+		}
+		finally {
+			await apiHelpers.jsonWebServicesOSBFaro.deleteIndividualSegments(
+				`[${segmentIds.join(',')}]`,
+				project.groupId
+			);
+		}
+	}
+);
+
+test(
+	'Individual associated segments list can be ordered by name',
+	{
+		tag: '@LRAC-8991',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const runId = getRandomString();
+
+		const individual = {
+			...generateIndividual({name: 'seg' + runId}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		// Three dynamic segments matching the individual, named to sort A, B, C
+
+		const segmentNames = [
+			`Segment ${runId} A`,
+			`Segment ${runId} B`,
+			`Segment ${runId} C`,
+		];
+
+		const segmentIds = [];
+
+		for (const name of segmentNames) {
+			const segment =
+				await apiHelpers.jsonWebServicesOSBFaro.createIndividualSegment(
+					{
+						channelId: channel.id,
+						filter: `(firstName eq '${individual.name}')`,
+						groupId: project.groupId,
+						name,
+					}
+				);
+
+			segmentIds.push(segment.id);
+		}
+
+		try {
+			await runNanites({
+				apiHelpers,
+				naniteNames: [Nanites.UpdateMembershipsNanite],
+				page,
+			});
+
+			// Open the individual profile Segments tab
+
+			await openIndividualProfileViaURL({
+				channelID: channel.id,
+				individualId: individual.id,
+				page,
+				projectID: project.groupId,
+			});
+
+			await page.getByRole('link', {name: 'Segments'}).click();
+
+			// Ordering by name lists the segments alphabetically
+
+			await clickAndExpectToBeVisible({
+				autoClick: true,
+				target: page.getByRole('menuitem', {name: 'Name'}),
+				trigger: page.getByRole('button', {name: 'Order'}),
+			});
+
+			await viewNameListInOrder({itemNames: segmentNames, page});
+		}
+		finally {
+			await apiHelpers.jsonWebServicesOSBFaro.deleteIndividualSegments(
+				`[${segmentIds.join(',')}]`,
+				project.groupId
+			);
+		}
+	}
+);
+
+test(
+	'Individual associated segment can be selected to view its membership',
+	{
+		tag: '@LRAC-8993',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const runId = getRandomString();
+
+		const individual = {
+			...generateIndividual({name: 'seg' + runId}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		const segmentNames = [`Segment ${runId} A`, `Segment ${runId} B`];
+
+		const segmentIds = [];
+
+		for (const name of segmentNames) {
+			const segment =
+				await apiHelpers.jsonWebServicesOSBFaro.createIndividualSegment(
+					{
+						channelId: channel.id,
+						filter: `(firstName eq '${individual.name}')`,
+						groupId: project.groupId,
+						name,
+					}
+				);
+
+			segmentIds.push(segment.id);
+		}
+
+		try {
+			await runNanites({
+				apiHelpers,
+				naniteNames: [Nanites.UpdateMembershipsNanite],
+				page,
+			});
+
+			// Open the individual profile Segments tab
+
+			await openIndividualProfileViaURL({
+				channelID: channel.id,
+				individualId: individual.id,
+				page,
+				projectID: project.groupId,
+			});
+
+			await page.getByRole('link', {name: 'Segments'}).click();
+
+			// Select an associated segment and open its membership
+
+			await page.getByRole('link', {name: segmentNames[1]}).click();
+
+			await page.getByRole('link', {name: 'Membership'}).click();
+
+			await expect(
+				page.getByText(`${individual.name} Smith`).first()
+			).toBeVisible();
+		}
+		finally {
+			await apiHelpers.jsonWebServicesOSBFaro.deleteIndividualSegments(
+				`[${segmentIds.join(',')}]`,
+				project.groupId
+			);
+		}
+	}
+);
+
+test(
+	'Individual Events activity can be expanded to view its event attributes',
+	{
+		tag: '@LRAC-8907',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const individual = {
+			...generateIndividual({name: 'act' + getRandomString()}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		const pastDate = new Date(date);
+
+		pastDate.setDate(pastDate.getDate() - 1);
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents([
+			{
+				applicationId: 'Page',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				emailAddressHashed: createHash('sha256')
+					.update(`${individual.name}@liferay.com`)
+					.digest('hex'),
+				eventDate: pastDate.toISOString(),
+				eventId: 'pageViewed',
+				sessionId: individual.id,
+				title: 'pageViewed',
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createIdentityActivitiesSummary(
+			[
+				{
+					activitiesCount: 1,
+					channelId: channel.id,
+					dataSourceId,
+					eventId: 'pageViewed',
+					firstActivityDate: date.toISOString(),
+					identityId: individual.id,
+					individualId: individual.id,
+					lastActivityDate: date.toISOString(),
+				},
+			]
+		);
+
+		// Open the individual profile
+
+		await openIndividualProfileViaURL({
+			channelID: channel.id,
+			individualId: individual.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		// Expand the activity in the Individual Events timeline
+
+		await changeTimeFilter({page, timeFilterPeriod: 'Last 24 hours'});
+
+		await page.getByText('pageViewed').first().click();
+
+		await expect(page.getByText('"applicationId": "Page"')).toBeVisible();
+		await expect(page.getByText('"eventId": "pageViewed"')).toBeVisible();
+	}
+);
+
+test(
+	'A selected individual activity point can clear its date selection',
+	{
+		tag: '@LRAC-8916',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const individual = {
+			...generateIndividual({name: 'act' + getRandomString()}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		const pastDate = new Date(date);
+
+		pastDate.setDate(pastDate.getDate() - 1);
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents([
+			{
+				applicationId: 'Page',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				emailAddressHashed: createHash('sha256')
+					.update(`${individual.name}@liferay.com`)
+					.digest('hex'),
+				eventDate: pastDate.toISOString(),
+				eventId: 'pageViewed',
+				sessionId: individual.id,
+				title: 'pageViewed',
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.closeSessions();
+
+		await apiHelpers.jsonWebServicesOSBAsah.createIdentityActivitiesSummary(
+			[
+				{
+					activitiesCount: 1,
+					channelId: channel.id,
+					dataSourceId,
+					eventId: 'pageViewed',
+					firstActivityDate: date.toISOString(),
+					identityId: individual.id,
+					individualId: individual.id,
+					lastActivityDate: date.toISOString(),
+				},
+			]
+		);
+
+		// Open the individual profile
+
+		await openIndividualProfileViaURL({
+			channelID: channel.id,
+			individualId: individual.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		// Select a point on the activity chart, then clear the date selection
+
+		await page.locator('.recharts-bar-rectangle path').first().click();
+
+		await expect(
+			page.getByRole('button', {name: 'Clear Date Selection'})
+		).toBeVisible();
+
+		await page.getByRole('button', {name: 'Clear Date Selection'}).click();
+
+		await expect(
+			page.getByRole('button', {name: 'Clear Date Selection'})
+		).toHaveCount(0);
+	}
+);
+
+test(
+	'All seeded individual attributes appear in the Details list',
+	{
+		tag: '@LRAC-8938',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const individual = {
+			...generateIndividual({name: 'det' + getRandomString()}),
+			dataSourceId,
+			jobTitle: 'lawyer',
+		};
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents([
+			{
+				applicationId: 'Page',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				emailAddressHashed: createHash('sha256')
+					.update(`${individual.name}@liferay.com`)
+					.digest('hex'),
+				eventDate: date.toISOString(),
+				eventId: 'pageViewed',
+				sessionId: individual.id,
+				title: 'pageViewed',
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createSessions([
+			{
+				channelId: channel.id,
+				id: individual.id,
+				sessionEnd: date.toISOString(),
+				sessionStart: date.toISOString(),
+				userId: individual.id,
+			},
+		]);
+
+		await apiHelpers.jsonWebServicesOSBAsah.createIdentityActivitiesSummary(
+			[
+				{
+					activitiesCount: 1,
+					channelId: channel.id,
+					dataSourceId,
+					eventId: 'pageViewed',
+					firstActivityDate: date.toISOString(),
+					identityId: individual.id,
+					individualId: individual.id,
+					lastActivityDate: date.toISOString(),
+				},
+			]
+		);
+
+		// Open the individual profile Details tab
+
+		await openIndividualProfileViaURL({
+			channelID: channel.id,
+			individualId: individual.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		await waitForLoading(page);
+
+		await page.getByRole('link', {exact: true, name: 'Details'}).click();
+
+		// The seeded attributes appear in the Details list
+
+		await expect(
+			page.getByRole('row').nth(1).getByRole('cell').nth(0)
+		).toContainText('birthDate');
+		await expect(
+			page.getByRole('row').nth(2).getByRole('cell').nth(0)
+		).toContainText('email');
+		await expect(
+			page.getByRole('row').nth(3).getByRole('cell').nth(0)
+		).toContainText('familyName');
+		await expect(
+			page.getByRole('row').nth(4).getByRole('cell').nth(0)
+		).toContainText('givenName');
+		await expect(
+			page.getByRole('row').nth(5).getByRole('cell').nth(0)
+		).toContainText('jobTitle');
+	}
+);
+
+test(
+	'Synced contacts appear in the Known Individuals list',
+	{
+		tag: '@LRAC-12659',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const runId = getRandomString();
+
+		const individuals = [
+			{...generateIndividual({name: 'dxp' + runId}), dataSourceId},
+			{...generateIndividual({name: 'lxc' + runId}), dataSourceId},
+		];
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents(
+			individuals.map((individual) => ({
+				applicationId: 'Page',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				eventDate: date.toISOString(),
+				eventId: 'pageViewed',
+				title: 'pageViewed',
+				userId: individual.id,
+			}))
+		);
+
+		await navigateToACPageViaURL({
+			acPage: ACPage.individualPage,
+			channelID: channel.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		await page.getByRole('link', {name: 'Known Individuals'}).click();
+
+		// Both synced contacts surface in the Known Individuals list
+
+		for (const individual of individuals) {
+			await expect(async () => {
+				await page
+					.getByPlaceholder('Search')
+					.first()
+					.fill(individual.name);
+
+				await expect(
+					page.getByRole('link', {name: individual.name}).first()
+				).toBeVisible({timeout: 3000});
+			}).toPass({timeout: 30000});
+		}
+	}
+);
+
+test(
+	'Contacts synced by user group appear in the Known Individuals list',
+	{
+		tag: '@LRAC-12665',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const individual = {
+			...generateIndividual({name: 'grp' + getRandomString()}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents([
+			{
+				applicationId: 'Page',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				eventDate: date.toISOString(),
+				eventId: 'pageViewed',
+				title: 'pageViewed',
+				userId: individual.id,
+			},
+		]);
+
+		await navigateToACPageViaURL({
+			acPage: ACPage.individualPage,
+			channelID: channel.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		await page.getByRole('link', {name: 'Known Individuals'}).click();
+
+		await expect(async () => {
+			await page.getByPlaceholder('Search').first().fill(individual.name);
+
+			await expect(
+				page.getByRole('link', {name: individual.name}).first()
+			).toBeVisible({timeout: 3000});
+		}).toPass({timeout: 30000});
+	}
+);
+
+test(
+	'Contacts synced by organization appear in the Known Individuals list',
+	{
+		tag: '@LRAC-12662',
+	},
+	async ({
+		analyticsChannel: channel,
+		apiHelpers,
+		dxpSyncedAnalyticsChannel,
+		page,
+		project,
+	}) => {
+		const {dataSourceId} = dxpSyncedAnalyticsChannel;
+
+		const individual = {
+			...generateIndividual({name: 'org' + getRandomString()}),
+			dataSourceId,
+		};
+
+		const date = new Date();
+
+		await createIndividuals({apiHelpers, individuals: [individual]});
+
+		await apiHelpers.jsonWebServicesOSBAsah.createEvents([
+			{
+				applicationId: 'Page',
+				canonicalUrl: 'https://www.liferay.com',
+				channelId: channel.id,
+				dataSourceId,
+				eventDate: date.toISOString(),
+				eventId: 'pageViewed',
+				title: 'pageViewed',
+				userId: individual.id,
+			},
+		]);
+
+		await navigateToACPageViaURL({
+			acPage: ACPage.individualPage,
+			channelID: channel.id,
+			page,
+			projectID: project.groupId,
+		});
+
+		await page.getByRole('link', {name: 'Known Individuals'}).click();
+
+		await expect(async () => {
+			await page.getByPlaceholder('Search').first().fill(individual.name);
+
+			await expect(
+				page.getByRole('link', {name: individual.name}).first()
+			).toBeVisible({timeout: 3000});
+		}).toPass({timeout: 30000});
+	}
+);

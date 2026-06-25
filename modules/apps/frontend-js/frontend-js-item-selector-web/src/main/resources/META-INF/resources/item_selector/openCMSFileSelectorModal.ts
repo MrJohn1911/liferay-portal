@@ -58,7 +58,11 @@ function urlBuilder({
 
 	const scopePredicates = folderId
 		? [`(folderId eq ${folderId})`]
-		: ["(cmsSection eq 'files')", '(cmsRoot eq true)'];
+		: [
+				"(cmsSection eq 'files')",
+				'(cmsRoot eq true)',
+				'(rootDescendantNode eq false)',
+			];
 
 	const filter = [...scopePredicates, '(status in (0, 2, 3))']
 		.concat(filters.filter(Boolean))
@@ -228,6 +232,7 @@ export default function openCMSFileSelectorModal({
 	config,
 	fdsProps,
 	filters,
+	folderMemoryKey,
 	groupId,
 	itemTypeLabel,
 	maxFileSize,
@@ -238,6 +243,14 @@ export default function openCMSFileSelectorModal({
 	config?: Partial<CMSFileItemSelectorModalConfig>;
 	fdsProps?: Partial<CMSFileItemSelectorModalProps['fdsProps']>;
 	filters?: string[];
+
+	/**
+	 * Stable identifier of the field opening the selector. When provided, the
+	 * selector reopens at the folder where this field's previous selection was
+	 * made. Each field must pass its own key so the remembered folder is not
+	 * shared between fields.
+	 */
+	folderMemoryKey?: string;
 	groupId: number;
 	itemTypeLabel?: string;
 	maxFileSize?: number;
@@ -290,6 +303,7 @@ export default function openCMSFileSelectorModal({
 			filesUploaderComponent: allowDragAndDrop
 				? CMSFileUploaderComponent
 				: undefined,
+			folderMemoryKey,
 			groupId,
 			itemTypeLabel: itemTypeLabel ?? Liferay.Language.get('files'),
 			maxFileSize,

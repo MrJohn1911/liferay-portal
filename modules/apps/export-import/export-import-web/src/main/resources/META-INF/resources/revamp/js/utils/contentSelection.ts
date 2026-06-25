@@ -6,6 +6,7 @@
 import {sub} from 'frontend-js-web';
 
 import {
+	PreviewPortletDataHandlerBoolean,
 	PreviewPortletDataHandlerControl,
 	PreviewPortletDataHandlerSection,
 } from '../types/portletDataHandler';
@@ -67,7 +68,7 @@ export function isSelected(
 	);
 }
 
-export function getInitialSelection(
+export function getHandlerSelection(
 	entry: PreviewPortletDataHandlerControl
 ): HandlerSelection {
 	if (entry.name === LAYOUT_SET_LAYOUTS_PORTLET_DATA_KEY) {
@@ -82,14 +83,102 @@ export function getInitialSelection(
 		return true;
 	}
 
-	return getInitialSelections(entry.previewPortletDataHandlerControls);
+	return getHandlerSelections(entry.previewPortletDataHandlerControls);
 }
 
-export function getInitialSelections(
+export function getHandlerSelections(
 	controls: PreviewPortletDataHandlerControl[]
 ): Record<string, HandlerSelection> {
 	return Object.fromEntries(
-		controls.map((control) => [control.name, getInitialSelection(control)])
+		controls.map((control) => [control.name, getHandlerSelection(control)])
+	);
+}
+
+export function getSectionPreviewPortletDataHandlers(
+	section: PreviewPortletDataHandlerSection,
+	{lookAndFeelEnabled = false}: {lookAndFeelEnabled?: boolean} = {}
+): PreviewPortletDataHandlerBoolean[] {
+	const previewPortletDataHandlers =
+		section.previewPortletDataHandlers.map<PreviewPortletDataHandlerBoolean>(
+			(handler) => ({...handler, type: 'Boolean'})
+		);
+
+	if (!(lookAndFeelEnabled && section.name === SITE_BUILDER_SECTION_KEY)) {
+		return previewPortletDataHandlers;
+	}
+
+	return [
+		...previewPortletDataHandlers,
+		{
+			label: Liferay.Language.get('look-and-feel'),
+			name: 'lookAndFeel',
+			previewPortletDataHandlerControls: [
+				{
+					label: Liferay.Language.get('theme-settings'),
+					name: 'themeSettings',
+					type: 'Boolean',
+				},
+				{
+					label: Liferay.Language.get('logo'),
+					name: 'logo',
+					type: 'Boolean',
+				},
+				{
+					label: Liferay.Language.get('site-pages-settings'),
+					name: 'sitePagesSettings',
+					type: 'Boolean',
+				},
+				{
+					label: Liferay.Language.get('site-template-settings'),
+					name: 'siteTemplateSettings',
+					type: 'Boolean',
+				},
+			],
+			type: 'Boolean',
+		},
+	];
+}
+
+export function getSectionSelection(
+	section: PreviewPortletDataHandlerSection,
+	{
+		commentsAndRatingsEnabled = false,
+		lookAndFeelEnabled = false,
+	}: {commentsAndRatingsEnabled?: boolean; lookAndFeelEnabled?: boolean} = {}
+): Record<string, HandlerSelection> {
+	const selection = getHandlerSelections(
+		getSectionPreviewPortletDataHandlers(section, {lookAndFeelEnabled})
+	);
+
+	if (commentsAndRatingsEnabled && section.name === CONTENT_SECTION_KEY) {
+		selection.commentsAndRatings = {comments: true, ratings: true};
+	}
+
+	return selection;
+}
+
+export function getFullDataSelection(
+	sections: PreviewPortletDataHandlerSection[],
+	{
+		commentsAndRatingsEnabled = false,
+		lookAndFeelEnabled = false,
+		showDeletions = false,
+	}: {
+		commentsAndRatingsEnabled?: boolean;
+		lookAndFeelEnabled?: boolean;
+		showDeletions?: boolean;
+	} = {}
+): ContentSelection {
+	return Object.fromEntries(
+		getVisibleSections(sections, {lookAndFeelEnabled, showDeletions}).map(
+			(section) => [
+				section.name,
+				getSectionSelection(section, {
+					commentsAndRatingsEnabled,
+					lookAndFeelEnabled,
+				}),
+			]
+		)
 	);
 }
 
@@ -144,6 +233,26 @@ export function withSiteBuilderSection(
 			previewPortletDataHandlers: [],
 		},
 	];
+}
+
+export function getVisibleSections(
+	sections: PreviewPortletDataHandlerSection[],
+	{
+		lookAndFeelEnabled = false,
+		showDeletions = false,
+	}: {lookAndFeelEnabled?: boolean; showDeletions?: boolean} = {}
+): PreviewPortletDataHandlerSection[] {
+	const filteredSections = sections.filter(
+		(section) =>
+			showDeletions || !!section.additionCount || !section.deletionCount
+	);
+
+	return lookAndFeelEnabled
+		? withSiteBuilderSection(
+				filteredSections,
+				Liferay.Language.get('category.site_administration.build')
+			)
+		: filteredSections;
 }
 
 export function toProcessRequestFlags(

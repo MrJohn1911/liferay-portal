@@ -45,11 +45,20 @@ public class DefaultBuildUpdater extends BaseBuildUpdater {
 	public void reinvoke(Map<String, String> reinvokeBuildParameters) {
 		Build build = getBuild();
 
+		JenkinsMaster currentJenkinsMaster = null;
+
+		Build.Invocation currentInvocation = build.getCurrentInvocation();
+
+		if (currentInvocation != null) {
+			currentJenkinsMaster = currentInvocation.getJenkinsMaster();
+		}
+
 		JenkinsCohort jenkinsCohort = build.getJenkinsCohort();
 
 		JenkinsMaster jenkinsMaster =
 			jenkinsCohort.getMostAvailableJenkinsMaster(
-				build.getInvokedBatchSize(), build.getJobName());
+				currentJenkinsMaster, build.getInvokedBatchSize(),
+				build.getJobName());
 
 		build.setJenkinsMaster(jenkinsMaster);
 
@@ -350,6 +359,16 @@ public class DefaultBuildUpdater extends BaseBuildUpdater {
 		Map<String, String> reinvokeBuildParameters) {
 
 		Build build = getBuild();
+
+		Build parentBuild = build.getParentBuild();
+
+		if (parentBuild != null) {
+			String parentBuildURL = parentBuild.getBuildURL();
+
+			if (!JenkinsResultsParserUtil.isNullOrEmpty(parentBuildURL)) {
+				build.setParameterValue("PARENT_BUILD_URL", parentBuildURL);
+			}
+		}
 
 		Map<String, String> buildParameters = new HashMap<>(
 			build.getParameters());

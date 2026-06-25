@@ -5,16 +5,22 @@
 
 package com.liferay.frontend.js.audiences.web.internal.servlet.taglib;
 
+import com.liferay.frontend.js.audiences.AudiencesDefinition;
+import com.liferay.frontend.js.audiences.AudiencesDefinitionProvider;
+import com.liferay.frontend.js.audiences.ElementVariations;
+import com.liferay.frontend.js.audiences.ElementVariationsProvider;
 import com.liferay.frontend.js.audiences.web.internal.configuration.FrontendJSAudiencesConfiguration;
+import com.liferay.frontend.js.audiences.web.internal.util.BootstrapJavaScriptUtil;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
+import com.liferay.portal.kernel.content.security.policy.ContentSecurityPolicyNonceProviderUtil;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.module.configuration.ConfigurationException;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.url.builder.AbsolutePortalURLBuilder;
 import com.liferay.portal.url.builder.AbsolutePortalURLBuilderFactory;
-import com.liferay.portal.url.builder.ESModuleAbsolutePortalURLBuilder;
 import com.liferay.portal.url.builder.ServletAbsolutePortalURLBuilder;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,61 +45,72 @@ public class FrontendJSAudiencesWebTopHeadDynamicInclude
 			HttpServletResponse httpServletResponse, String key)
 		throws IOException {
 
+		long companyId = _portal.getCompanyId(httpServletRequest);
+
+		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-83647")) {
+			return;
+		}
+
+		AudiencesDefinition audiencesDefinition =
+			_audiencesDefinitionProvider.getAudiencesDefinition(companyId);
+
+		if (audiencesDefinition == null) {
+			return;
+		}
+
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)httpServletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
-		if (!FeatureFlagManagerUtil.isEnabled(
-				themeDisplay.getCompanyId(), "LPD-83647")) {
+		ElementVariations elementVariations =
+			_elementVariationsProvider.getElementVariations(
+				themeDisplay.getPlid());
 
+		if (elementVariations == null) {
 			return;
-		}
-
-		FrontendJSAudiencesConfiguration frontendJSAudiencesConfiguration;
-
-		try {
-			frontendJSAudiencesConfiguration =
-				_configurationProvider.getCompanyConfiguration(
-					FrontendJSAudiencesConfiguration.class,
-					themeDisplay.getCompanyId());
-		}
-		catch (ConfigurationException configurationException) {
-			throw new IOException(configurationException);
 		}
 
 		PrintWriter printWriter = httpServletResponse.getWriter();
 
-		printWriter.println(
-			"<script data-senna-track=\"temporary\" type=\"module\">");
-		printWriter.print("import {audiences} from '");
+		printWriter.print("<script data-senna-track=\"temporary\"");
+		printWriter.print(
+			ContentSecurityPolicyNonceProviderUtil.getNonceAttribute(
+				httpServletRequest));
+		printWriter.print(" src=\"");
 
 		AbsolutePortalURLBuilder absolutePortalURLBuilder =
 			_absolutePortalURLBuilderFactory.getAbsolutePortalURLBuilder(
 				httpServletRequest);
-
-		ESModuleAbsolutePortalURLBuilder esModuleAbsolutePortalURLBuilder =
-			absolutePortalURLBuilder.forESModule(
-				"frontend-js-audiences-web", "index.js");
-
-		printWriter.print(esModuleAbsolutePortalURLBuilder.build());
-
-		printWriter.println("';");
-
-		if (frontendJSAudiencesConfiguration.enableLog()) {
-			printWriter.println("audiences.setLogEnabled(true);");
-		}
-
-		printWriter.println("audiences.clear('PAGE');");
-		printWriter.print("await audiences.runDetection('");
 
 		ServletAbsolutePortalURLBuilder servletAbsolutePortalURLBuilder =
 			absolutePortalURLBuilder.forServlet("/audiences");
 
 		printWriter.print(servletAbsolutePortalURLBuilder.build());
 
-		printWriter.println("');");
-		printWriter.println("await audiences.runHandlers();");
-		printWriter.println("</script>");
+		printWriter.print("/bootstrap.(");
+		printWriter.print(BootstrapJavaScriptUtil.getHash());
+		printWriter.print(").js?audiencesDefinitionHash=");
+		printWriter.print(audiencesDefinition.getHash());
+		printWriter.print("&elementVariationsHash=");
+		printWriter.print(elementVariations.getHash());
+		printWriter.print("&enableLog=");
+
+		FrontendJSAudiencesConfiguration frontendJSAudiencesConfiguration;
+
+		try {
+			frontendJSAudiencesConfiguration =
+				_configurationProvider.getCompanyConfiguration(
+					FrontendJSAudiencesConfiguration.class, companyId);
+		}
+		catch (ConfigurationException configurationException) {
+			throw new IOException(configurationException);
+		}
+
+		printWriter.print(frontendJSAudiencesConfiguration.enableLog());
+
+		printWriter.print("&plid=");
+		printWriter.print(themeDisplay.getPlid());
+		printWriter.print("\" type=\"module\"></script>");
 	}
 
 	@Override
@@ -106,6 +123,15 @@ public class FrontendJSAudiencesWebTopHeadDynamicInclude
 	private AbsolutePortalURLBuilderFactory _absolutePortalURLBuilderFactory;
 
 	@Reference
+	private AudiencesDefinitionProvider _audiencesDefinitionProvider;
+
+	@Reference
 	private ConfigurationProvider _configurationProvider;
+
+	@Reference
+	private ElementVariationsProvider _elementVariationsProvider;
+
+	@Reference
+	private Portal _portal;
 
 }

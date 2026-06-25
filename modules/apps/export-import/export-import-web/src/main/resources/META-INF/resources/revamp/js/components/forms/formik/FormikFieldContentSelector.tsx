@@ -4,11 +4,12 @@
  */
 
 import {useField, useFormikContext} from 'formik';
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 
 import {PageTreeModalConfiguration} from '../../../pages/export/components/PageTreeModal';
 import {ExportImportProcess} from '../../../types/exportImportProcess';
 import {PreviewPortletDataHandlerSection} from '../../../types/portletDataHandler';
+import {getFullDataSelection} from '../../../utils/contentSelection';
 import ContentSelector, {
 	ContentSelection,
 } from '../content_selector/ContentSelector';
@@ -34,7 +35,32 @@ export function FormikFieldContentSelector({
 }: FormikFieldContentSelectorProps) {
 	const [field, meta, helpers] = useField<ContentSelection | undefined>(name);
 	const [{value: deletions}] = useField<boolean | undefined>('deletions');
-	const {setFieldTouched} = useFormikContext();
+	const {setFieldTouched, setFieldValue} = useFormikContext();
+
+	const showDeletions = !!deletions;
+
+	const shouldSeed =
+		!!sections.length && field.value === undefined && !meta.touched;
+
+	const defaultContentSelection = shouldSeed
+		? getFullDataSelection(sections, {
+				commentsAndRatingsEnabled,
+				lookAndFeelEnabled,
+				showDeletions,
+			})
+		: undefined;
+
+	const hasSeededRef = useRef(false);
+
+	useEffect(() => {
+		if (hasSeededRef.current || !defaultContentSelection) {
+			return;
+		}
+
+		hasSeededRef.current = true;
+
+		setFieldValue(name, defaultContentSelection);
+	}, [name, defaultContentSelection, setFieldValue]);
 
 	return (
 		<ContentSelector
@@ -50,8 +76,8 @@ export function FormikFieldContentSelector({
 			pageTreeModalConfiguration={pageTreeModalConfiguration}
 			process={process}
 			sections={sections}
-			showDeletions={!!deletions}
-			value={field.value}
+			showDeletions={showDeletions}
+			value={field.value ?? defaultContentSelection}
 		/>
 	);
 }

@@ -27,12 +27,22 @@ import React, {
 } from 'react';
 
 import ItemSelectorModal, {FilesUploaderComponent} from './ItemSelectorModal';
+import {
+	FolderCrumb,
+	getLastBreadcrumbFolders,
+	setLastBreadcrumbFolders,
+} from './lastBreadcrumbFoldersMemory';
 import {TDetachedItemSelectorModal} from './types';
 
 import '../css/DetachedCMSFilesItemSelectorModal.scss';
 
 const OBJECT_ENTRY_FOLDER_CLASS_NAME =
 	'com.liferay.object.model.ObjectEntryFolder';
+
+const OBJECT_ENTRY_FOLDERS_API_URL =
+	'/o/headless-object/v1.0/object-entry-folders';
+
+const STATUS_IN_TRASH = 8;
 
 function isFolder(item?: {entryClassName: string}): boolean {
 	return item?.entryClassName === OBJECT_ENTRY_FOLDER_CLASS_NAME;
@@ -140,29 +150,70 @@ const NewItemsNotificationComponent = ({
 type DetachedCMSFilesItemSelectorModalProps<T extends Record<string, any>> =
 	TDetachedItemSelectorModal<T> & {
 		buildApiURL: (folderId: number | null) => string;
+		folderMemoryKey?: string;
 	};
 
-type FolderCrumb = {
-	id: number | null;
-	label: string;
-	scopeId?: number | null;
-};
+function getRootBreadcrumbFolders(): FolderCrumb[] {
+	return [
+		{
+			id: null,
+			label: Liferay.Language.get('files'),
+		},
+	];
+}
+
+async function isFolderAvailable(folder: FolderCrumb): Promise<boolean> {
+
+	// The root ("Files") has no backing object entry folder to validate, so it
+	// is always available.
+
+	if (folder.id === null) {
+		return true;
+	}
+
+	try {
+		const response = await fetch(
+			`${OBJECT_ENTRY_FOLDERS_API_URL}/${folder.id}`
+		);
+
+		// Only a confirmed deletion (the folder is gone or in the recycle bin)
+		// should drop the selector back to the root. A transient failure
+		// (network error, server error, missing permission) is inconclusive,
+		// so the remembered folder is kept rather than wiped.
+
+		if (response.status === 404) {
+			return false;
+		}
+
+		if (!response.ok) {
+			return true;
+		}
+
+		const objectEntryFolder = await response.json();
+
+		return objectEntryFolder?.status?.code !== STATUS_IN_TRASH;
+	}
+	catch (error) {
+		return true;
+	}
+}
 
 const DetachedCMSFilesItemSelectorModal = <T extends Record<string, any>>(
 	props: DetachedCMSFilesItemSelectorModalProps<T>
 ) => {
-	const {buildApiURL, ...restProps} = props;
+	const {buildApiURL, folderMemoryKey, onItemsChange, ...restProps} = props;
 
 	const {observer, onOpenChange, open} = useModal();
 	const [newItemsCount, setNewItemsCount] = useState(0);
 	const [showInlineNotification, setShowInlineNotification] = useState(false);
 	const [breadcrumbFolders, setBreadcrumbFolders] = useState<FolderCrumb[]>(
-		() => [
-			{
-				id: null,
-				label: Liferay.Language.get('files'),
-			},
-		]
+		() => {
+			const restoredFolders = folderMemoryKey
+				? getLastBreadcrumbFolders(folderMemoryKey)
+				: null;
+
+			return restoredFolders ?? getRootBreadcrumbFolders();
+		}
 	);
 
 	const isBrowserTabVisible = useBrowserTabVisibility();
@@ -171,6 +222,28 @@ const DetachedCMSFilesItemSelectorModal = <T extends Record<string, any>>(
 	useEffect(() => {
 		onOpenChange(true);
 	}, [onOpenChange]);
+
+	useEffect(() => {
+		if (!folderMemoryKey) {
+			return;
+		}
+
+		const restoredFolders = getLastBreadcrumbFolders(folderMemoryKey);
+
+		if (!restoredFolders || restoredFolders.length <= 1) {
+			return;
+		}
+
+		isFolderAvailable(restoredFolders[restoredFolders.length - 1]).then(
+			(available) => {
+				if (!available) {
+					setLastBreadcrumbFolders(folderMemoryKey, null);
+
+					setBreadcrumbFolders(getRootBreadcrumbFolders());
+				}
+			}
+		);
+	}, [folderMemoryKey]);
 
 	const activeFolderId = breadcrumbFolders.at(-1)!.id;
 	const activeScopeId = breadcrumbFolders.at(-1)!.scopeId ?? null;
@@ -222,6 +295,17 @@ const DetachedCMSFilesItemSelectorModal = <T extends Record<string, any>>(
 			setBreadcrumbFolders((path) => [...path, folder]);
 		},
 		[]
+	);
+
+	const handleItemsChange = useCallback(
+		(items: T[]) => {
+			if (folderMemoryKey) {
+				setLastBreadcrumbFolders(folderMemoryKey, breadcrumbFolders);
+			}
+
+			onItemsChange(items);
+		},
+		[breadcrumbFolders, folderMemoryKey, onItemsChange]
 	);
 
 	const customRenderers = useMemo(
@@ -431,6 +515,7 @@ const DetachedCMSFilesItemSelectorModal = <T extends Record<string, any>>(
 					fdsProps={fdsProps}
 					filesUploaderComponent={filesUploaderComponent}
 					observer={observer}
+					onItemsChange={handleItemsChange}
 					onOpenChange={onOpenChange}
 					open={open}
 				/>

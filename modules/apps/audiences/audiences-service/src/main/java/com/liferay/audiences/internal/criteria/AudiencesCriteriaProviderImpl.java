@@ -43,6 +43,8 @@ public class AudiencesCriteriaProviderImpl
 
 		audiencesCriteriaTypes.add(
 			_getBrowserAttributesAudiencesCriteriaType(locale));
+		audiencesCriteriaTypes.add(
+			_getGeneralAttributesAudiencesCriteriaType(locale));
 
 		AudiencesCriteriaType customAudiencesCriteriaType =
 			_getCustomAudiencesCriteriaType(companyId, locale);
@@ -60,36 +62,36 @@ public class AudiencesCriteriaProviderImpl
 		return new AudiencesCriteriaType(
 			Arrays.asList(
 				new AudiencesCriteria(
-					"desktop", AudiencesCriteriaKeys.BROWSER_NAME,
+					"text", AudiencesCriteriaKeys.BROWSER_NAME,
 					_language.get(locale, "browser-name"),
 					AudiencesCriteria.Type.STRING),
 				new AudiencesCriteria(
-					"desktop", AudiencesCriteriaKeys.BROWSER_VERSION,
+					"text", AudiencesCriteriaKeys.BROWSER_VERSION,
 					_language.get(locale, "browser-version"),
 					AudiencesCriteria.Type.STRING),
 				new AudiencesCriteria(
-					"password", AudiencesCriteriaKeys.COOKIES,
+					"fieldset", AudiencesCriteriaKeys.COOKIES,
 					_language.get(locale, "cookies"),
 					AudiencesCriteria.Type.COLLECTION),
 				new AudiencesCriteria(
-					"desktop", AudiencesCriteriaKeys.DEVICE_TYPE,
+					"text", AudiencesCriteriaKeys.DEVICE_TYPE,
 					_language.get(locale, "device-type"),
 					AudiencesCriteria.Type.STRING),
 				new AudiencesCriteria(
-					"globe", AudiencesCriteriaKeys.GEOLOCATION,
+					"text", AudiencesCriteriaKeys.GEOLOCATION,
 					_language.get(locale, "geolocation"),
 					AudiencesCriteria.Type.STRING),
 				new AudiencesCriteria(
-					"globe", AudiencesCriteriaKeys.HOSTNAME,
+					"text", AudiencesCriteriaKeys.HOSTNAME,
 					_language.get(locale, "hostname"),
 					AudiencesCriteria.Type.STRING),
 				new AudiencesCriteria(
-					"globe", AudiencesCriteriaKeys.LANGUAGE,
+					"text", AudiencesCriteriaKeys.LANGUAGE,
 					_language.get(locale, "language"),
 					_getLanguageOptions(locale),
 					AudiencesCriteria.Type.OPTIONS),
 				new AudiencesCriteria(
-					"calendar", AudiencesCriteriaKeys.LOCAL_DATE,
+					"date", AudiencesCriteriaKeys.LOCAL_DATE,
 					_language.get(locale, "local-date"),
 					AudiencesCriteria.Type.DATE),
 				new AudiencesCriteria(
@@ -97,27 +99,27 @@ public class AudiencesCriteriaProviderImpl
 					_language.get(locale, "local-hour"), _getLocalHourOptions(),
 					AudiencesCriteria.Type.NUMBER),
 				new AudiencesCriteria(
-					"link", AudiencesCriteriaKeys.PATHNAME,
+					"text", AudiencesCriteriaKeys.PATHNAME,
 					_language.get(locale, "pathname"),
 					AudiencesCriteria.Type.STRING),
 				new AudiencesCriteria(
-					"link", AudiencesCriteriaKeys.REFERRER,
+					"text", AudiencesCriteriaKeys.REFERRER,
 					_language.get(locale, "referrer-url"),
 					AudiencesCriteria.Type.STRING),
 				new AudiencesCriteria(
-					"code", AudiencesCriteriaKeys.REQUEST_PARAMETERS,
+					"fieldset", AudiencesCriteriaKeys.REQUEST_PARAMETERS,
 					_language.get(locale, "request-parameters"),
 					AudiencesCriteria.Type.COLLECTION),
 				new AudiencesCriteria(
-					"time", AudiencesCriteriaKeys.TIMEZONE,
+					"text", AudiencesCriteriaKeys.TIMEZONE,
 					_language.get(locale, "time-zone"),
 					AudiencesCriteria.Type.STRING),
 				new AudiencesCriteria(
-					"link", AudiencesCriteriaKeys.URL,
+					"text", AudiencesCriteriaKeys.URL,
 					_language.get(locale, "url"),
 					AudiencesCriteria.Type.STRING),
 				new AudiencesCriteria(
-					"desktop", AudiencesCriteriaKeys.USER_AGENT,
+					"text", AudiencesCriteriaKeys.USER_AGENT,
 					_language.get(locale, "user-agent"),
 					AudiencesCriteria.Type.STRING)),
 			_language.get(locale, "browser-attributes"));
@@ -151,6 +153,28 @@ public class AudiencesCriteriaProviderImpl
 
 			return null;
 		}
+	}
+
+	private AudiencesCriteriaType _getGeneralAttributesAudiencesCriteriaType(
+		Locale locale) {
+
+		return new AudiencesCriteriaType(
+			Arrays.asList(
+				new AudiencesCriteria(
+					"text", AudiencesCriteriaKeys.AUTHENTICATION,
+					_language.get(locale, "authentication"),
+					Arrays.asList(
+						new AudiencesCriteria.Option(
+							_language.get(locale, "yes"), "yes"),
+						new AudiencesCriteria.Option(
+							_language.get(locale, "no"), "no")),
+					AudiencesCriteria.Type.OPTIONS),
+				new AudiencesCriteria(
+					"text", AudiencesCriteriaKeys.LANGUAGE,
+					_language.get(locale, "language"),
+					_getLanguageOptions(locale),
+					AudiencesCriteria.Type.OPTIONS)),
+			_language.get(locale, "general"));
 	}
 
 	private List<AudiencesCriteria.Option> _getLanguageOptions(Locale locale) {

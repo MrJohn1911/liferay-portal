@@ -165,7 +165,7 @@ public class LayoutSetPrototypePropagationTest
 			LayoutSetPrototypeLocalServiceUtil.updateLayoutSetPrototype(
 				_layoutSetPrototype);
 
-		Assert.assertTrue(_sites.isLayoutSetMergeable(group, layoutSet));
+		Assert.assertTrue(_sites.isLayoutSetMergeable(layoutSet));
 
 		settingsUnicodeProperties = layoutSet.getSettingsProperties();
 
@@ -181,7 +181,7 @@ public class LayoutSetPrototypePropagationTest
 
 		Assert.assertFalse(
 			_sites.isLayoutSetMergeable(
-				group, LayoutSetLocalServiceUtil.updateLayoutSet(layoutSet)));
+				LayoutSetLocalServiceUtil.updateLayoutSet(layoutSet)));
 	}
 
 	@Test
@@ -283,8 +283,6 @@ public class LayoutSetPrototypePropagationTest
 
 		Assert.assertEquals(
 			_initialPrototypeLayoutsCount, getGroupLayoutCount());
-
-		MergeLayoutPrototypesThreadLocal.setSkipMerge(false);
 
 		LayoutServiceUtil.getLayouts(
 			group.getGroupId(), false, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
@@ -769,10 +767,8 @@ public class LayoutSetPrototypePropagationTest
 				testGroup, 0, layoutSetPrototype.getLayoutSetPrototypeId(),
 				false, true);
 
-			MergeLayoutPrototypesThreadLocal.setSkipMerge(false);
-
 			_sites.mergeLayoutSetPrototypeLayouts(
-				testGroup, testGroup.getPrivateLayoutSet());
+				testGroup.getPrivateLayoutSet());
 
 			LayoutSet publicLayoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
 				testGroup.getGroupId(), false);
@@ -839,10 +835,8 @@ public class LayoutSetPrototypePropagationTest
 				testGroup, layoutSetPrototype.getLayoutSetPrototypeId(), 0,
 				true, false);
 
-			MergeLayoutPrototypesThreadLocal.setSkipMerge(false);
-
 			_sites.mergeLayoutSetPrototypeLayouts(
-				testGroup, testGroup.getPublicLayoutSet());
+				testGroup.getPublicLayoutSet());
 
 			publicLayoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
 				testGroup.getGroupId(), false);
@@ -1177,9 +1171,7 @@ public class LayoutSetPrototypePropagationTest
 
 		layoutSet = LayoutSetLocalServiceUtil.updateLayoutSet(layoutSet);
 
-		MergeLayoutPrototypesThreadLocal.setSkipMerge(false);
-
-		_sites.mergeLayoutSetPrototypeLayouts(group, layoutSet);
+		_sites.mergeLayoutSetPrototypeLayouts(layoutSet);
 
 		Thread.sleep(2000);
 

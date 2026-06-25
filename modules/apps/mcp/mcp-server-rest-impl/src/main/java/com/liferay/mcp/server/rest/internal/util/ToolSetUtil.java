@@ -65,6 +65,7 @@ public class ToolSetUtil {
 		String toolSetName) {
 
 		return OpenAPIUtil.getTool(
+			!Objects.equals(toolSetName, _TOOL_SET_NAME),
 			_getOpenAPIJSONObject(
 				_getOpenAPIBrief(toolSetName), httpServletRequest),
 			toolName);
@@ -117,7 +118,7 @@ public class ToolSetUtil {
 			inputJSONObject = JSONFactoryUtil.createJSONObject();
 		}
 
-		if (Objects.equals(toolSetName, "mcp-server-v1.0")) {
+		if (Objects.equals(toolSetName, _TOOL_SET_NAME)) {
 			if (Objects.equals(toolName, "getToolSetToolSetNameTool")) {
 				return _getResponse(
 					getTool(
@@ -337,12 +338,21 @@ public class ToolSetUtil {
 			_getBaseURL(httpServletRequest) + openAPIBrief._basePath +
 				openAPIBrief._openAPIPath,
 			url -> {
+				String content = null;
+
 				try {
-					return JSONFactoryUtil.createJSONObject(
-						_get(httpServletRequest, url));
+					content = _get(httpServletRequest, url);
+
+					return JSONFactoryUtil.createJSONObject(content);
 				}
 				catch (Exception exception) {
-					throw new RuntimeException(exception);
+					throw new RuntimeException(
+						StringBundler.concat(
+							"Unable to read a valid OpenAPI document from \"",
+							url, "\": ",
+							StringUtil.shorten(
+								GetterUtil.getString(content), 200)),
+						exception);
 				}
 			});
 	}
@@ -472,6 +482,8 @@ public class ToolSetUtil {
 
 		return openAPIPath.substring(0, index);
 	}
+
+	private static final String _TOOL_SET_NAME = "mcp-server-v1.0";
 
 	private static final Log _log = LogFactoryUtil.getLog(ToolSetUtil.class);
 

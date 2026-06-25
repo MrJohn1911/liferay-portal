@@ -1103,7 +1103,7 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 			else {
 				<#if entity.versionedEntity??>
 					throw new IllegalArgumentException("${entity.name} is read only, create a new version instead");
-				<#elseif entity.hasLazyBlobEntityColumn()>
+				<#elseif entity.hasLazyBlobEntityColumn() && !serviceBuilder.isVersionGTE_7_4_0()>
 
 					<#-- Workaround for HHH-2680 -->
 
@@ -3207,6 +3207,7 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 						${entity.name}ModelImpl.ORDER_BY_JPQL,
 						_ENTITY_ALIAS_PREFIX,
 						"${entityFinder.where!}",
+						"${entityFinder.DBWhere!}",
 						<#list entityColumns as entityColumn>
 							<#if entity.hasCompoundPK() && entityColumn.isPrimary()>
 								<#assign columnName = "id." + entityColumn.name />
