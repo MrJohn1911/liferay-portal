@@ -19,10 +19,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Mario Gomes
  * @author Iliyan Peychev
  */
-@Component(
-	property = "java.delegate=com.liferay.content.site.generator.internal.workflow.node.delegate.PageSpecToIRServiceNodeDelegate#execute",
-	service = ServiceNodeDelegate.class
-)
+@Component(service = ServiceNodeDelegate.class)
 public class PageSpecToIRServiceNodeDelegate implements ServiceNodeDelegate {
 
 	@Override
@@ -38,6 +35,11 @@ public class PageSpecToIRServiceNodeDelegate implements ServiceNodeDelegate {
 			inputVariables.get("currentPageSpecification"),
 			inputVariables.get("pageTitle"),
 			GetterUtil.getString(inputVariables.get("locale"), "en-US"));
+	}
+
+	@Override
+	public String getKey() {
+		return "javaDelegate#pageSpecToIR";
 	}
 
 }

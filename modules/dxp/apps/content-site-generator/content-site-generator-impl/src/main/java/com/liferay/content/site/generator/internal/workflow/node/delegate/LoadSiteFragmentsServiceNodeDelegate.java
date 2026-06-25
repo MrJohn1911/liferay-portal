@@ -26,16 +26,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * Aggregates the site's fragment entries into the catalog JSON the page
- * builder nodes consume.
- *
  * @author Mario Gomes
  * @author Iliyan Peychev
  */
-@Component(
-	property = "java.delegate=com.liferay.content.site.generator.internal.workflow.node.delegate.LoadSiteFragmentsServiceNodeDelegate#execute",
-	service = ServiceNodeDelegate.class
-)
+@Component(service = ServiceNodeDelegate.class)
 public class LoadSiteFragmentsServiceNodeDelegate
 	implements ServiceNodeDelegate {
 
@@ -87,6 +81,11 @@ public class LoadSiteFragmentsServiceNodeDelegate
 		}
 
 		return catalogJSONArray.toString();
+	}
+
+	@Override
+	public String getKey() {
+		return "javaDelegate#loadSiteFragments";
 	}
 
 	@Reference

@@ -39,18 +39,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * Turns a generated site plan into CSGGenerationItem object entries. Each entry
- * wraps one batch-engine envelope (01-site through 07-blogs) and stores the raw
- * envelope JSON as a Document Library file. The companion commit action later
- * imports each envelope through the batch engine.
- *
  * @author Mario Gomes
  * @author Iliyan Peychev
  */
-@Component(
-	property = "java.delegate=com.liferay.content.site.generator.internal.workflow.node.delegate.WriteCSGGenerationItemsServiceNodeDelegate#execute",
-	service = ServiceNodeDelegate.class
-)
+@Component(service = ServiceNodeDelegate.class)
 public class WriteCSGGenerationItemsServiceNodeDelegate
 	implements ServiceNodeDelegate {
 
@@ -157,6 +149,11 @@ public class WriteCSGGenerationItemsServiceNodeDelegate
 
 			throw exception1;
 		}
+	}
+
+	@Override
+	public String getKey() {
+		return "javaDelegate#writeCSGGenerationItems";
 	}
 
 	private long _addBatchFileEntry(

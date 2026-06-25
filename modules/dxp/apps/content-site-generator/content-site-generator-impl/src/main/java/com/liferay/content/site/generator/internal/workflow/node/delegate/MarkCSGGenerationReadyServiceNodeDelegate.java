@@ -39,10 +39,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author Iliyan Peychev
  */
-@Component(
-	property = "java.delegate=com.liferay.content.site.generator.internal.workflow.node.delegate.MarkCSGGenerationReadyServiceNodeDelegate#execute",
-	service = ServiceNodeDelegate.class
-)
+@Component(service = ServiceNodeDelegate.class)
 public class MarkCSGGenerationReadyServiceNodeDelegate
 	implements ServiceNodeDelegate {
 
@@ -76,6 +73,11 @@ public class MarkCSGGenerationReadyServiceNodeDelegate
 		}
 
 		return "The generation was marked ready.";
+	}
+
+	@Override
+	public String getKey() {
+		return "javaDelegate#markCSGGenerationReady";
 	}
 
 	private ObjectEntry _getCSGGenerationObjectEntry(

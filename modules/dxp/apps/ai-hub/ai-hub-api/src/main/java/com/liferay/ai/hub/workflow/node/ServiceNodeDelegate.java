@@ -10,10 +10,6 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * Executes the Java logic behind a workflow service node. Implementations
- * register as OSGi components with the property "java.delegate" set to the
- * node's java-delegate value (for example, "com.example.Converter#convert").
- *
  * @author Iliyan Peychev
  */
 public interface ServiceNodeDelegate {
@@ -22,5 +18,7 @@ public interface ServiceNodeDelegate {
 			Map<String, String> inputVariables,
 			Map<String, Serializable> workflowContext)
 		throws Exception;
+
+	public String getKey();
 
 }

@@ -19,10 +19,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Mario Gomes
  * @author Iliyan Peychev
  */
-@Component(
-	property = "java.delegate=com.liferay.content.site.generator.internal.workflow.node.delegate.IRToPageSpecServiceNodeDelegate#execute",
-	service = ServiceNodeDelegate.class
-)
+@Component(service = ServiceNodeDelegate.class)
 public class IRToPageSpecServiceNodeDelegate implements ServiceNodeDelegate {
 
 	@Override
@@ -49,6 +46,11 @@ public class IRToPageSpecServiceNodeDelegate implements ServiceNodeDelegate {
 				inputVariables.get("experienceERC"),
 				sitePageExternalReferenceCode + "-default"),
 			GetterUtil.getString(inputVariables.get("locale"), "en-US"));
+	}
+
+	@Override
+	public String getKey() {
+		return "javaDelegate#irToPageSpec";
 	}
 
 }

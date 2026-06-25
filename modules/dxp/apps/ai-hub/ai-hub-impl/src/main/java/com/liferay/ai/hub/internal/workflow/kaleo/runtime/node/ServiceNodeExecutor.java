@@ -55,7 +55,13 @@ public class ServiceNodeExecutor extends BaseNodeExecutor {
 	@Activate
 	protected void activate(BundleContext bundleContext) {
 		_serviceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
-			bundleContext, ServiceNodeDelegate.class, "java.delegate");
+			bundleContext, ServiceNodeDelegate.class, null,
+			(serviceReference, emitter) -> {
+				ServiceNodeDelegate serviceNodeDelegate =
+					bundleContext.getService(serviceReference);
+
+				emitter.emit(serviceNodeDelegate.getKey());
+			});
 	}
 
 	@Deactivate

@@ -21,17 +21,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * Strips Markdown fences from an LLM response and repairs common JSON
- * malformations (truncated strings, trailing commas, missing commas, and
- * unbalanced braces or brackets).
- *
  * @author Mario Gomes
  * @author Iliyan Peychev
  */
-@Component(
-	property = "java.delegate=com.liferay.content.site.generator.internal.workflow.node.delegate.JSONRepairServiceNodeDelegate#execute",
-	service = ServiceNodeDelegate.class
-)
+@Component(service = ServiceNodeDelegate.class)
 public class JSONRepairServiceNodeDelegate implements ServiceNodeDelegate {
 
 	@Override
@@ -50,6 +43,11 @@ public class JSONRepairServiceNodeDelegate implements ServiceNodeDelegate {
 		Map.Entry<String, String> entry = iterator.next();
 
 		return _repairJSON(_stripMarkdownFences(entry.getValue()));
+	}
+
+	@Override
+	public String getKey() {
+		return "javaDelegate#jsonRepair";
 	}
 
 	private String _repairJSON(String json) {

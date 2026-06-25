@@ -19,17 +19,9 @@ import java.util.Map;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Completes the agent invocation early with an acknowledgment so the chat
- * answers immediately while the workflow keeps running. Long-running agents
- * place this node after their first step instead of holding the supervisor
- * thread until the workflow ends.
- *
  * @author Iliyan Peychev
  */
-@Component(
-	property = "java.delegate=com.liferay.content.site.generator.internal.workflow.node.delegate.AcknowledgeAgentServiceNodeDelegate#execute",
-	service = ServiceNodeDelegate.class
-)
+@Component(service = ServiceNodeDelegate.class)
 public class AcknowledgeAgentServiceNodeDelegate
 	implements ServiceNodeDelegate {
 
@@ -60,6 +52,11 @@ public class AcknowledgeAgentServiceNodeDelegate
 		AgentUtil.complete(message);
 
 		return acknowledgment;
+	}
+
+	@Override
+	public String getKey() {
+		return "javaDelegate#acknowledgeAgent";
 	}
 
 }
