@@ -9,6 +9,7 @@ import com.liferay.ai.hub.agent.AgentContext;
 import com.liferay.ai.hub.agent.SupervisorAgent;
 import com.liferay.ai.hub.rest.dto.v1_0.Message;
 import com.liferay.ai.hub.rest.internal.util.ContextUserUtil;
+import com.liferay.ai.hub.rest.internal.util.MessageUtil;
 import com.liferay.ai.hub.rest.internal.util.OAuth2ApplicationIdResolverUtil;
 import com.liferay.ai.hub.rest.resource.v1_0.MessageResource;
 import com.liferay.ai.hub.util.AccountEntryUtil;
@@ -63,7 +64,10 @@ public class MessageResourceImpl extends BaseMessageResourceImpl {
 			).groupId(
 				AccountEntryUtil.getUserAccountEntryGroupId(user.getUserId())
 			).input(
-				Map.of("message", message.getText())
+				Map.of(
+					"message",
+					MessageUtil.appendContext(
+						message.getText(), message.getContext()))
 			).instructionDefinitionScope(
 				message.getInstructionDefinitionScopeAsString()
 			).oAuth2ApplicationId(
