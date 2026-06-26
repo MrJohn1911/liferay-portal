@@ -10,6 +10,7 @@ import com.liferay.account.model.AccountEntry;
 import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.ai.hub.configuration.VertexAIConfiguration;
+import com.liferay.ai.hub.constants.AIHubAgentDefinitionSettingConstants;
 import com.liferay.ai.hub.rest.client.dto.v1_0.AgentDefinition;
 import com.liferay.ai.hub.rest.client.dto.v1_0.Model;
 import com.liferay.ai.hub.rest.client.dto.v1_0.Variable;
@@ -239,7 +240,8 @@ public class AgentDefinitionResourceTest
 			Assert.assertEquals(
 				_accountEntry.getAccountEntryId(),
 				settingObjectEntry.getPropertyValue(
-					"r_accountToAIHubAgentDefinitionSettings_accountEntryId"));
+					AIHubAgentDefinitionSettingConstants.
+						OBJECT_FIELD_NAME_ACCOUNT_ENTRY_ID));
 			Assert.assertEquals(
 				"active", settingObjectEntry.getPropertyValue("name"));
 			Assert.assertEquals(
@@ -489,6 +491,11 @@ public class AgentDefinitionResourceTest
 			"active", "externalReferenceCode", "inputVariables",
 			"outputVariable", "version", "workflowDefinitionName"
 		};
+	}
+
+	@Override
+	protected String[] getIgnoredEntityFieldNames() {
+		return new String[] {"active"};
 	}
 
 	@Override
