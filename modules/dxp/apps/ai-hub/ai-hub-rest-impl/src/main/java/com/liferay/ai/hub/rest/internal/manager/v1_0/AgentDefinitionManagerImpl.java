@@ -8,6 +8,7 @@ package com.liferay.ai.hub.rest.internal.manager.v1_0;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.ai.hub.agent.AgentActiveStateResolver;
 import com.liferay.ai.hub.configuration.VertexAIConfiguration;
+import com.liferay.ai.hub.constants.AIHubAgentDefinitionSettingConstants;
 import com.liferay.ai.hub.rest.dto.v1_0.AgentDefinition;
 import com.liferay.ai.hub.rest.dto.v1_0.Model;
 import com.liferay.ai.hub.rest.dto.v1_0.Status;
@@ -611,8 +612,8 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 						() -> Map.of(
 							"agentDefinitionExternalReferenceCode",
 							agentExternalReferenceCode, "name", "active",
-							"r_accountToAIHubAgentDefinitionSettings_" +
-								"accountEntryId",
+							AIHubAgentDefinitionSettingConstants.
+								OBJECT_FIELD_NAME_ACCOUNT_ENTRY_ID,
 							accountEntry.getAccountEntryId(), "value",
 							String.valueOf(active)));
 				}

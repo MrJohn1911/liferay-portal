@@ -7,6 +7,7 @@ package com.liferay.ai.hub.internal.agent;
 
 import com.liferay.account.model.AccountEntry;
 import com.liferay.ai.hub.agent.AgentActiveStateResolver;
+import com.liferay.ai.hub.constants.AIHubAgentDefinitionSettingConstants;
 import com.liferay.ai.hub.util.AccountEntryUtil;
 import com.liferay.object.rest.dto.v1_0.ObjectEntry;
 import com.liferay.object.rest.manager.v1_0.ObjectEntryManager;
@@ -58,8 +59,8 @@ public class AgentActiveStateResolverImpl implements AgentActiveStateResolver {
 		for (ObjectEntry objectEntry : page.getItems()) {
 			if (accountEntry.getAccountEntryId() != GetterUtil.getLong(
 					objectEntry.getPropertyValue(
-						"r_accountToAIHubAgentDefinitionSettings_" +
-							"accountEntryId"))) {
+						AIHubAgentDefinitionSettingConstants.
+							OBJECT_FIELD_NAME_ACCOUNT_ENTRY_ID))) {
 
 				continue;
 			}
