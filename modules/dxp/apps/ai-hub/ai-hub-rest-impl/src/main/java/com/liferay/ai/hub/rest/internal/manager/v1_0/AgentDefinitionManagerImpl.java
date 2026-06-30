@@ -22,6 +22,7 @@ import com.liferay.object.rest.dto.v1_0.ObjectEntry;
 import com.liferay.object.rest.manager.v1_0.DefaultObjectEntryManager;
 import com.liferay.object.rest.manager.v1_0.ObjectEntryManager;
 import com.liferay.object.service.ObjectDefinitionLocalService;
+import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
@@ -97,8 +98,7 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 			workflowDefinition.getCompanyId(), workflowDefinition.getName(),
 			dtoConverterContext.getUserId(), workflowDefinition.getVersion());
 
-		_deleteAgentDefinitionSettings(
-			companyId, dtoConverterContext, externalReferenceCode);
+		_deleteAgentDefinitionSettings(companyId, externalReferenceCode);
 	}
 
 	@Override
@@ -335,23 +335,26 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 	}
 
 	private void _deleteAgentDefinitionSettings(
-			long companyId, DTOConverterContext dtoConverterContext,
-			String agentExternalReferenceCode)
+			long companyId, String agentExternalReferenceCode)
 		throws Exception {
 
 		ObjectDefinition objectDefinition =
 			_getAgentDefinitionSettingObjectDefinition(companyId);
 
-		Page<ObjectEntry> page = _objectEntryManager.getObjectEntries(
-			companyId, objectDefinition, null, null, dtoConverterContext,
-			"agentDefinitionExternalReferenceCode eq '" +
-				agentExternalReferenceCode + "'",
-			Pagination.of(1, 10000), null, null);
+		for (com.liferay.object.model.ObjectEntry objectEntry :
+				_objectEntryLocalService.getObjectEntries(
+					0, objectDefinition.getObjectDefinitionId(),
+					QueryUtil.ALL_POS, QueryUtil.ALL_POS)) {
 
-		for (ObjectEntry objectEntry : page.getItems()) {
-			_objectEntryManager.deleteObjectEntry(
-				companyId, dtoConverterContext,
-				objectEntry.getExternalReferenceCode(), objectDefinition, null);
+			if (Objects.equals(
+					agentExternalReferenceCode,
+					MapUtil.getString(
+						objectEntry.getValues(),
+						"agentDefinitionExternalReferenceCode"))) {
+
+				_objectEntryLocalService.deleteObjectEntry(
+					objectEntry.getObjectEntryId());
+			}
 		}
 	}
 
@@ -642,6 +645,9 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 
 	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
+
+	@Reference
+	private ObjectEntryLocalService _objectEntryLocalService;
 
 	@Reference(target = "(object.entry.manager.storage.type=default)")
 	private ObjectEntryManager _objectEntryManager;
