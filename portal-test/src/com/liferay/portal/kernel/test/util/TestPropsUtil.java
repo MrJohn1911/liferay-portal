@@ -110,7 +110,7 @@ public class TestPropsUtil {
 		"object.storage.sugarcrm.base.url", "object.storage.sugarcrm.client.id",
 		"object.storage.sugarcrm.grant.type",
 		"object.storage.sugarcrm.password", "object.storage.sugarcrm.username",
-		"vertex.ai.project.id");
+		"vertex.ai.project.id", "vertex.ai.service.account");
 	private static final TestPropsUtil _testPropsUtil = new TestPropsUtil();
 
 	private final Properties _props = new Properties();

@@ -306,6 +306,9 @@ public class AgentInstanceResourceTest
 							"modelName", TestPropsValues.VERTEX_AI_MODEL_NAME
 						).put(
 							"projectId", TestPropsValues.VERTEX_AI_PROJECT_ID
+						).put(
+							"serviceAccount",
+							TestPropsValues.VERTEX_AI_SERVICE_ACCOUNT
 						).build())) {
 
 			_testPostAgentInstance();

@@ -67,6 +67,9 @@ public class TestPropsValues {
 	public static final String VERTEX_AI_PROJECT_ID = TestPropsUtil.get(
 		"vertex.ai.project.id");
 
+	public static final String VERTEX_AI_SERVICE_ACCOUNT = TestPropsUtil.get(
+		"vertex.ai.service.account");
+
 	static {
 		String companyWebId = TestPropsUtil.get("company.web.id");
 

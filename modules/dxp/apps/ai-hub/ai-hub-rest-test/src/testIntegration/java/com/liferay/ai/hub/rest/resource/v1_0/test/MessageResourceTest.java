@@ -143,6 +143,9 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 							"modelName", TestPropsValues.VERTEX_AI_MODEL_NAME
 						).put(
 							"projectId", TestPropsValues.VERTEX_AI_PROJECT_ID
+						).put(
+							"serviceAccount",
+							TestPropsValues.VERTEX_AI_SERVICE_ACCOUNT
 						).build())) {
 
 			CountDownLatch countDownLatch1 = new CountDownLatch(4);
@@ -258,6 +261,9 @@ public class MessageResourceTest extends BaseMessageResourceTestCase {
 							"modelName", TestPropsValues.VERTEX_AI_MODEL_NAME
 						).put(
 							"projectId", TestPropsValues.VERTEX_AI_PROJECT_ID
+						).put(
+							"serviceAccount",
+							TestPropsValues.VERTEX_AI_SERVICE_ACCOUNT
 						).build())) {
 
 			CountDownLatch countDownLatch1 = new CountDownLatch(4);
