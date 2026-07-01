@@ -5,6 +5,8 @@
 
 package com.liferay.ai.hub.internal.model;
 
+import com.google.auth.oauth2.GoogleCredentials;
+
 import com.liferay.ai.hub.configuration.VertexAIConfiguration;
 import com.liferay.ai.hub.internal.langchain4j.model.chat.listener.AIHubChatModelListenerImpl;
 import com.liferay.ai.hub.quota.QuotaManager;
@@ -18,6 +20,12 @@ import dev.langchain4j.model.vertexai.gemini.SafetyThreshold;
 import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiChatModel;
 import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiStreamingChatModel;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import java.nio.charset.StandardCharsets;
+
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +53,8 @@ public class VertexAiGeminiUtil {
 			VertexAiGeminiChatModel.builder();
 
 		_setAPIEndpoint(builder::apiEndpoint, vertexAIConfiguration.location());
+		_setCredentials(
+			builder::credentials, vertexAIConfiguration.serviceAccount());
 
 		return builder.listeners(
 			Collections.singletonList(
@@ -90,6 +100,8 @@ public class VertexAiGeminiUtil {
 			builder = VertexAiGeminiStreamingChatModel.builder();
 
 		_setAPIEndpoint(builder::apiEndpoint, location);
+		_setCredentials(
+			builder::credentials, vertexAIConfiguration.serviceAccount());
 
 		return builder.listeners(
 			Collections.singletonList(
@@ -116,6 +128,44 @@ public class VertexAiGeminiUtil {
 
 			apiEndpointConsumer.accept(
 				"aiplatform." + location + ".rep.googleapis.com");
+		}
+	}
+
+	private static void _setCredentials(
+			Consumer<GoogleCredentials> credentialsConsumer,
+			String serviceAccount)
+		throws ConfigurationException {
+
+		if (Validator.isNull(serviceAccount)) {
+			return;
+		}
+
+		String serviceAccountJSON = serviceAccount.trim();
+
+		try {
+			byte[] bytes = null;
+
+			if (serviceAccountJSON.startsWith("{")) {
+				bytes = serviceAccountJSON.getBytes(StandardCharsets.UTF_8);
+			}
+			else {
+				bytes = Base64.getMimeDecoder(
+				).decode(
+					serviceAccountJSON
+				);
+			}
+
+			credentialsConsumer.accept(
+				GoogleCredentials.fromStream(
+					new ByteArrayInputStream(bytes)
+				).createScoped(
+					Collections.singletonList(
+						"https://www.googleapis.com/auth/cloud-platform")
+				));
+		}
+		catch (IllegalArgumentException | IOException exception) {
+			throw new ConfigurationException(
+				"Unable to read the Vertex AI service account", exception);
 		}
 	}
 

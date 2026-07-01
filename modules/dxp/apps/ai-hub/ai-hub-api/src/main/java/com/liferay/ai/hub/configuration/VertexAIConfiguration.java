@@ -31,4 +31,9 @@ public interface VertexAIConfiguration {
 	@Meta.AD(name = "project-id")
 	public String projectId();
 
+	@Meta.AD(
+		name = "service-account", required = false, type = Meta.Type.Password
+	)
+	public String serviceAccount();
+
 }
