@@ -77,6 +77,17 @@ async function postAgentDefinition(agentDefinition: AgentDefinition) {
 	return response.json();
 }
 
+async function updateAgentDefinitionActive(
+	externalReferenceCode: string,
+	active: boolean
+) {
+	return fetch(
+		`/o/ai-hub/v1.0/agent-definitions/by-external-reference-code/` +
+			`${externalReferenceCode}/update-active?active=${active}`,
+		{method: 'PATCH'}
+	);
+}
+
 async function putAgentDefinition(
 	agentDefinition: AgentDefinition,
 	externalReferenceCode: string
@@ -126,4 +137,5 @@ export {
 	putAgentDefinition,
 	putAgentDefinitionToContentRetrievers,
 	putAgentDefinitionToGuardrails,
+	updateAgentDefinitionActive,
 };

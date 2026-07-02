@@ -18,6 +18,7 @@ import {
 	putAgentDefinition,
 	putAgentDefinitionToContentRetrievers,
 	putAgentDefinitionToGuardrails,
+	updateAgentDefinitionActive,
 } from '../services/AgentDefinitionService';
 import {getContentRetrievers} from '../services/ContentRetrieverService';
 import {getGuardrails} from '../services/GuardrailService';
@@ -35,6 +36,7 @@ interface UseAgentDefinitionFormProps {
 export function useAgentDefinitionForm({
 	accountEntryExternalReferenceCode,
 	externalReferenceCode,
+	readOnly,
 }: UseAgentDefinitionFormProps) {
 	const generatedExternalReferenceCode = useMemo(
 		() => generateExternalReferenceCode(),
@@ -71,12 +73,24 @@ export function useAgentDefinitionForm({
 		},
 		onSubmit: async (formValues) => {
 			try {
-				const response = externalReferenceCode
-					? await putAgentDefinition(
+				let response;
+
+				if (externalReferenceCode) {
+					if (!readOnly) {
+						response = await putAgentDefinition(
 							formValues,
 							externalReferenceCode
-						)
-					: await postAgentDefinition(formValues);
+						);
+					}
+				}
+				else {
+					response = await postAgentDefinition(formValues);
+				}
+
+				await updateAgentDefinitionActive(
+					formValues.externalReferenceCode,
+					formValues.active
+				);
 
 				if (formValues.externalReferenceCode) {
 					await Promise.all([
@@ -87,7 +101,7 @@ export function useAgentDefinitionForm({
 					]);
 				}
 
-				if (response?.status?.label === 'approved') {
+				if (!response || response.status?.label === 'approved') {
 					openToast({
 						message: Liferay.Language.get(
 							'agent-saved-successfully'
