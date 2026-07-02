@@ -87,7 +87,7 @@ export function useAgentDefinitionForm({
 					response = await postAgentDefinition(formValues);
 				}
 
-				await updateAgentDefinitionActive(
+				const activeResponse = await updateAgentDefinitionActive(
 					formValues.externalReferenceCode,
 					formValues.active
 				);
@@ -101,7 +101,10 @@ export function useAgentDefinitionForm({
 					]);
 				}
 
-				if (!response || response.status?.label === 'approved') {
+				if (
+					activeResponse.ok &&
+					(!response || response.status?.label === 'approved')
+				) {
 					openToast({
 						message: Liferay.Language.get(
 							'agent-saved-successfully'
@@ -111,7 +114,12 @@ export function useAgentDefinitionForm({
 				}
 				else {
 					openToast({
-						message: Liferay.Language.get('failed-to-save-agent'),
+						message:
+							!activeResponse.ok && readOnly
+								? Liferay.Language.get(
+										'unable-to-change-a-system-agent-while-ai-features-are-disabled'
+									)
+								: Liferay.Language.get('failed-to-save-agent'),
 						type: 'danger',
 					});
 				}
