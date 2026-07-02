@@ -89,6 +89,35 @@
 			"required": true,
 			"system": false,
 			"type": "Long"
+		},
+		{
+			"DBType": "Long",
+			"businessType": "Relationship",
+			"defaultValue": "null",
+			"externalReferenceCode": "AI_HUB_AGENT_DEFINITION_TO_AI_HUB_AGENT_DEFINITION_SETTINGS",
+			"indexed": true,
+			"indexedLanguageId": "en_US",
+			"label": {
+				"en_US": "AI Hub Agent Definition to AI Hub Agent Definition Settings"
+			},
+			"name": "r_agentDefinitionToSettings_aiHubAgentDefinitionId",
+			"objectDefinitionExternalReferenceCode1": "L_AI_HUB_AGENT_DEFINITION",
+			"objectFieldSettings": [
+				{
+					"name": "objectDefinition1ShortName",
+					"value": "AIHubAgentDefinition"
+				},
+				{
+					"name": "objectRelationshipERCObjectFieldName",
+					"value": "r_agentDefinitionToSettings_aiHubAgentDefinitionERC"
+				}
+			],
+			"objectRelationshipExternalReferenceCode": "L_AI_HUB_AGENT_DEFINITION_TO_L_AI_HUB_AGENT_DEFINITION_SETTINGS",
+			"readOnly": false,
+			"relationshipType": "oneToMany",
+			"required": false,
+			"system": false,
+			"type": "Long"
 		}
 	],
 	"objectFolderExternalReferenceCode": "default",

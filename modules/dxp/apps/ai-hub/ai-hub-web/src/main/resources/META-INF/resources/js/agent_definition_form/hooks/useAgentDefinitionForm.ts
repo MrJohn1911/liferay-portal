@@ -154,8 +154,14 @@ export function useAgentDefinitionForm({
 					externalReferenceCode
 				);
 
+				const activeSetting = (
+					agentDefinition.agentDefinitionToSettings || []
+				).find((setting: {name: string}) => setting.name === 'active');
+
 				setValues({
-					active: agentDefinition.active,
+					active: activeSetting
+						? activeSetting.value === 'true'
+						: agentDefinition.active,
 					description: agentDefinition.description,
 					externalReferenceCode:
 						agentDefinition.externalReferenceCode,

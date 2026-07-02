@@ -599,7 +599,11 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 				new ObjectEntry() {
 					{
 						setProperties(
-							() -> Map.of("value", String.valueOf(active)));
+							() -> Map.of(
+								"r_agentDefinitionToSettings_" +
+									"aiHubAgentDefinitionERC",
+								agentExternalReferenceCode, "value",
+								String.valueOf(active)));
 					}
 				},
 				null);
@@ -615,6 +619,9 @@ public class AgentDefinitionManagerImpl implements AgentDefinitionManager {
 						() -> Map.of(
 							"agentDefinitionExternalReferenceCode",
 							agentExternalReferenceCode, "name", "active",
+							"r_agentDefinitionToSettings_" +
+								"aiHubAgentDefinitionERC",
+							agentExternalReferenceCode,
 							AIHubAgentDefinitionSettingConstants.
 								OBJECT_FIELD_NAME_ACCOUNT_ENTRY_ID,
 							accountEntry.getAccountEntryId(), "value",

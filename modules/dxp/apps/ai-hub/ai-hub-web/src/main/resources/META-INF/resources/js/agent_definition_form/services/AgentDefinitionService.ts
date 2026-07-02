@@ -36,7 +36,7 @@ async function disassociateAgentDefinitionFromGuardrail(
 async function getAgentDefinition(externalReferenceCode: string) {
 	const response = await fetch(
 		`${AGENT_DEFINITION_BY_ERC_URI}${externalReferenceCode}` +
-			'?nestedFields=agentDefinitionsToContentRetrievers,aiHubAgentDefinitionsToAIHubGuardrails',
+			'?nestedFields=agentDefinitionToSettings,agentDefinitionsToContentRetrievers,aiHubAgentDefinitionsToAIHubGuardrails',
 		{
 			method: 'GET',
 		}
