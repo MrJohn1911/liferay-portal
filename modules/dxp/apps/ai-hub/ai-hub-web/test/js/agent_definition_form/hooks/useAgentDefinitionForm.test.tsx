@@ -17,6 +17,7 @@ const mockPostAgentDefinition = jest.fn();
 const mockPutAgentDefinition = jest.fn();
 const mockPutAgentDefinitionToContentRetrievers = jest.fn();
 const mockPutAgentDefinitionToGuardrails = jest.fn();
+const mockUpdateAgentDefinitionActive = jest.fn();
 
 jest.mock(
 	'../../../../src/main/resources/META-INF/resources/js/agent_definition_form/services/AgentDefinitionService',
@@ -33,6 +34,8 @@ jest.mock(
 			mockPutAgentDefinitionToContentRetrievers(...args),
 		putAgentDefinitionToGuardrails: (...args: any[]) =>
 			mockPutAgentDefinitionToGuardrails(...args),
+		updateAgentDefinitionActive: (...args: any[]) =>
+			mockUpdateAgentDefinitionActive(...args),
 	})
 );
 
@@ -104,9 +107,11 @@ describe('useAgentDefinitionForm', () => {
 		mockPutAgentDefinition.mockReset();
 		mockPutAgentDefinitionToContentRetrievers.mockReset();
 		mockPutAgentDefinitionToGuardrails.mockReset();
+		mockUpdateAgentDefinitionActive.mockReset();
 
 		mockGetContentRetrievers.mockResolvedValue({items: []});
 		mockGetGuardrails.mockResolvedValue({items: []});
+		mockUpdateAgentDefinitionActive.mockResolvedValue({ok: true});
 	});
 
 	describe('initial values', () => {
