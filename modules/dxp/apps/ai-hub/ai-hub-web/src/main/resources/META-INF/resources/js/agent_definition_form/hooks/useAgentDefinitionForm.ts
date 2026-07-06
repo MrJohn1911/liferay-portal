@@ -18,6 +18,7 @@ import {
 	putAgentDefinition,
 	putAgentDefinitionToContentRetrievers,
 	putAgentDefinitionToGuardrails,
+	updateAgentDefinitionActive,
 } from '../services/AgentDefinitionService';
 import {getContentRetrievers} from '../services/ContentRetrieverService';
 import {getGuardrails} from '../services/GuardrailService';
@@ -35,6 +36,7 @@ interface UseAgentDefinitionFormProps {
 export function useAgentDefinitionForm({
 	accountEntryExternalReferenceCode,
 	externalReferenceCode,
+	readOnly,
 }: UseAgentDefinitionFormProps) {
 	const generatedExternalReferenceCode = useMemo(
 		() => generateExternalReferenceCode(),
@@ -71,12 +73,24 @@ export function useAgentDefinitionForm({
 		},
 		onSubmit: async (formValues) => {
 			try {
-				const response = externalReferenceCode
-					? await putAgentDefinition(
+				let response;
+
+				if (externalReferenceCode) {
+					if (!readOnly) {
+						response = await putAgentDefinition(
 							formValues,
 							externalReferenceCode
-						)
-					: await postAgentDefinition(formValues);
+						);
+					}
+				}
+				else {
+					response = await postAgentDefinition(formValues);
+				}
+
+				const activeResponse = await updateAgentDefinitionActive(
+					formValues.externalReferenceCode,
+					formValues.active
+				);
 
 				if (formValues.externalReferenceCode) {
 					await Promise.all([
@@ -87,7 +101,10 @@ export function useAgentDefinitionForm({
 					]);
 				}
 
-				if (response?.status?.label === 'approved') {
+				if (
+					activeResponse.ok &&
+					(!response || response.status?.label === 'approved')
+				) {
 					openToast({
 						message: Liferay.Language.get(
 							'agent-saved-successfully'
@@ -97,7 +114,12 @@ export function useAgentDefinitionForm({
 				}
 				else {
 					openToast({
-						message: Liferay.Language.get('failed-to-save-agent'),
+						message:
+							!activeResponse.ok && readOnly
+								? Liferay.Language.get(
+										'unable-to-change-a-system-agent-while-ai-features-are-disabled'
+									)
+								: Liferay.Language.get('failed-to-save-agent'),
 						type: 'danger',
 					});
 				}
@@ -154,8 +176,14 @@ export function useAgentDefinitionForm({
 					externalReferenceCode
 				);
 
+				const activeSetting = (
+					agentDefinition.agentDefinitionToSettings || []
+				).find((setting: {name: string}) => setting.name === 'active');
+
 				setValues({
-					active: agentDefinition.active,
+					active: activeSetting
+						? activeSetting.value === 'true'
+						: agentDefinition.active,
 					description: agentDefinition.description,
 					externalReferenceCode:
 						agentDefinition.externalReferenceCode,

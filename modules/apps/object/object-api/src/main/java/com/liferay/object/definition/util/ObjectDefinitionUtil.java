@@ -184,6 +184,8 @@ public class ObjectDefinitionUtil {
 		).put(
 			"AIHubAgentDefinition", "/ai-hub/agent-definitions"
 		).put(
+			"AIHubAgentDefinitionSetting", "/ai-hub/agent-definition-settings"
+		).put(
 			"AIHubChatbot", "/ai-hub/chatbots"
 		).put(
 			"AIHubConfiguration", "/ai-hub/configurations"

@@ -5,6 +5,7 @@
 
 package com.liferay.ai.hub.internal.agent;
 
+import com.liferay.ai.hub.agent.AgentActiveStateResolver;
 import com.liferay.ai.hub.agent.AgentContext;
 import com.liferay.ai.hub.agent.DefaultAgent;
 import com.liferay.ai.hub.internal.langchain4j.agentic.internal.InternalAgentImpl;
@@ -27,6 +28,25 @@ public class DefaultAgentImpl implements DefaultAgent {
 
 	@Override
 	public long invoke(AgentContext agentContext) {
+		boolean active;
+
+		try {
+			active = _agentActiveStateResolver.isActive(
+				agentContext.getCompanyId(),
+				agentContext.getDTOConverterContext(),
+				agentContext.getAgentDefinitionExternalReferenceCode(), true);
+		}
+		catch (Exception exception) {
+			throw new RuntimeException(exception);
+		}
+
+		if (!active) {
+			throw new IllegalStateException(
+				"Agent " +
+					agentContext.getAgentDefinitionExternalReferenceCode() +
+						" is not active for the current account");
+		}
+
 		InternalAgentImpl internalAgentImpl = new InternalAgentImpl(
 			agentContext, _quotaManager, _workflowDefinitionManager,
 			_workflowInstanceManager);
@@ -46,6 +66,9 @@ public class DefaultAgentImpl implements DefaultAgent {
 
 		return (Long)internalAgentImpl.invoke(agentContext.getInput());
 	}
+
+	@Reference
+	private AgentActiveStateResolver _agentActiveStateResolver;
 
 	@Reference(policyOption = ReferencePolicyOption.GREEDY)
 	private QuotaManager _quotaManager;

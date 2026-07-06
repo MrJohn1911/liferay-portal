@@ -44,7 +44,6 @@ const DetailsPanel: React.FC<IProps> = ({
 					<h2>{Liferay.Language.get('details')}</h2>
 
 					<ClayToggle
-						disabled={readOnly}
 						label={Liferay.Language.get('enable-agent')}
 						onToggle={(toggled) => setField('active', toggled)}
 						toggled={values.active}

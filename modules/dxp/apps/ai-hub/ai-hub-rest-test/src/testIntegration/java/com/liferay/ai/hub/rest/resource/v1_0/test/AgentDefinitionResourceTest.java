@@ -10,6 +10,7 @@ import com.liferay.account.model.AccountEntry;
 import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.ai.hub.configuration.VertexAIConfiguration;
+import com.liferay.ai.hub.constants.AIHubAgentDefinitionSettingConstants;
 import com.liferay.ai.hub.rest.client.dto.v1_0.AgentDefinition;
 import com.liferay.ai.hub.rest.client.dto.v1_0.Model;
 import com.liferay.ai.hub.rest.client.dto.v1_0.Variable;
@@ -69,6 +70,7 @@ import com.liferay.site.initializer.SiteInitializerRegistry;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -200,6 +202,84 @@ public class AgentDefinitionResourceTest
 	@Override
 	@Test
 	public void testGetAgentDefinitionsPageWithPagination() {
+	}
+
+	@Test
+	public void testManagedAgentActiveStateIsPerAccount() throws Exception {
+		String externalReferenceCode =
+			WorkflowDefinitionConstants.EXTERNAL_REFERENCE_CODE_CHANGE_TONE;
+
+		try {
+
+			// Deactivating stores the state for the account without mutating
+			// the shared agent definition
+
+			AgentDefinition agentDefinition =
+				agentDefinitionResource.
+					patchAgentDefinitionByExternalReferenceCodeUpdateActive(
+						externalReferenceCode, false);
+
+			Assert.assertFalse(agentDefinition.getActive());
+
+			Assert.assertFalse(
+				_getAgentDefinition(
+					externalReferenceCode
+				).getActive());
+
+			Assert.assertEquals(
+				Boolean.TRUE,
+				_getAgentDefinitionObjectEntry(
+					externalReferenceCode
+				).getPropertyValue(
+					"active"
+				));
+
+			ObjectEntry settingObjectEntry =
+				_getAgentDefinitionSettingObjectEntry(externalReferenceCode);
+
+			Assert.assertEquals(
+				_accountEntry.getAccountEntryId(),
+				settingObjectEntry.getPropertyValue(
+					AIHubAgentDefinitionSettingConstants.
+						OBJECT_FIELD_NAME_ACCOUNT_ENTRY_ID));
+			Assert.assertEquals(
+				"active", settingObjectEntry.getPropertyValue("name"));
+			Assert.assertEquals(
+				"false", settingObjectEntry.getPropertyValue("value"));
+
+			// Reactivating reuses the same setting
+
+			agentDefinition =
+				agentDefinitionResource.
+					patchAgentDefinitionByExternalReferenceCodeUpdateActive(
+						externalReferenceCode, true);
+
+			Assert.assertTrue(agentDefinition.getActive());
+
+			Assert.assertTrue(
+				_getAgentDefinition(
+					externalReferenceCode
+				).getActive());
+
+			Assert.assertEquals(
+				Boolean.TRUE,
+				_getAgentDefinitionObjectEntry(
+					externalReferenceCode
+				).getPropertyValue(
+					"active"
+				));
+
+			settingObjectEntry = _getAgentDefinitionSettingObjectEntry(
+				externalReferenceCode);
+
+			Assert.assertEquals(
+				"true", settingObjectEntry.getPropertyValue("value"));
+		}
+		finally {
+			agentDefinitionResource.
+				patchAgentDefinitionByExternalReferenceCodeUpdateActive(
+					externalReferenceCode, true);
+		}
 	}
 
 	@Override
@@ -414,6 +494,11 @@ public class AgentDefinitionResourceTest
 	}
 
 	@Override
+	protected String[] getIgnoredEntityFieldNames() {
+		return new String[] {"active"};
+	}
+
+	@Override
 	protected AgentDefinition
 			testBatchEngineDeleteImportTask_addAgentDefinition()
 		throws Exception {
@@ -454,6 +539,56 @@ public class AgentDefinitionResourceTest
 		Assert.assertEquals(expectedProviderLabel, model.getProviderLabel());
 	}
 
+	private AgentDefinition _getAgentDefinition(String externalReferenceCode)
+		throws Exception {
+
+		Page<AgentDefinition> page =
+			agentDefinitionResource.getAgentDefinitionsPage(
+				null, null, Pagination.of(1, 50), null);
+
+		for (AgentDefinition agentDefinition : page.getItems()) {
+			if (externalReferenceCode.equals(
+					agentDefinition.getExternalReferenceCode())) {
+
+				return agentDefinition;
+			}
+		}
+
+		return null;
+	}
+
+	private ObjectEntry _getAgentDefinitionObjectEntry(
+			String externalReferenceCode)
+		throws Exception {
+
+		return _objectEntryManager.getObjectEntry(
+			TestPropsValues.getCompanyId(), _dtoConverterContext,
+			externalReferenceCode, _getObjectDefinition(), null);
+	}
+
+	private ObjectEntry _getAgentDefinitionSettingObjectEntry(
+			String agentExternalReferenceCode)
+		throws Exception {
+
+		com.liferay.portal.vulcan.pagination.Page<ObjectEntry> page =
+			_objectEntryManager.getObjectEntries(
+				TestPropsValues.getCompanyId(),
+				_objectDefinitionLocalService.getObjectDefinition(
+					TestPropsValues.getCompanyId(),
+					"AIHubAgentDefinitionSetting"),
+				null, null, _dtoConverterContext,
+				"agentDefinitionExternalReferenceCode eq '" +
+					agentExternalReferenceCode + "' and name eq 'active'",
+				com.liferay.portal.vulcan.pagination.Pagination.of(1, 2), null,
+				null);
+
+		Assert.assertEquals(1, page.getTotalCount());
+
+		List<ObjectEntry> objectEntries = new ArrayList<>(page.getItems());
+
+		return objectEntries.get(0);
+	}
+
 	private Page<AgentDefinition> _getAgentDefinitionsPageWithModel(
 			String modelName)
 		throws Exception {
@@ -492,14 +627,14 @@ public class AgentDefinitionResourceTest
 
 		Page<AgentDefinition> page =
 			agentDefinitionResource.getAgentDefinitionsPage(
-				null, "(active eq false)", Pagination.of(1, 10), null);
+				null, "(active eq 'false')", Pagination.of(1, 10), null);
 
 		assertEquals(List.of(), (List<AgentDefinition>)page.getItems());
 
 		// Active as true
 
 		page = agentDefinitionResource.getAgentDefinitionsPage(
-			null, "(active eq true)", Pagination.of(1, 10), null);
+			null, "(active eq 'true')", Pagination.of(1, 10), null);
 
 		assertEquals(
 			_systemAgentDefinitions, (List<AgentDefinition>)page.getItems());

@@ -5,6 +5,7 @@
 
 package com.liferay.ai.hub.internal.agent;
 
+import com.liferay.ai.hub.agent.AgentActiveStateResolver;
 import com.liferay.ai.hub.agent.AgentContext;
 import com.liferay.ai.hub.agent.SupervisorAgent;
 import com.liferay.ai.hub.internal.exception.ContentInjectorException;
@@ -26,6 +27,7 @@ import com.liferay.portal.kernel.security.auth.CompanyInheritableThreadLocalCall
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -48,7 +50,9 @@ import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiChatModel;
 
 import java.lang.reflect.InvocationTargetException;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -118,8 +122,33 @@ public class SupervisorAgentImpl implements SupervisorAgent {
 				_objectDefinitionLocalService.getObjectDefinition(
 					agentContext.getCompanyId(), "AIHubAgentDefinition"),
 				null, null, agentContext.getDTOConverterContext(),
-				_getFilterString(agentContext), Pagination.of(1, 20), null,
+				_getFilterString(agentContext), Pagination.of(1, 60), null,
 				null);
+
+			Map<String, Boolean> activeByAgentExternalReferenceCode =
+				_agentActiveStateResolver.getActiveByAgentExternalReferenceCode(
+					agentContext.getCompanyId(),
+					agentContext.getDTOConverterContext());
+
+			List<ObjectEntry> activeObjectEntries = new ArrayList<>();
+
+			for (ObjectEntry objectEntry : page.getItems()) {
+				boolean active =
+					activeByAgentExternalReferenceCode.getOrDefault(
+						GetterUtil.getString(
+							objectEntry.getPropertyValue(
+								"externalReferenceCode")),
+						GetterUtil.getBoolean(
+							objectEntry.getPropertyValue("active")));
+
+				if (active) {
+					activeObjectEntries.add(objectEntry);
+				}
+
+				if (activeObjectEntries.size() == 20) {
+					break;
+				}
+			}
 
 			InternalAgentFactory internalAgentFactory =
 				new InternalAgentFactory(
@@ -127,7 +156,7 @@ public class SupervisorAgentImpl implements SupervisorAgent {
 					_workflowInstanceManager);
 
 			return TransformUtil.transformToArray(
-				page.getItems(), internalAgentFactory::create,
+				activeObjectEntries, internalAgentFactory::create,
 				InternalAgent.class);
 		}
 		catch (Exception exception) {
@@ -141,7 +170,7 @@ public class SupervisorAgentImpl implements SupervisorAgent {
 		throws Exception {
 
 		if (Validator.isNull(agentContext.getChatbotExternalReferenceCode())) {
-			return "(active eq true)";
+			return null;
 		}
 
 		NestedFieldsContext nestedFieldsContext =
@@ -164,7 +193,7 @@ public class SupervisorAgentImpl implements SupervisorAgent {
 					"agentDefinitionsToChatbots");
 
 			if (ArrayUtil.isEmpty(agentDefinitionObjectEntries)) {
-				return "(active eq true)";
+				return null;
 			}
 
 			String agentDefinitionIds = StringUtil.merge(
@@ -174,7 +203,7 @@ public class SupervisorAgentImpl implements SupervisorAgent {
 					String.class),
 				",");
 
-			return "(active eq true) and (id in (" + agentDefinitionIds + "))";
+			return "(id in (" + agentDefinitionIds + "))";
 		}
 		finally {
 			NestedFieldsContextThreadLocal.setNestedFieldsContext(
@@ -295,6 +324,9 @@ public class SupervisorAgentImpl implements SupervisorAgent {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		SupervisorAgentImpl.class);
+
+	@Reference
+	private AgentActiveStateResolver _agentActiveStateResolver;
 
 	@Reference
 	private Language _language;

@@ -35,6 +35,9 @@ ServerDisplayContext serverDisplayContext = (ServerDisplayContext)request.getAtt
 		<c:when test='<%= tabs1.equals("data-migration") %>'>
 			<liferay-util:include page="/data_migration.jsp" servletContext="<%= application %>" />
 		</c:when>
+		<c:when test='<%= tabs1.equals("database-migration") %>'>
+			<liferay-util:include page="/database_migration.jsp" servletContext="<%= application %>" />
+		</c:when>
 		<c:when test='<%= tabs1.equals("external-services") %>'>
 			<liferay-util:include page="/external_services.jsp" servletContext="<%= application %>" />
 		</c:when>

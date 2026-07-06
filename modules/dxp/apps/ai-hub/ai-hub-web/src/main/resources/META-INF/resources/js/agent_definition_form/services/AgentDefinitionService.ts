@@ -36,7 +36,7 @@ async function disassociateAgentDefinitionFromGuardrail(
 async function getAgentDefinition(externalReferenceCode: string) {
 	const response = await fetch(
 		`${AGENT_DEFINITION_BY_ERC_URI}${externalReferenceCode}` +
-			'?nestedFields=agentDefinitionsToContentRetrievers,aiHubAgentDefinitionsToAIHubGuardrails',
+			'?nestedFields=agentDefinitionToSettings,agentDefinitionsToContentRetrievers,aiHubAgentDefinitionsToAIHubGuardrails',
 		{
 			method: 'GET',
 		}
@@ -75,6 +75,17 @@ async function postAgentDefinition(agentDefinition: AgentDefinition) {
 	}
 
 	return response.json();
+}
+
+async function updateAgentDefinitionActive(
+	externalReferenceCode: string,
+	active: boolean
+) {
+	return fetch(
+		`/o/ai-hub/v1.0/agent-definitions/by-external-reference-code/` +
+			`${externalReferenceCode}/update-active?active=${active}`,
+		{method: 'PATCH'}
+	);
 }
 
 async function putAgentDefinition(
@@ -126,4 +137,5 @@ export {
 	putAgentDefinition,
 	putAgentDefinitionToContentRetrievers,
 	putAgentDefinitionToGuardrails,
+	updateAgentDefinitionActive,
 };

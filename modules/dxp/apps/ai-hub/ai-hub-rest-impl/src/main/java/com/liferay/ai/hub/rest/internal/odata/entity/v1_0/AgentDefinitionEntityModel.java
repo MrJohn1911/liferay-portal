@@ -5,9 +5,9 @@
 
 package com.liferay.ai.hub.rest.internal.odata.entity.v1_0;
 
-import com.liferay.portal.odata.entity.BooleanEntityField;
 import com.liferay.portal.odata.entity.EntityField;
 import com.liferay.portal.odata.entity.EntityModel;
+import com.liferay.portal.odata.entity.StringEntityField;
 
 import java.util.Map;
 
@@ -38,7 +38,7 @@ public class AgentDefinitionEntityModel implements EntityModel {
 	@Activate
 	protected void activate() {
 		_entityFieldMap = EntityModel.toEntityFieldsMap(
-			new BooleanEntityField("active", locale -> "active"));
+			new StringEntityField("active", locale -> "active"));
 	}
 
 	private Map<String, EntityField> _entityFieldMap;

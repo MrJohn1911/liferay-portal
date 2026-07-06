@@ -81,7 +81,7 @@ export default function AgentDefinitionForm({
 				<Toolbar.Item>
 					<Button
 						aria-label={Liferay.Language.get('save')}
-						disabled={readOnly || isSubmitting}
+						disabled={isSubmitting}
 						form={FORM_ID}
 						size="sm"
 						type="submit"
