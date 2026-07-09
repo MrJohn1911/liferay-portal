@@ -19,6 +19,8 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import dev.langchain4j.model.google.genai.GoogleGenAiChatModel;
 import dev.langchain4j.model.google.genai.GoogleGenAiStreamingChatModel;
 
+import java.time.Duration;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -43,12 +45,16 @@ public class GoogleGenAiUtil {
 				new AIHubChatModelListenerImpl(quotaManager, serviceContext))
 		).location(
 			vertexAIConfiguration.location()
+		).maxRetries(
+			2
 		).modelName(
 			vertexAIConfiguration.modelName()
 		).projectId(
 			vertexAIConfiguration.projectId()
 		).safetySettings(
 			_safetySettings
+		).timeout(
+			_timeout
 		).build();
 	}
 
@@ -76,6 +82,8 @@ public class GoogleGenAiUtil {
 			vertexAIConfiguration.projectId()
 		).safetySettings(
 			_safetySettings
+		).timeout(
+			_streamingTimeout
 		).build();
 	}
 
@@ -97,5 +105,7 @@ public class GoogleGenAiUtil {
 		_createSafetySetting(HarmCategory.Known.HARM_CATEGORY_HATE_SPEECH),
 		_createSafetySetting(
 			HarmCategory.Known.HARM_CATEGORY_SEXUALLY_EXPLICIT));
+	private static final Duration _streamingTimeout = Duration.ofMinutes(5);
+	private static final Duration _timeout = Duration.ofMinutes(2);
 
 }

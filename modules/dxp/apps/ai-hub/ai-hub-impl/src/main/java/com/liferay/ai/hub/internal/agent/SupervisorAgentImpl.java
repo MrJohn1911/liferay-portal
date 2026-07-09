@@ -38,6 +38,7 @@ import com.liferay.portal.vulcan.pagination.Pagination;
 import com.liferay.portal.workflow.manager.WorkflowDefinitionManager;
 
 import dev.langchain4j.agentic.AgenticServices;
+import dev.langchain4j.agentic.UntypedAgent;
 import dev.langchain4j.agentic.internal.InternalAgent;
 import dev.langchain4j.agentic.scope.AgentInvocation;
 import dev.langchain4j.agentic.scope.AgenticScope;
@@ -48,7 +49,9 @@ import dev.langchain4j.model.chat.ChatModel;
 
 import java.lang.reflect.InvocationTargetException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -244,26 +247,38 @@ public class SupervisorAgentImpl implements SupervisorAgent {
 
 		String[] agentDefinitionExternalReferenceCodes = null;
 
-		dev.langchain4j.agentic.supervisor.SupervisorAgent supervisorAgent =
-			AgenticServices.supervisorBuilder(
-			).chatMemoryProvider(
-				memoryId -> ChatMemoryProviderUtil.provide(
-					agentContext.getSseEventSinkKey())
-			).chatModel(
-				chatModel
-			).contextGenerationStrategy(
-				SupervisorContextStrategy.CHAT_MEMORY_AND_SUMMARIZATION
-			).maxAgentsInvocations(
-				5
-			).subAgents(
-				(Object[])internalAgents
-			).responseStrategy(
-				SupervisorResponseStrategy.SCORED
-			).build();
+		UntypedAgent supervisorAgent = AgenticServices.supervisorBuilder(
+			UntypedAgent.class
+		).chatMemoryProvider(
+			memoryId -> ChatMemoryProviderUtil.provide(
+				agentContext.getSseEventSinkKey())
+		).chatModel(
+			chatModel
+		).contextGenerationStrategy(
+			SupervisorContextStrategy.CHAT_MEMORY_AND_SUMMARIZATION
+		).maxAgentsInvocations(
+			5
+		).subAgents(
+			(Object[])internalAgents
+		).responseStrategy(
+			SupervisorResponseStrategy.SCORED
+		).build();
+
+		Map<String, Object> inputVariables = new HashMap<>();
+
+		Map<String, ?> input = agentContext.getInput();
+
+		if (input != null) {
+			inputVariables.putAll(input);
+		}
+
+		inputVariables.put(
+			"request", MapUtil.getString(inputVariables, "message"));
+
+		inputVariables.remove("message");
 
 		ResultWithAgenticScope<String> resultWithAgenticScope =
-			supervisorAgent.invokeWithAgenticScope(
-				MapUtil.getString(agentContext.getInput(), "message"));
+			supervisorAgent.invokeWithAgenticScope(inputVariables);
 
 		AgenticScope agenticScope = resultWithAgenticScope.agenticScope();
 

@@ -179,24 +179,6 @@ public class ServiceNodeExecutor extends BaseNodeExecutor {
 
 		String homePageURL = oAuth2Application.getHomePageURL();
 
-		try {
-			URL url = new URL(homePageURL);
-
-			if (!PortalRunMode.isTestMode() &&
-				InetAddressUtil.isLocalInetAddress(
-					InetAddressUtil.getInetAddressByName(url.getHost()))) {
-
-				throw new PortalException(
-					"The AI Hub Cell Liferay DXP URL must not be local: " +
-						homePageURL);
-			}
-		}
-		catch (MalformedURLException | UnknownHostException exception) {
-			throw new PortalException(
-				"The AI Hub Cell Liferay DXP URL is invalid: " + homePageURL,
-				exception);
-		}
-
 		return homePageURL;
 	}
 
