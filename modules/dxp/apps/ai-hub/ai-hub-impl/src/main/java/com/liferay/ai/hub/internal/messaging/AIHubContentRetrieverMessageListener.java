@@ -81,8 +81,6 @@ public class AIHubContentRetrieverMessageListener extends BaseMessageListener {
 			).put(
 				"contentsCount", jsonArray.length()
 			).put(
-				"query", message.getString("query")
-			).put(
 				"searchTarget", message.getString("searchTarget")
 			).put(
 				"workflowInstanceId", message.getLong("workflowInstanceId")

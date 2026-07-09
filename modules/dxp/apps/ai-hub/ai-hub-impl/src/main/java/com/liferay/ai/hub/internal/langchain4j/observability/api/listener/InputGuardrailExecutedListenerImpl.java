@@ -7,8 +7,6 @@ package com.liferay.ai.hub.internal.langchain4j.observability.api.listener;
 
 import com.liferay.portal.workflow.kaleo.runtime.ExecutionContext;
 
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.guardrail.InputGuardrailRequest;
 import dev.langchain4j.guardrail.InputGuardrailResult;
 import dev.langchain4j.observability.api.event.InputGuardrailExecutedEvent;
 import dev.langchain4j.observability.api.listener.InputGuardrailExecutedListener;
@@ -37,14 +35,9 @@ public class InputGuardrailExecutedListenerImpl
 			return;
 		}
 
-		InputGuardrailRequest inputGuardrailRequest =
-			inputGuardrailExecutedEvent.request();
-
-		UserMessage userMessage = inputGuardrailRequest.userMessage();
-
 		completeExceptionally(
-			userMessage.singleText(), inputGuardrailExecutedEvent.duration(),
-			inputGuardrailResult, "input");
+			null, inputGuardrailExecutedEvent.duration(), inputGuardrailResult,
+			"input");
 	}
 
 }

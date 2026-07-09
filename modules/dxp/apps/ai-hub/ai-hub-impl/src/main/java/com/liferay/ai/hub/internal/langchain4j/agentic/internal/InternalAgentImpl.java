@@ -147,8 +147,7 @@ public class InternalAgentImpl implements InternalAgent, InvocationHandler {
 			Message message = new Message();
 
 			message.put(
-				"additionalInformation",
-				JSONFactoryUtil.createJSONObject(inputObjects));
+				"additionalInformation", JSONFactoryUtil.createJSONObject());
 			message.put("createDate", new Date());
 			message.put(
 				"eventType", AIHubEventTypes.AI_HUB_AGENT_INSTANCE_START);
